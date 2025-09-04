@@ -1,6 +1,8 @@
+import type { Song } from "chordsheetjs";
+
 interface Props {
   clickedSong: number;
-  items: string[];
+  items: Song[];
   onClick: () => void;
 }
 
@@ -15,7 +17,7 @@ const SongList = ({ items, clickedSong = 0, onClick }: Props) => {
             className={clickedSong === index ? "active" : ""}
             onClick={() => onClick()}
           >
-            {item}
+            {item.title}
           </li>
         ))}
       </ul>

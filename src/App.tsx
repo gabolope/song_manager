@@ -3,11 +3,20 @@ import { useState } from "react";
 import SongViewer from "./components/SongViewer";
 import SongList from "./components/SongList";
 
+import ChordSheetJS from "chordsheetjs";
+
+
 import chordpro1 from "./songs/alquemecine.chordpro?raw";
 import chordpro2 from "./songs/danzarecantare.chordpro?raw";
 import chordpro3 from "./songs/entunombrecristo.chordpro?raw";
 
-let songList = [chordpro1, chordpro2, chordpro3];
+let songString = [chordpro1, chordpro2, chordpro3];
+
+const parser = new ChordSheetJS.ChordProParser();
+
+let songList = songString.map(song => parser.parse(song))
+
+console.log(songList)
 
 const App = () => {
   const [currentSong, setCurrentSong] = useState(chordpro3);
@@ -18,12 +27,12 @@ const App = () => {
   }
 
   function changeClicked() {
-    setClickedSong();
+    setClickedSong(1)
   }
 
   return (
     <>
-      <SongList items={songList} onClick={changeClicked}></SongList>
+      <SongList songList={songList} onClick={changeClicked} clickedSong={clickedSong}></SongList>
       <SongViewer song={currentSong} onClick={changeSong} />
     </>
   );
