@@ -2,6 +2,7 @@ import "./App.css";
 import { useState } from "react";
 import SongViewer from "./components/SongViewer";
 import SongList from "./components/SongList";
+import type { Song } from "chordsheetjs";
 
 import ChordSheetJS from "chordsheetjs";
 
@@ -16,24 +17,23 @@ const parser = new ChordSheetJS.ChordProParser();
 
 let songList = songString.map(song => parser.parse(song))
 
-console.log(songList)
+console.log(songList[1])
 
 const App = () => {
-  const [currentSong, setCurrentSong] = useState(chordpro3);
+  const [currentSong, setCurrentSong] = useState(songList[1]);
   const [clickedSong, setClickedSong] = useState(0);
 
-  function changeSong() {
-    setCurrentSong(chordpro2);
-  }
 
-  function changeClicked() {
-    setClickedSong(1)
+  function changeClicked(index: number) {
+    setClickedSong(index)
+    
+    console.log(clickedSong)
   }
 
   return (
     <>
-      <SongList songList={songList} onClick={changeClicked} clickedSong={clickedSong}></SongList>
-      <SongViewer song={currentSong} onClick={changeSong} />
+      <SongList items={songList} onClick={changeClicked} clickedSong={clickedSong} />
+       
     </>
   );
 };

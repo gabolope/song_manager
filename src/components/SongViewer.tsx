@@ -1,22 +1,18 @@
 import ChordSheetJS from "chordsheetjs";
 import parse from "html-react-parser";
+import type { Song } from "chordsheetjs";
 
 interface Props {
-  song: string;
-  onClick: () => void;
+  currentSong: Song;
 }
 
-const SongViewer = ({ song, onClick }: Props) => {
-  // Display a parsed sheet
-  const parser = new ChordSheetJS.ChordProParser();
-  const displaySong = parser.parse(song);
-
+const SongViewer = ({ currentSong }: Props) => {
+  
   const formatter = new ChordSheetJS.HtmlTableFormatter();
-  const html = formatter.format(displaySong);
+  const html = formatter.format(currentSong);
   return (
     <>
       <div className="chord-sheet-container">
-        <button onClick={() => onClick()}>Cambiar canción</button>
         {parse(html)}
       </div>
     </>

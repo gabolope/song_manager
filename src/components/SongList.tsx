@@ -3,7 +3,7 @@ import type { Song } from "chordsheetjs";
 interface Props {
   clickedSong: number;
   items: Song[];
-  onClick: () => void;
+  onClick: (id: number) => void;
 }
 
 const SongList = ({ items, clickedSong = 0, onClick }: Props) => {
@@ -15,7 +15,7 @@ const SongList = ({ items, clickedSong = 0, onClick }: Props) => {
           <li
             key={index}
             className={clickedSong === index ? "active" : ""}
-            onClick={() => onClick()}
+            onClick={() => onClick(index)}
           >
             {item.title}
           </li>
