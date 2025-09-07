@@ -1,26 +1,32 @@
 import type { Song } from "chordsheetjs";
+import "./SongList.css";
 
 interface Props {
-  clickedSong: number;
+  selectedSong: number;
   items: Song[];
   onClick: (id: number) => void;
 }
 
-const SongList = ({ items, clickedSong = 0, onClick }: Props) => {
+const SongList = ({ items, selectedSong = 0, onClick }: Props) => {
   return (
     <>
-      <h1>Lista de canciones</h1>
-      <ul>
+      <div className="list-group songListContainer">
         {items.map((item, index) => (
-          <li
+          <a
+            href="#"
+            aria-current="true"
             key={index}
-            className={clickedSong === index ? "active" : ""}
+            className={
+              selectedSong === index
+                ? "list-group-item list-group-item-action active"
+                : "list-group-item list-group-item-action"
+            }
             onClick={() => onClick(index)}
           >
             {item.title}
-          </li>
+          </a>
         ))}
-      </ul>
+      </div>
     </>
   );
 };
