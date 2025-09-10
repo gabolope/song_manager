@@ -4,10 +4,11 @@ import "./SongList.css";
 interface Props {
   selectedSong: number;
   items: Song[];
+  onAdd: () => void
   onClick: (id: number) => void;
 }
 
-const SongList = ({ items, selectedSong = 0, onClick }: Props) => {
+const SongList = ({ items, selectedSong = 0, onAdd, onClick }: Props) => {
   return (
     <>
       <div className="list-group songListContainer">
@@ -29,7 +30,7 @@ const SongList = ({ items, selectedSong = 0, onClick }: Props) => {
                     {item.title}
                   </div>
                   <div className="col-4">
-                    {selectedSong === index ? <button className="btn btn-outline-light addButton">Agregar a lista</button> :null}
+                    {selectedSong === index ? <button className="btn btn-outline-light addButton" onClick={() => onAdd()}>Agregar a lista</button> :null}
                   </div>
                 </a>
             </div>

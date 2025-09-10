@@ -32,6 +32,7 @@ const App = () => {
         items={songList}
         onClick={changeClicked}
         selectedSong={clickedSong}
+        onAdd={() => console.log(currentSong)}
       />
       <SongViewer displayedSong={currentSong} />
     </>
