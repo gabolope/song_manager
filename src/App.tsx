@@ -1,11 +1,10 @@
 import "./App.css";
-
+import ChordSheetJS from "chordsheetjs";
 import { useState } from "react";
+import type { Song } from "chordsheetjs";
 import SongViewer from "./components/SongViewer";
 import SongList from "./components/SongList";
-import type { Song } from "chordsheetjs";
-
-import ChordSheetJS from "chordsheetjs";
+import BookList from "./components/BookList";
 
 import chordpro1 from "./songs/alquemecine.chordpro?raw";
 import chordpro2 from "./songs/danzarecantare.chordpro?raw";
@@ -18,13 +17,25 @@ const parser = new ChordSheetJS.ChordProParser();
 const songList: Song[] = songString.map((song) => parser.parse(song));
 
 const App = () => {
-  const [currentSong, setCurrentSong] = useState<Song>();
+  const [currentSong, setCurrentSong] = useState<Song>(songList[0]);
   const [clickedSong, setClickedSong] = useState(0);
+  const [book, setBook] = useState<Song[]>([]);
 
   function changeClicked(index: number) {
     setClickedSong(index);
     setCurrentSong(songList[index]);
   }
+
+  const addCurrentSongToBook = () => {
+    if (book.includes(currentSong))
+      return alert(`${currentSong.title} ya se encuentra en la lista`);
+    setBook([...book, currentSong]);
+    console.log(book);
+  };
+
+  const deleteCurrentSongFromBook = () => {
+    setBook(book.filter((song) => song !== currentSong));
+  };
 
   return (
     <>
@@ -32,7 +43,13 @@ const App = () => {
         items={songList}
         onClick={changeClicked}
         selectedSong={clickedSong}
-        onAdd={() => console.log(currentSong)}
+        onAdd={addCurrentSongToBook}
+      />
+      <BookList
+        items={book}
+        onClick={changeClicked}
+        onDelete={deleteCurrentSongFromBook}
+        selectedSong={clickedSong}
       />
       <SongViewer displayedSong={currentSong} />
     </>
