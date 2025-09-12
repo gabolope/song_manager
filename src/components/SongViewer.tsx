@@ -4,19 +4,27 @@ import type { Song } from "chordsheetjs";
 import { useEffect, useRef, useState } from "react";
 import "./SongViewer.css";
 
+// Defino un placeholder:
 import chordpro1 from "../songs/alquemecine.chordpro?raw";
-
 const parser = new ChordSheetJS.ChordProParser();
 const placeholder = parser.parse(chordpro1);
 
 interface Props {
+  onLeft: () => void;
+  onRight: () => void;
   displayedSong?: Song;
 }
 
-const SongViewer = ({ displayedSong = placeholder }: Props) => {
+const SongViewer = ({
+  onLeft,
+  onRight,
+  displayedSong = placeholder,
+}: Props) => {
+  // Formateo de song:
   const formatter = new ChordSheetJS.HtmlTableFormatter();
   const html = formatter.format(displayedSong);
 
+  // Manejo de FullScreen:
   const [isFullScreen, setFullScreen] = useState(false);
   const viewerRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +40,7 @@ const SongViewer = ({ displayedSong = placeholder }: Props) => {
     if (viewerRef.current) viewerRef.current.requestFullscreen();
   };
 
-  function exitFullscreen() {
+  function exitFullScreen() {
     document.exitFullscreen();
   }
 
@@ -40,21 +48,53 @@ const SongViewer = ({ displayedSong = placeholder }: Props) => {
     <>
       <div className="card songViewerContainer" ref={viewerRef}>
         {isFullScreen ? (
-          <button
-            type="button"
-            className="btn btn-outline-secondary"
-            onClick={exitFullscreen}
+          <div
+            className="btn-group"
+            role="group"
+            aria-label="Default button group"
           >
-            Salir
-          </button>
+            <button type="button" className="btn btn-outline-primary">
+              &lt;&lt;&lt;
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={exitFullScreen}
+            >
+              Salir
+            </button>
+            <button type="button" className="btn btn-outline-primary">
+              &gt;&gt;&gt;
+            </button>
+          </div>
         ) : (
-          <button
-            type="button"
-            className="btn btn-outline-secondary"
-            onClick={goFullScreen}
+          <div
+            className="btn-group"
+            role="group"
+            aria-label="Default button group"
           >
-            Pantalla Completa
-          </button>
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={onLeft}
+            >
+              &lt;&lt;&lt;
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={goFullScreen}
+            >
+              Pantalla completa
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={onRight}
+            >
+              &gt;&gt;&gt;
+            </button>
+          </div>
         )}
         <div>{parse(html)}</div>
       </div>

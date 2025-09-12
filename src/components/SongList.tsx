@@ -5,7 +5,7 @@ interface Props {
   items: Song[];
   onAdd: () => void;
   onClick: (id: number) => void;
-  selectedSong: number;
+  selectedSong: number | null;
 }
 
 const SongList = ({ items, selectedSong = 0, onAdd, onClick }: Props) => {
@@ -22,8 +22,8 @@ const SongList = ({ items, selectedSong = 0, onAdd, onClick }: Props) => {
                 key={index}
                 className={
                   selectedSong === index
-                    ? "list-group-item list-group-item-action active"
-                    : "list-group-item list-group-item-action"
+                    ? "list-group-item list-group-item-action d-flex justify-content-between list-group-item-primary"
+                    : "list-group-item list-group-item-action d-flex justify-content-between"
                 }
                 onClick={() => onClick(index)}
               >
@@ -31,7 +31,7 @@ const SongList = ({ items, selectedSong = 0, onAdd, onClick }: Props) => {
                 <div className="col-4">
                   {selectedSong === index ? (
                     <button
-                      className="btn btn-outline-light"
+                      className="btn btn-outline-secondary"
                       onClick={() => onAdd()}
                     >
                       Agregar a lista

@@ -4,7 +4,7 @@ interface Props {
   items: Song[];
   onClick: (id: number) => void;
   onDelete: () => void;
-  selectedSong: number;
+  selectedSong: number | null;
 }
 const BookList = ({ items, onClick, onDelete, selectedSong }: Props) => {
   return (
@@ -19,8 +19,8 @@ const BookList = ({ items, onClick, onDelete, selectedSong }: Props) => {
               key={index}
               className={
                 selectedSong === index
-                  ? "list-group-item list-group-item-action list-group-item-success"
-                  : "list-group-item list-group-item-action"
+                  ? "list-group-item list-group-item-action d-flex justify-content-between list-group-item-success"
+                  : "list-group-item list-group-item-action d-flex justify-content-between"
               }
               onClick={() => onClick(index)}
             >
