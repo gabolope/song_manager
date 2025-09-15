@@ -10,17 +10,17 @@ interface Props {
 
 const SongList = ({ items, selectedSong = 0, onAdd, onClick }: Props) => {
   return (
-    <div className="songListContainer">
+    <div className="list-group songListContainer">
       {items.map((item, index) => (
         <div
           key={index}
-          className={selectedSong === index ? "listItem active" : "listItem"}
+          className={selectedSong === index ? " listItem list-group-item list-group-item-action active" : " listItem list-group-item list-group-item-action"}
           onClick={() => onClick(index)}
         >
-          <div className="">{item.title}</div>
-          <div className="">
+          <div>{item.title}</div>
+          <div>
             {selectedSong === index ? (
-              <button className="" onClick={() => onAdd()}>
+              <button className="btn btn-outline-light" onClick={() => onAdd()}>
                 Agregar
               </button>
             ) : null}

@@ -1,20 +1,11 @@
-.songListContainer {
-  background-color: white;
-  border: 2px solid gray;
-  border-radius: 10px;
+.list-group.songListContainer {
   margin: 1rem;
   width: 500px;
 }
-
-.listItem {
-  color: gray;
-  padding: 0.5rem;
-  &:hover {
-    background-color: rgb(179, 179, 179);
-    color: black;
-  }
-}
-.active {
-  background-color: rgb(93, 93, 255);
-  color: black;
+.list-group-item.listItem{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 50px;
 }
