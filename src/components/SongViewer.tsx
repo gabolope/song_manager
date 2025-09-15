@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import "./SongViewer.css";
 
 // Defino un placeholder:
-import chordpro1 from "../songs/alquemecine.chordpro?raw";
+import chordpro1 from "../songs/E1 Eres mi amigo fiel.chordpro?raw";
 const parser = new ChordSheetJS.ChordProParser();
 const placeholder = parser.parse(chordpro1);
 

@@ -12,58 +12,72 @@ import chordpro3 from "./songs/entunombrecristo.chordpro?raw";
 
 let songString = [chordpro1, chordpro2, chordpro3];
 
+// Creo un tipo de Song para TS, que tiene un id agregado:
+type MySong = Song & { id: number };
+
 // Parseo canciones a formato Song:
 const parser = new ChordSheetJS.ChordProParser();
-const songList: Song[] = songString.map((song) => parser.parse(song));
+const songList: MySong[] = songString.map((song, i) => {
+  const parsed = parser.parse(song) as MySong;
+  parsed.id = i;
+  return parsed;
+});
 
 const App = () => {
-  const [currentSong, setCurrentSong] = useState<Song>(songList[0]);
-  const [selectedListSong, setSelectedListSong] = useState<number | null>(0);
-  const [selectedBookSong, setSelectedBookSong] = useState<number | null>(null);
-  const [book, setBook] = useState<Song[]>([]);
-  const [displayIndex, setDisplayIndex] = useState(0);
+  const [currentSong, setCurrentSong] = useState<MySong>(songList[0]);
+  const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
+  const [book, setBook] = useState<MySong[]>([]);
+  const [displayIndex, setDisplayIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    setCurrentSong(book[displayIndex]);
-  }, [displayIndex]);
+    if (displayIndex !== null && book[displayIndex]) {
+      setCurrentSong(book[displayIndex]);
+    }
+  }, [displayIndex, book]);
 
   // Manejo de click en lista:
   const changeListClicked = (index: number) => {
     setSelectedListSong(index);
     setCurrentSong(songList[index]);
-    setSelectedBookSong(null); //quita la selección de book
+    setDisplayIndex(null); //quita la selección de book
   };
 
   // Manejo de click en book:
   const changeBookClicked = (index: number) => {
-    setSelectedBookSong(index);
     setDisplayIndex(index);
     setSelectedListSong(null); //quita la selección de list
   };
 
   // Añadir canción a book:
   const addCurrentSongToBook = () => {
-    if (book.includes(currentSong))
+    if (book.some((song) => song.id === currentSong.id))
       return alert(`${currentSong.title} ya se encuentra en la lista`);
     setBook([...book, currentSong]);
-    console.log(book);
   };
 
   // Quitar canción a book:
   const deleteCurrentSongFromBook = () => {
     setBook(book.filter((song) => song !== currentSong));
-    setSelectedBookSong(null);
+    setDisplayIndex(null);
   };
 
   // Manejo de cambio a izquierda y derecha
   const bookLeft = () => {
-    setDisplayIndex(displayIndex - 1);
-    setSelectedBookSong(displayIndex);
+    // este if pone el límite izquierdo de la lista.
+    if (displayIndex !== null && displayIndex > 0) {
+      setDisplayIndex(displayIndex - 1);
+    } else {
+      console.log("limite izquierda");
+    }
   };
 
   const bookRight = () => {
-    setDisplayIndex(displayIndex + 1);
-    setSelectedBookSong(displayIndex);
+    // este if pone el límite derecho de la lista.
+    if (displayIndex !== null && displayIndex < book.length - 1) {
+      setDisplayIndex(displayIndex + 1);
+    } else {
+      console.log("limite derecha");
+    }
   };
   return (
     <>
@@ -77,7 +91,7 @@ const App = () => {
         items={book}
         onClick={changeBookClicked}
         onDelete={deleteCurrentSongFromBook}
-        selectedSong={selectedBookSong}
+        selectedSong={displayIndex}
       />
       <SongViewer
         displayedSong={currentSong}
