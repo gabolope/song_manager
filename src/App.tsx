@@ -6,11 +6,14 @@ import SongViewer from "./components/SongViewer";
 import SongList from "./components/SongList";
 import BookList from "./components/BookList";
 
-import chordpro1 from "./songs/alquemecine.chordpro?raw";
-import chordpro2 from "./songs/danzarecantare.chordpro?raw";
-import chordpro3 from "./songs/entunombrecristo.chordpro?raw";
+// Importar todos los archivos de la carpeta como texto.
+const rawSongs = import.meta.glob("./songs/*.chordpro", {
+  eager: true, // hace que la operación se sincrónica
+  as: "raw", // indica a Vite que importe contenido como string (equivalente a ?raw)
+});
 
-let songString = [chordpro1, chordpro2, chordpro3];
+// Obtener un array de strings a partir del objeto modules
+const songString = Object.values(rawSongs) as string[];
 
 // Creo un tipo de Song para TS, que tiene un id agregado:
 type MySong = Song & { id: number };
@@ -81,23 +84,27 @@ const App = () => {
   };
   return (
     <>
-      <SongList
-        items={songList}
-        onClick={changeListClicked}
-        selectedSong={selectedListSong}
-        onAdd={addCurrentSongToBook}
-      />
-      <BookList
-        items={book}
-        onClick={changeBookClicked}
-        onDelete={deleteCurrentSongFromBook}
-        selectedSong={displayIndex}
-      />
-      <SongViewer
-        displayedSong={currentSong}
-        onLeft={bookLeft}
-        onRight={bookRight}
-      />
+      <div className="mainFrame">
+        <div className="listContainer">
+          <SongList
+            items={songList}
+            onClick={changeListClicked}
+            selectedSong={selectedListSong}
+            onAdd={addCurrentSongToBook}
+          />
+          <BookList
+            items={book}
+            onClick={changeBookClicked}
+            onDelete={deleteCurrentSongFromBook}
+            selectedSong={displayIndex}
+          />
+        </div>
+        <SongViewer
+          displayedSong={currentSong}
+          onLeft={bookLeft}
+          onRight={bookRight}
+        />
+      </div>
     </>
   );
 };

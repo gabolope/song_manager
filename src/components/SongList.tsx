@@ -14,7 +14,11 @@ const SongList = ({ items, selectedSong = 0, onAdd, onClick }: Props) => {
       {items.map((item, index) => (
         <div
           key={index}
-          className={selectedSong === index ? " listItem list-group-item list-group-item-action active" : " listItem list-group-item list-group-item-action"}
+          className={
+            selectedSong === index
+              ? "listItem list-group-item list-group-item-action active"
+              : " listItem list-group-item list-group-item-action"
+          }
           onClick={() => onClick(index)}
         >
           <div>{item.title}</div>

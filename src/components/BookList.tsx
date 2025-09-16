@@ -1,4 +1,5 @@
 import type { Song } from "chordsheetjs";
+import "./BookList.css";
 
 interface Props {
   items: Song[];
@@ -8,8 +9,7 @@ interface Props {
 }
 const BookList = ({ items, onClick, onDelete, selectedSong }: Props) => {
   return (
-    <div className="list-group">
-      <h4>Lista de canciones</h4>
+    <div className="list-group songListContainer resizable">
       {items.map((item, index) => (
         <a
           href="#"
@@ -17,18 +17,15 @@ const BookList = ({ items, onClick, onDelete, selectedSong }: Props) => {
           key={index}
           className={
             selectedSong === index
-              ? "row justify-content-between list-group-item list-group-item-action d-flex justify-content-between list-group-item-success"
-              : "row justify-content-between list-group-item list-group-item-action d-flex justify-content-between"
+              ? "listItem list-group-item list-group-item-action active"
+              : " listItem list-group-item list-group-item-action"
           }
           onClick={() => onClick(index)}
         >
-          <div className="col-4">{item.title}</div>
-          <div className="col-4">
+          <div>{item.title}</div>
+          <div>
             {selectedSong === index ? (
-              <button
-                className="btn btn-outline-danger"
-                onClick={() => onDelete()}
-              >
+              <button className="btn btn-secondary" onClick={() => onDelete()}>
                 Eliminar
               </button>
             ) : null}

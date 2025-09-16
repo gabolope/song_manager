@@ -1,5 +1,10 @@
-.songViewerContainer {
-  width: 500px;
+.card.songViewerContainer {
+  background-color: black;
+  color: white;
+  flex: 1;
+  max-height: 100vh;
   margin: 1rem;
   padding: 1rem;
+  white-space: nowrap;
+  overflow: auto;
 }

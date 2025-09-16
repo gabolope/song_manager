@@ -1,11 +1,13 @@
 .list-group.songListContainer {
+  flex: 1;
   margin: 1rem;
   width: 500px;
+  overflow-y: auto;
 }
-.list-group-item.listItem{
+.list-group-item.listItem {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  height: 50px;
+  min-height: 75px;
 }
