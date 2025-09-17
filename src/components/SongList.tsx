@@ -1,6 +1,5 @@
 import type { Song } from "chordsheetjs";
 import "./SongList.css";
-import SongListFilter from "./SongListFilter";
 
 interface Props {
   items: Song[];
@@ -12,7 +11,6 @@ interface Props {
 const SongList = ({ items, selectedSong = 0, onAdd, onClick }: Props) => {
   return (
     <div className="list-group songListContainer">
-      <SongListFilter />
       {items.map((item, index) => (
         <div
           key={index}

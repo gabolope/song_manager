@@ -4,6 +4,7 @@ import type { Song } from "chordsheetjs";
 import { useEffect, useRef, useState } from "react";
 import "./SongViewer.css";
 
+
 // Defino un placeholder:
 import chordpro1 from "../songs/E1 Eres mi amigo fiel.chordpro?raw";
 const parser = new ChordSheetJS.ChordProParser();
@@ -55,7 +56,7 @@ const SongViewer = ({
           >
             <button
               type="button"
-              className="btn btn-outline-primary"
+              className="btn btn-outline-primary buttonMove"
               onClick={onLeft}
             >
               &lt;&lt;&lt;
@@ -69,7 +70,7 @@ const SongViewer = ({
             </button>
             <button
               type="button"
-              className="btn btn-outline-primary"
+              className="btn btn-outline-primary buttonMove"
               onClick={onRight}
             >
               &gt;&gt;&gt;
@@ -77,13 +78,13 @@ const SongViewer = ({
           </div>
         ) : (
           <div
-            className="btn-group"
+            className="btn-group barra"
             role="group"
             aria-label="Default button group"
           >
             <button
               type="button"
-              className="btn btn-outline-primary"
+              className="btn btn-outline-primary buttonMove"
               onClick={onLeft}
             >
               &lt;&lt;&lt;
@@ -97,7 +98,7 @@ const SongViewer = ({
             </button>
             <button
               type="button"
-              className="btn btn-outline-primary"
+              className="btn btn-outline-primary buttonMove"
               onClick={onRight}
             >
               &gt;&gt;&gt;

@@ -1,3 +1,8 @@
+.btn-group .buttonMove{
+  @media (max-width: 1200px) {
+    display: none;
+  }
+}
 .card.songViewerContainer {
   background-color: black;
   color: white;
