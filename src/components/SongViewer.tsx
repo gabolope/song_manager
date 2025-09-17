@@ -53,7 +53,11 @@ const SongViewer = ({
             role="group"
             aria-label="Default button group"
           >
-            <button type="button" className="btn btn-outline-primary">
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={onLeft}
+            >
               &lt;&lt;&lt;
             </button>
             <button
@@ -63,7 +67,11 @@ const SongViewer = ({
             >
               Salir
             </button>
-            <button type="button" className="btn btn-outline-primary">
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={onRight}
+            >
               &gt;&gt;&gt;
             </button>
           </div>
@@ -96,6 +104,8 @@ const SongViewer = ({
             </button>
           </div>
         )}
+        <div className="songTitle">{displayedSong.title}</div>
+        <div className="tono">Tono: {displayedSong.key}</div>
         <div>{parse(html)}</div>
       </div>
     </>

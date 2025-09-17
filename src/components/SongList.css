@@ -11,3 +11,6 @@
   align-items: center;
   min-height: 75px;
 }
+.songListFilter {
+  margin: 0 0 1rem 0;
+}

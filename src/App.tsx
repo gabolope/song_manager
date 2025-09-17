@@ -92,6 +92,7 @@ const App = () => {
             selectedSong={selectedListSong}
             onAdd={addCurrentSongToBook}
           />
+          <hr />
           <BookList
             items={book}
             onClick={changeBookClicked}

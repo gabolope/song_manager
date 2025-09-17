@@ -2,9 +2,46 @@
   background-color: black;
   color: white;
   flex: 1;
-  max-height: 100vh;
+  max-height: 100%;
   margin: 1rem;
   padding: 1rem;
   white-space: nowrap;
   overflow: auto;
+}
+
+.chord {
+  color: #ffd998;
+  font-size: 1.25rem;
+}
+
+.chorus {
+  color: #e9de5a;
+}
+
+.chorus::before {
+  content: "Chorus";
+  display: block;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: white;
+}
+
+.label-wrapper h3 {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+/* Modifico el título que yo inserto */
+.songTitle {
+  font-size: 1.5rem;
+}
+
+/* Quito el título mostrado por el parser */
+.title {
+  display: none;
+}
+
+.tono {
+  font-size: 1.25rem;
+  color: rgb(201, 201, 255);
 }

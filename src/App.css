@@ -1,9 +1,4 @@
-html,
-body {
-  height: 100%;
-}
 .listContainer {
-  background-color: bisque;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -12,4 +7,5 @@ body {
 .mainFrame {
   display: flex;
   flex-direction: row;
+  max-height: 100vh;
 }
