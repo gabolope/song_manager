@@ -1,10 +1,11 @@
-import "./App.css";
 import ChordSheetJS from "chordsheetjs";
 import { useEffect, useState } from "react";
+import { initializeApp } from "firebase/app";
 import type { Song } from "chordsheetjs";
 import SongViewer from "./components/SongViewer";
 import SongList from "./components/SongList";
 import BookList from "./components/BookList";
+import "./App.css";
 
 // Importar todos los archivos de la carpeta como texto.
 const rawSongs = import.meta.glob("./songs/*.chordpro", {
@@ -25,6 +26,28 @@ const songList: MySong[] = songString.map((song, i) => {
   parsed.id = i;
   return parsed;
 });
+
+/* // Import the functions you need from the SDKs you need
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCrDtz6GBIbxyXIVpeJg863xtZAXoZMASA",
+  authDomain: "song-manager-5b3bb.firebaseapp.com",
+  projectId: "song-manager-5b3bb",
+  storageBucket: "song-manager-5b3bb.firebasestorage.app",
+  messagingSenderId: "325687043031",
+  appId: "1:325687043031:web:8f83a5918c42df69f7a192",
+  measurementId: "G-WXQQQV23PV",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
 const App = () => {
   const [currentSong, setCurrentSong] = useState<MySong>(songList[0]);
