@@ -105,6 +105,52 @@ const App = () => {
       console.log("limite derecha");
     }
   };
+
+  // Manejo de teclas y swipe
+  useEffect(() => {
+    // Teclado
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        bookLeft();
+      }
+      if (e.key === "ArrowRight") {
+        bookRight();
+      }
+    };
+
+    // Tactil
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX = e.changedTouches[0].screenX;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      touchEndX = e.changedTouches[0].screenX;
+
+      if (touchEndX < touchStartX - 50) {
+        bookRight();
+      }
+      if (touchEndX > touchStartX + 50) {
+        bookLeft();
+      }
+    };
+
+    // listeners
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("touchend", handleTouchEnd);
+
+    // cleanup
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [bookLeft, bookRight]);
+
+
   return (
     <>
       <div className="mainFrame">

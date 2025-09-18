@@ -21,7 +21,10 @@ const SongList = ({ items, selectedSong = 0, onAdd, onClick }: Props) => {
           }
           onClick={() => onClick(index)}
         >
-          <div>{item.title}</div>
+          <div className="songName">
+            <div className="songTitle">{item.title}</div>
+            <div className="songKey"> Tonalidad: <span>{item.key}</span></div>
+          </div>
           <div>
             {selectedSong === index ? (
               <button className="btn btn-outline-light" onClick={() => onAdd()}>
