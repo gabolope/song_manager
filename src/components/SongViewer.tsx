@@ -4,7 +4,6 @@ import type { Song } from "chordsheetjs";
 import { useEffect, useRef, useState } from "react";
 import "./SongViewer.css";
 
-
 // Defino un placeholder:
 import chordpro1 from "../songs/E1 Eres mi amigo fiel.chordpro?raw";
 const parser = new ChordSheetJS.ChordProParser();
