@@ -1,7 +1,7 @@
 import ChordSheetJS from "chordsheetjs";
 import { useEffect, useState } from "react";
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, addDoc, writeBatch, doc, QuerySnapshot } from "firebase/firestore";
 import type { Song } from "chordsheetjs";
 import SongViewer from "./components/SongViewer";
 import SongList from "./components/SongList";
@@ -48,25 +48,45 @@ const App = () => {
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
   const [book, setBook] = useState<MySong[]>([]);
   const [displayIndex, setDisplayIndex] = useState<number | null>(null);
+  const [uploadedSongs, setUploadedSongs] = useState<Song>([])
+
 
   // Query de Firestone:
   async function leerCanciones() {
     const querySnapshot = await getDocs(collection(db, "songs"));
-    querySnapshot.forEach((doc) => {
-      console.log(`${doc.id} =>`, doc.data(), doc.data().titulo);
-    });
+    return querySnapshot
   }
-  leerCanciones();
+  const cancionesSubidas = leerCanciones();
+
+  
 
   // Agregar canciones a Firebase:
-  async function uploadSong() {
+  /* async function uploadSong(list) {
     const docRef = await addDoc(collection(db, "songs"), {
       titulo: "solo tu",
       key: "A",
     });
     console.log("nuevo documento:", docRef.id);
-  }
-  uploadSong();
+  } */
+  // uploadSong();
+
+  /* async function uploadSongs(list: Song[]) {
+    const batch = writeBatch(db)
+
+    list.forEach(song => {
+      if (cancionesSubidas.includes(song)) return
+      const ref = doc(collection(db, 'songs'))
+      batch.set(ref, {
+        title: song.title,
+        tone: song.key
+      })
+    })
+    
+    await batch.commit()
+    console.log(list.length, ' canciones agregadas. ')
+  } */
+
+  //uploadSongs(songList)
 
   useEffect(() => {
     if (displayIndex !== null && book[displayIndex]) {
