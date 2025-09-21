@@ -31,6 +31,17 @@
   color: white;
 }
 
+.chord-sheet{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.paragraph{
+  
+  padding: 0 1rem 2rem 0;
+}
+
 .label-wrapper h3 {
   font-size: 1.4rem;
   font-weight: bold;

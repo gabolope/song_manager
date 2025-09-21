@@ -48,17 +48,22 @@ const App = () => {
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
   const [book, setBook] = useState<MySong[]>([]);
   const [displayIndex, setDisplayIndex] = useState<number | null>(null);
-  const [uploadedSongs, setUploadedSongs] = useState<Song>([])
+  const [uploadedSongs, setUploadedSongs] = useState<any>([])
 
-
-  // Query de Firestone:
-  async function leerCanciones() {
-    const querySnapshot = await getDocs(collection(db, "songs"));
-    return querySnapshot
-  }
-  const cancionesSubidas = leerCanciones();
-
-  
+  // Obtener canciones de Firebase:
+  useEffect(() => {
+    async function fetchSongs() {
+      const querySnapshot: QuerySnapshot = await getDocs(collection(db, "songs"));
+      const songs: any[] = [];
+      querySnapshot.forEach(doc =>{
+        songs.push({id:doc.id, ...doc.data()})
+      })
+      setUploadedSongs(songs)
+      console.log(songs)
+    }
+    fetchSongs();
+  }, [])
+   
 
   // Agregar canciones a Firebase:
   /* async function uploadSong(list) {
@@ -70,11 +75,11 @@ const App = () => {
   } */
   // uploadSong();
 
-  /* async function uploadSongs(list: Song[]) {
+  async function uploadSongs(list: Song[]) {
     const batch = writeBatch(db)
 
     list.forEach(song => {
-      if (cancionesSubidas.includes(song)) return
+      if (uploadedSongs.includes(song)) return
       const ref = doc(collection(db, 'songs'))
       batch.set(ref, {
         title: song.title,
@@ -84,7 +89,7 @@ const App = () => {
     
     await batch.commit()
     console.log(list.length, ' canciones agregadas. ')
-  } */
+  } 
 
   //uploadSongs(songList)
 
@@ -188,7 +193,7 @@ const App = () => {
       <div className="mainFrame">
         <div className="listContainer">
           <SongList
-            items={songList}
+            items={uploadedSongs.length > 0 ? uploadedSongs : songList}
             onClick={changeListClicked}
             selectedSong={selectedListSong}
             onAdd={addCurrentSongToBook}

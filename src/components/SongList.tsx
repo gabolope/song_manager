@@ -23,7 +23,7 @@ const SongList = ({ items, selectedSong = 0, onAdd, onClick }: Props) => {
         >
           <div className="songName">
             <div className="songTitle">{item.title}</div>
-            <div className="songKey"> Tonalidad: <span>{item.key}</span></div>
+            <div className="songKey"> Tono: <span>{item.tone}</span></div>
           </div>
           <div>
             {selectedSong === index ? (
