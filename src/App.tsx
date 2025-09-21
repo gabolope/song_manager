@@ -91,7 +91,7 @@ const App = () => {
     console.log(list.length, ' canciones agregadas. ')
   } 
 
-  //uploadSongs(songList)
+  uploadSongs(songList)
 
   useEffect(() => {
     if (displayIndex !== null && book[displayIndex]) {
