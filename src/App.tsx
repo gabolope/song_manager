@@ -1,7 +1,15 @@
 import ChordSheetJS from "chordsheetjs";
 import { useEffect, useState } from "react";
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, addDoc, writeBatch, doc, QuerySnapshot } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  addDoc,
+  writeBatch,
+  doc,
+  QuerySnapshot,
+} from "firebase/firestore";
 import type { Song } from "chordsheetjs";
 import SongViewer from "./components/SongViewer";
 import SongList from "./components/SongList";
@@ -48,22 +56,25 @@ const App = () => {
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
   const [book, setBook] = useState<MySong[]>([]);
   const [displayIndex, setDisplayIndex] = useState<number | null>(null);
-  const [uploadedSongs, setUploadedSongs] = useState<any>([])
+  const [uploadedSongs, setUploadedSongs] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Obtener canciones de Firebase:
   useEffect(() => {
     async function fetchSongs() {
-      const querySnapshot: QuerySnapshot = await getDocs(collection(db, "songs"));
+      const querySnapshot: QuerySnapshot = await getDocs(
+        collection(db, "songs")
+      );
       const songs: any[] = [];
-      querySnapshot.forEach(doc =>{
-        songs.push({id:doc.id, ...doc.data()})
-      })
-      setUploadedSongs(songs)
-      console.log(songs)
+      querySnapshot.forEach((doc) => {
+        songs.push({ id: doc.id, ...doc.data() });
+      });
+      setUploadedSongs(songs);
+      setIsLoading(false);
+      console.log(songs);
     }
     fetchSongs();
-  }, [])
-   
+  }, []);
 
   // Agregar canciones a Firebase:
   /* async function uploadSong(list) {
@@ -76,22 +87,22 @@ const App = () => {
   // uploadSong();
 
   async function uploadSongs(list: Song[]) {
-    const batch = writeBatch(db)
+    const batch = writeBatch(db);
 
-    list.forEach(song => {
-      if (uploadedSongs.includes(song)) return
-      const ref = doc(collection(db, 'songs'))
+    list.forEach((song) => {
+      if (uploadedSongs.includes(song)) return;
+      const ref = doc(collection(db, "songs"));
       batch.set(ref, {
         title: song.title,
-        tone: song.key
-      })
-    })
-    
-    await batch.commit()
-    console.log(list.length, ' canciones agregadas. ')
-  } 
+        tone: song.key,
+      });
+    });
 
-  uploadSongs(songList)
+    await batch.commit();
+    console.log(list.length, " canciones agregadas. ");
+  }
+
+  uploadSongs(songList);
 
   useEffect(() => {
     if (displayIndex !== null && book[displayIndex]) {
@@ -193,10 +204,11 @@ const App = () => {
       <div className="mainFrame">
         <div className="listContainer">
           <SongList
-            items={uploadedSongs.length > 0 ? uploadedSongs : songList}
+            items={uploadedSongs}
             onClick={changeListClicked}
             selectedSong={selectedListSong}
             onAdd={addCurrentSongToBook}
+            isLoading={isLoading}
           />
           <hr />
           <BookList
