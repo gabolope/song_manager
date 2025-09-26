@@ -9,6 +9,7 @@ import {
   writeBatch,
   doc,
   QuerySnapshot,
+  setDoc
 } from "firebase/firestore";
 import type { Song } from "chordsheetjs";
 import SongViewer from "./components/SongViewer";
@@ -99,10 +100,25 @@ const App = () => {
     });
 
     await batch.commit();
-    console.log(list.length, " canciones agregadas. ");
+    console.log(list.length, "canciones agregadas. ");
   }
 
-  uploadSongs(songList);
+  // uploadSongs(songList);
+
+  // Subir lista completa a Firebase:
+  async function uploadBook(list: MySong[]){
+    await setDoc(doc(db, 'live', 'book'),{
+
+    })
+ }
+  // Cambiar canción compartida en Firebase:
+  async function changeSharedSong(song: MySong) {
+    await setDoc(doc(db, 'live', 'current'),{
+      song: song.title,
+      tone: song.key,
+      id: song.id
+    })
+  }
 
   useEffect(() => {
     if (displayIndex !== null && book[displayIndex]) {
@@ -121,6 +137,7 @@ const App = () => {
   const changeBookClicked = (index: number) => {
     setDisplayIndex(index);
     setSelectedListSong(null); //quita la selección de list
+    changeSharedSong(book[index]);
   };
 
   // Añadir canción a book:
@@ -140,18 +157,18 @@ const App = () => {
   const bookLeft = () => {
     // este if pone el límite izquierdo de la lista.
     if (displayIndex !== null && displayIndex > 0) {
-      setDisplayIndex(displayIndex - 1);
-    } else {
-      console.log("limite izquierda");
+      const newIndex = displayIndex - 1;
+      setDisplayIndex(newIndex);
+      changeSharedSong(book[newIndex]);
     }
   };
 
   const bookRight = () => {
     // este if pone el límite derecho de la lista.
     if (displayIndex !== null && displayIndex < book.length - 1) {
-      setDisplayIndex(displayIndex + 1);
-    } else {
-      console.log("limite derecha");
+      const newIndex = displayIndex + 1;
+      setDisplayIndex(newIndex);
+      changeSharedSong(book[newIndex]);
     }
   };
 
