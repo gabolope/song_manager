@@ -59,6 +59,7 @@ const App = () => {
   const [displayIndex, setDisplayIndex] = useState<number | null>(null);
   const [uploadedSongs, setUploadedSongs] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [bookLoaded, setBookLoaded] = useState(false); // nuevo flag para evitar overwrite
 
   // Obtener canciones de Firebase:
   useEffect(() => {
@@ -76,6 +77,30 @@ const App = () => {
     }
     fetchSongs();
   }, []);
+
+  // Obtener book de Firebase:
+  useEffect(() => {
+    async function fetchBook() { 
+-      const docRef = doc(db, 'live', 'book');
+-      const docSnap = await getDocs(collection(db, 'live'));
+-      if (docSnap) {
+-        const data = docSnap.docs.find(doc => doc.id === 'book')?.data();
+-        if (data && data.songs) {
+-          setBook(data.songs);
+-        }
+-      }
++      const docRef = doc(db, "live", "book");
++      const docSnap = await getDoc(docRef);
++      if (docSnap.exists()) {
++        const data = docSnap.data();
++        if (data && data.songs) setBook(data.songs);
++      }
++      // marcar que la carga inicial del book ya terminó (aunque no exista)
++      setBookLoaded(true);
+    }
+    fetchBook();
+  }, []);
+
 
   // Agregar canciones a Firebase:
   /* async function uploadSong(list) {
@@ -108,7 +133,11 @@ const App = () => {
   // Subir lista completa a Firebase:
   async function uploadBook(list: MySong[]){
     await setDoc(doc(db, 'live', 'book'),{
-
+      songs: list.map(song => ({
+        title: song.title,
+        tone: song.key,
+        id: song.id
+      }))
     })
  }
   // Cambiar canción compartida en Firebase:
@@ -124,6 +153,7 @@ const App = () => {
     if (displayIndex !== null && book[displayIndex]) {
       setCurrentSong(book[displayIndex]);
     }
+    uploadBook(book); // sube el book a firebase cada vez que cambia
   }, [displayIndex, book]);
 
   // Manejo de click en lista:
@@ -229,7 +259,7 @@ const App = () => {
           />
           <hr />
           <BookList
-            items={book}
+            items={book} 
             onClick={changeBookClicked}
             onDelete={deleteCurrentSongFromBook}
             selectedSong={displayIndex}
