@@ -1,36 +1,19 @@
-import type { Song } from "chordsheetjs";
-import "./BookList.css";
+import type { SongDTO } from "@/types/song";
 
 interface Props {
-  items: Song[];
-  onClick: (id: number) => void;
-  onDelete: () => void;
-  selectedSong: number | null;
+  items: SongDTO[];
+  selectedIndex: number | null;
+  onClick: (index: number) => void;
+  onDelete: (id: string) => void;
 }
-const BookList = ({ items, onClick, onDelete, selectedSong }: Props) => {
+const BookList = ({ items, selectedIndex, onClick, onDelete }: Props) => {
   return (
-    <div className="list-group songListContainer resizable">
-      {items.map((item, index) => (
-        <a
-          href="#"
-          aria-current="true"
-          key={index}
-          className={
-            selectedSong === index
-              ? "listItem list-group-item list-group-item-action active"
-              : " listItem list-group-item list-group-item-action"
-          }
-          onClick={() => onClick(index)}
-        >
-          <div>{item.title}</div>
-          <div>
-            {selectedSong === index ? (
-              <button className="btn btn-secondary" onClick={() => onDelete()}>
-                Eliminar
-              </button>
-            ) : null}
-          </div>
-        </a>
+    <div>
+      {items.map((song, index) => (
+        <div key={song.id}>
+          <button onClick={() => onClick(index)}>{song.title}</button>
+          <button onClick={() => onDelete(song.id)}>X</button>
+        </div>
       ))}
     </div>
   );

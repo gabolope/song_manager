@@ -1,10 +1,11 @@
-.btn-group .buttonMove{
+.btn-group .buttonMove {
   @media (max-width: 1200px) {
     display: none;
   }
 }
 .card.songViewerContainer {
-  background-color: black;
+  border: 1px solid white;
+  border-radius: 10px;
   color: white;
   flex: 1;
   max-height: 100%;
@@ -31,14 +32,13 @@
   color: white;
 }
 
-.chord-sheet{
+.chord-sheet {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
 }
 
-.paragraph{
-  
+.paragraph {
   padding: 0 1rem 2rem 0;
 }
 

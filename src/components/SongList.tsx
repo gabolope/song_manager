@@ -1,65 +1,47 @@
-import type { Song } from "chordsheetjs";
-import ContentLoader from "react-content-loader";
-import "./SongList.css";
+import { Button, Stack, List, Text } from "@chakra-ui/react";
+import type { SongDTO } from "../types/song";
+import { IoIosAddCircleOutline } from "react-icons/io";
 
 interface Props {
-  isLoading?: boolean;
-  items: Song[];
-  onAdd: () => void;
-  onClick: (id: number) => void;
-  selectedSong: number | null;
+  items: SongDTO[];
+  isLoading: boolean;
+  onClick?: (index: number) => void;
+  selectedIndex?: number | null;
+  addToBook: (song: SongDTO) => void;
 }
-
-const BulletList = () => (
-  <ContentLoader viewBox="0 0 400 150" height={130} width={400}>
-    <circle cx="10" cy="20" r="8" />
-    <rect x="25" y="15" rx="5" ry="5" width="220" height="10" />
-    <circle cx="10" cy="50" r="8" />
-    <rect x="25" y="45" rx="5" ry="5" width="220" height="10" />
-    <circle cx="10" cy="80" r="8" />
-    <rect x="25" y="75" rx="5" ry="5" width="220" height="10" />
-    <circle cx="10" cy="110" r="8" />
-    <rect x="25" y="105" rx="5" ry="5" width="220" height="10" />
-  </ContentLoader>
-);
 
 const SongList = ({
   isLoading,
   items,
-  selectedSong = 0,
-  onAdd,
   onClick,
+  selectedIndex,
+  addToBook,
 }: Props) => {
+  if (isLoading) return "Cargando...";
+
   return (
-    <div className="list-group songListContainer">
-      {isLoading && <BulletList />}
-      {items.map((item, index) => (
-        <div
-          key={index}
-          className={
-            selectedSong === index
-              ? "listItem list-group-item list-group-item-action active"
-              : " listItem list-group-item list-group-item-action"
-          }
-          onClick={() => onClick(index)}
-        >
-          <div className="songName">
-            <div className="songTitle">{item.title}</div>
-            <div className="songKey">
-              {" "}
-              Tono: <span>{item.tone}</span>
-            </div>
-          </div>
-          <div>
-            {selectedSong === index ? (
-              <button className="btn btn-outline-light" onClick={() => onAdd()}>
-                Agregar
-              </button>
-            ) : null}
-          </div>
-        </div>
+    <List.Root gap={2}>
+      {items.map((song, index) => (
+        <List.Item key={song.id}>
+          <Button
+            width="400px"
+            justifyContent="flex-start"
+            variant={selectedIndex === index ? "solid" : "ghost"}
+            colorPalette={selectedIndex === index ? "white" : "gray"}
+            onClick={() => onClick?.(index)}
+            whiteSpace={"normal"}
+            textAlign={"left"}
+          >
+            {song.title || <Text opacity={0.6}>Sin título</Text>}
+            {selectedIndex === index && (
+              <IoIosAddCircleOutline
+                onClick={() => addToBook(items[selectedIndex!])}
+              />
+            )}
+          </Button>
+        </List.Item>
       ))}
-    </div>
+    </List.Root>
   );
 };
 

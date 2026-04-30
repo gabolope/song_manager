@@ -1,30 +1,21 @@
-import ChordSheetJS from "chordsheetjs";
 import parse from "html-react-parser";
-import type { Song } from "chordsheetjs";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./SongViewer.css";
-
-// Defino un placeholder:
-import chordpro1 from "../songs/E1 Eres mi amigo fiel.chordpro?raw";
-const parser = new ChordSheetJS.ChordProParser();
-const placeholder = parser.parse(chordpro1);
+import { formatSong } from "../services/chordpro.service";
+import type { SongDTO } from "../types/song";
 
 interface Props {
   onLeft: () => void;
   onRight: () => void;
-  displayedSong?: Song;
+  displayedSong?: SongDTO | null;
 }
 
-const SongViewer = ({
-  onLeft,
-  onRight,
-  displayedSong = placeholder,
-}: Props) => {
-  // Formateo de song:
-  const formatter = new ChordSheetJS.HtmlTableFormatter();
-  const html = formatter.format(displayedSong);
+const SongViewer = ({ onLeft, onRight, displayedSong }: Props) => {
+  const html = useMemo(() => {
+    if (!displayedSong) return "";
+    return formatSong(displayedSong.content);
+  }, [displayedSong]);
 
-  // Manejo de FullScreen:
   const [isFullScreen, setFullScreen] = useState(false);
   const viewerRef = useRef<HTMLDivElement>(null);
 
@@ -34,81 +25,46 @@ const SongViewer = ({
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
   }, []);
 
   const goFullScreen = () => {
-    if (viewerRef.current) viewerRef.current.requestFullscreen();
+    viewerRef.current?.requestFullscreen();
   };
 
-  function exitFullScreen() {
+  const exitFullScreen = () => {
     document.exitFullscreen();
+  };
+
+  if (!displayedSong) {
+    return (
+      <div className="card songViewerContainer">Seleccioná una canción</div>
+    );
   }
 
   return (
-    <>
-      <div className="card songViewerContainer" ref={viewerRef}>
-        {isFullScreen ? (
-          <div
-            className="btn-group"
-            role="group"
-            aria-label="Default button group"
-          >
-            <button
-              type="button"
-              className="btn btn-outline-primary buttonMove"
-              onClick={onLeft}
-            >
-              &lt;&lt;&lt;
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline-primary"
-              onClick={exitFullScreen}
-            >
-              Salir
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline-primary buttonMove"
-              onClick={onRight}
-            >
-              &gt;&gt;&gt;
-            </button>
-          </div>
-        ) : (
-          <div
-            className="btn-group barra"
-            role="group"
-            aria-label="Default button group"
-          >
-            <button
-              type="button"
-              className="btn btn-outline-primary buttonMove"
-              onClick={onLeft}
-            >
-              &lt;&lt;&lt;
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline-primary"
-              onClick={goFullScreen}
-            >
-              Pantalla completa
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline-primary buttonMove"
-              onClick={onRight}
-            >
-              &gt;&gt;&gt;
-            </button>
-          </div>
-        )}
-        <div className="songTitle">{displayedSong.title}</div>
-        <div className="tono">Tono: {displayedSong.key}</div>
-        <div>{parse(html)}</div>
-      </div>
-    </>
+    <div className="card songViewerContainer" ref={viewerRef}>
+      {isFullScreen ? (
+        <div className="btn-group">
+          <button onClick={onLeft}>&lt;&lt;&lt;</button>
+          <button onClick={exitFullScreen}>Salir</button>
+          <button onClick={onRight}>&gt;&gt;&gt;</button>
+        </div>
+      ) : (
+        <div className="btn-group barra">
+          <button onClick={onLeft}>&lt;&lt;&lt;</button>
+          <button onClick={goFullScreen}>Pantalla completa</button>
+          <button onClick={onRight}>&gt;&gt;&gt;</button>
+        </div>
+      )}
+
+      <div className="songTitle">{displayedSong.title}</div>
+      <div className="tono">Tono: {displayedSong.key ?? "-"}</div>
+      <div>{parse(html)}</div>
+    </div>
   );
 };
 
