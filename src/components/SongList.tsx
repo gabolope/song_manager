@@ -1,9 +1,9 @@
-import { Button, Stack, List, Text } from "@chakra-ui/react";
+import { Button, List, Text } from "@chakra-ui/react";
 import type { SongDTO } from "../types/song";
 import { IoIosAddCircleOutline } from "react-icons/io";
 
 interface Props {
-  items: SongDTO[];
+  items: SongDTO[] | undefined;
   isLoading: boolean;
   onClick?: (index: number) => void;
   selectedIndex?: number | null;
@@ -21,7 +21,7 @@ const SongList = ({
 
   return (
     <List.Root gap={2}>
-      {items.map((song, index) => (
+      {items?.map((song, index) => (
         <List.Item key={song.id}>
           <Button
             width="400px"

@@ -1,13 +1,13 @@
 import { Grid, GridItem } from "@chakra-ui/react";
 import SongList from "./components/SongList";
-import { useSongs } from "./hooks/useSongs";
+import useSongs from "./hooks/useSongs";
 import { useState } from "react";
 import SongViewer from "./components/SongViewer";
 import type { SongDTO } from "./types/song";
 import BookList from "./components/BookList";
 
 const App = () => {
-  const { songs, loading } = useSongs();
+  const { data: songs, error, isLoading } = useSongs();
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
@@ -28,8 +28,10 @@ const App = () => {
     bookIndex !== null
       ? book[bookIndex]
       : selectedIndex !== null
-        ? songs[selectedIndex]
+        ? songs?.[selectedIndex]
         : null;
+
+  if (error) return <p>{error.message}</p>;
 
   return (
     <Grid
@@ -50,7 +52,7 @@ const App = () => {
           <GridItem>
             <SongList
               items={songs}
-              isLoading={loading}
+              isLoading={isLoading}
               onClick={(index) => setSelectedIndex(index)}
               selectedIndex={selectedIndex}
               addToBook={addToBook}

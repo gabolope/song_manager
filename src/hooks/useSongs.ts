@@ -1,18 +1,13 @@
-import { useEffect, useState } from "react";
 import { fetchSongs } from "../services/songs.service";
 import type { SongDTO } from "../types/song";
+import { useQuery } from "@tanstack/react-query";
 
-export function useSongs() {
-  const [songs, setSongs] = useState<SongDTO[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<unknown>(null);
+const useSongs = () => {
+  return useQuery<SongDTO[], Error>({
+    queryKey: ["songs"],
+    queryFn: fetchSongs,
+    staleTime: 10 * 1000, //10 segundos para que songList sea stale
+  });
+};
 
-  useEffect(() => {
-    fetchSongs()
-      .then(setSongs)
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, []);
-
-  return { songs, loading, error };
-}
+export default useSongs;
