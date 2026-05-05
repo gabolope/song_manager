@@ -1,4 +1,4 @@
-import ChordSheetJS, { type Song } from "chordsheetjs";
+import ChordSheetJS from "chordsheetjs";
 
 const parser = new ChordSheetJS.ChordProParser();
 const formatter = new ChordSheetJS.HtmlTableFormatter();

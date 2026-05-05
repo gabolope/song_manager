@@ -1,6 +1,5 @@
 import { db } from "./firebase";
-import { doc, setDoc, writeBatch, collection } from "firebase/firestore";
-import type { Song } from "chordsheetjs";
+import { doc, setDoc } from "firebase/firestore";
 
 export async function uploadBook(list: any[]) {
   await setDoc(doc(db, "live", "book"), {

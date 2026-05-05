@@ -1,11 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  collection,
-  writeBatch,
-  doc,
-  deleteDoc,
-  setDoc,
-} from "firebase/firestore";
+import { doc, deleteDoc, setDoc } from "firebase/firestore";
 import { db } from "../services/firebase";
 import type { SongDTO } from "../types/song";
 
