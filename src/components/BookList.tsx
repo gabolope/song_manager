@@ -3,7 +3,7 @@ import { Button } from "@chakra-ui/react";
 import "./SongList.css";
 
 interface Props {
-  items: SongDTO[];
+  items?: SongDTO[];
   onClick: (index: number) => void;
   onDelete: (id: string) => void;
   selected: number | null;

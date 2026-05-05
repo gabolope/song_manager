@@ -5,14 +5,19 @@ import SongList from "./components/SongList";
 import BookList from "./components/BookList";
 import SongViewer from "./components/SongViewer";
 import { Grid, GridItem, Splitter } from "@chakra-ui/react";
+import { collection, writeBatch, doc } from "firebase/firestore";
+import { db } from "./services/firebase";
+import useBook from "./hooks/useBook";
+import { useQueryClient } from "@tanstack/react-query";
 
 const App = () => {
   const { data: songs, error, isLoading } = useSongs();
+  const { data: book } = useBook();
+
+  const queryClient = useQueryClient();
 
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
   const [selectedBookSong, setSelectedBookSong] = useState<number | null>(null);
-
-  const [book, setBook] = useState<SongDTO[]>([]);
 
   // Manejo de selección de list y book
   const listClick = (index: number) => {
@@ -28,18 +33,26 @@ const App = () => {
     selectedListSong !== null
       ? songs?.[selectedListSong]
       : selectedBookSong !== null
-        ? book[selectedBookSong]
+        ? book?.[selectedBookSong]
         : null;
 
-  const addToBook = (song: SongDTO) => {
-    if (book.some((s) => s.id === song.id)) return;
-    setBook([...book, song]);
-  };
+  // Manejo de subida de book
+  async function addToBook(song: SongDTO) {
+    if (book?.some((s) => s.id === song.id)) return;
 
-  const removeFromBook = (id: string) => {
+    const ref = doc(collection(db, "book"));
+    const batch = writeBatch(db);
+
+    batch.set(ref, song);
+    await batch.commit();
+
+    queryClient.invalidateQueries({ queryKey: ["book"] });
+  }
+
+  /* const removeFromBook = (id: string) => {
     setBook(book.filter((s) => s.id !== id));
     setSelectedBookSong(null);
-  };
+  }; */
 
   if (error) return <p>{error.message}</p>;
 
@@ -89,7 +102,7 @@ const App = () => {
                 onClick={(index) => {
                   bookClick(index);
                 }}
-                onDelete={removeFromBook}
+                onDelete={(i) => console.log("borrar", i)}
               />
             </Splitter.Panel>
           </Splitter.Root>
