@@ -1,20 +1,16 @@
 import { useState } from "react";
 import useSongs from "./hooks/useSongs";
-import type { SongDTO } from "./types/song";
 import SongList from "./components/SongList";
 import BookList from "./components/BookList";
 import SongViewer from "./components/SongViewer";
 import { Grid, GridItem, Splitter } from "@chakra-ui/react";
-import { collection, writeBatch, doc } from "firebase/firestore";
-import { db } from "./services/firebase";
 import useBook from "./hooks/useBook";
-import { useQueryClient } from "@tanstack/react-query";
+import { useBookMutations } from "./hooks/useBookMutations";
 
 const App = () => {
   const { data: songs, error, isLoading } = useSongs();
   const { data: book } = useBook();
-
-  const queryClient = useQueryClient();
+  const { addToBook, removeFromBook } = useBookMutations(book);
 
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
   const [selectedBookSong, setSelectedBookSong] = useState<number | null>(null);
@@ -35,24 +31,6 @@ const App = () => {
       : selectedBookSong !== null
         ? book?.[selectedBookSong]
         : null;
-
-  // Manejo de subida de book
-  async function addToBook(song: SongDTO) {
-    if (book?.some((s) => s.id === song.id)) return;
-
-    const ref = doc(collection(db, "book"));
-    const batch = writeBatch(db);
-
-    batch.set(ref, song);
-    await batch.commit();
-
-    queryClient.invalidateQueries({ queryKey: ["book"] });
-  }
-
-  /* const removeFromBook = (id: string) => {
-    setBook(book.filter((s) => s.id !== id));
-    setSelectedBookSong(null);
-  }; */
 
   if (error) return <p>{error.message}</p>;
 
@@ -91,7 +69,7 @@ const App = () => {
                 isLoading={isLoading}
                 onClick={(index) => listClick(index)}
                 selected={selectedListSong}
-                addToBook={addToBook}
+                addToBook={(song) => addToBook.mutate(song)}
               ></SongList>
             </Splitter.Panel>
             <Splitter.ResizeTrigger id="a:b" />
@@ -99,10 +77,8 @@ const App = () => {
               <BookList
                 items={book}
                 selected={selectedBookSong}
-                onClick={(index) => {
-                  bookClick(index);
-                }}
-                onDelete={(i) => console.log("borrar", i)}
+                onClick={bookClick}
+                onDelete={(id) => removeFromBook.mutate(id)}
               />
             </Splitter.Panel>
           </Splitter.Root>

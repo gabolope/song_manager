@@ -18,7 +18,7 @@ const BookList = ({ items, onClick, onDelete, selected }: Props) => {
             <div>
               {selected === index && (
                 <Button
-                  onClick={() => console.log(song.id)}
+                  onClick={() => onDelete(song.id)}
                   colorPalette={"red"}
                   h={"50px"}
                   borderRadius={"0"}
