@@ -16,6 +16,7 @@ const SongViewer = ({ onLeft, onRight, displayedSong }: Props) => {
     return formatSong(displayedSong.content);
   }, [displayedSong]);
 
+  // Manejo de fullscreen
   const [isFullScreen, setFullScreen] = useState(false);
   const viewerRef = useRef<HTMLDivElement>(null);
 

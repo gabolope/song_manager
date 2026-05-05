@@ -12,6 +12,7 @@ export async function fetchSongs(): Promise<SongDTO[]> {
       id: doc.id,
       title: data.title ?? "",
       content: data.content ?? "",
+      key: data.key ?? "",
     };
   });
 }

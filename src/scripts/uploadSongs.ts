@@ -1,3 +1,5 @@
+// UTILIZADO TEMPORALMENTE PARA SUBIR LAS CANCIONES
+
 import { collection, writeBatch, doc } from "firebase/firestore";
 import { db } from "../services/firebase";
 

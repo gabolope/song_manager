@@ -14,7 +14,7 @@ const BookList = ({ items, onClick, onDelete, selected }: Props) => {
       {items?.map((song, index) => (
         <div key={index} onClick={() => onClick?.(index)}>
           <div className={selected === index ? "song selected" : "song"}>
-            <div className="title">{song.title}</div>
+            <div>{song.title}</div>
             <div>
               {selected === index && (
                 <Button

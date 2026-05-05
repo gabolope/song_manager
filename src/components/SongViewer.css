@@ -54,7 +54,7 @@
 
 /* Quito el título mostrado por el parser */
 .title {
-  display: block;
+  display: none;
 }
 
 .tono {

@@ -1,9 +1,6 @@
-.songList {
-  padding: 10px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
+.selected {
+  background-color: white;
+  color: black;
 }
 .song {
   display: flex;
@@ -15,7 +12,10 @@
   border-radius: 5px;
   overflow: hidden;
 }
-.selected {
-  background-color: white;
-  color: black;
+.songList {
+  padding: 10px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }

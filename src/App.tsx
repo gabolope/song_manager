@@ -1,20 +1,18 @@
-import { Grid, GridItem, Splitter } from "@chakra-ui/react";
-import SongList from "./components/SongList";
-import useSongs from "./hooks/useSongs";
 import { useState } from "react";
-import SongViewer from "./components/SongViewer";
+import useSongs from "./hooks/useSongs";
 import type { SongDTO } from "./types/song";
+import SongList from "./components/SongList";
 import BookList from "./components/BookList";
+import SongViewer from "./components/SongViewer";
+import { Grid, GridItem, Splitter } from "@chakra-ui/react";
 
 const App = () => {
   const { data: songs, error, isLoading } = useSongs();
 
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
   const [selectedBookSong, setSelectedBookSong] = useState<number | null>(null);
 
   const [book, setBook] = useState<SongDTO[]>([]);
-  const [bookIndex, setBookIndex] = useState<number | null>(null);
 
   // Manejo de selección de list y book
   const listClick = (index: number) => {
@@ -33,13 +31,6 @@ const App = () => {
         ? book[selectedBookSong]
         : null;
 
-  /*  const currentSong =
-    selectedListSong !== null
-      ? book[selectedBookSong]
-      : selectedIndex !== null
-        ? songs?.[selectedIndex]
-        : null; */
-
   const addToBook = (song: SongDTO) => {
     if (book.some((s) => s.id === song.id)) return;
     setBook([...book, song]);
@@ -47,7 +38,7 @@ const App = () => {
 
   const removeFromBook = (id: string) => {
     setBook(book.filter((s) => s.id !== id));
-    setBookIndex(null);
+    setSelectedBookSong(null);
   };
 
   if (error) return <p>{error.message}</p>;

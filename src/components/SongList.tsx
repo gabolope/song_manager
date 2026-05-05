@@ -24,9 +24,7 @@ const SongList = ({
       {items?.map((song, index) => (
         <div key={index} onClick={() => onClick?.(index)}>
           <div className={selected === index ? "song selected" : "song"}>
-            <div className="title">
-              {song.title || <Text opacity={0.6}>Sin título</Text>}
-            </div>
+            <div>{song.title || <Text opacity={0.6}>Sin título</Text>}</div>
             <div>
               {selected === index && (
                 <Button
