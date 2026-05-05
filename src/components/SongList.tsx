@@ -1,47 +1,48 @@
-import { Button, List, Text } from "@chakra-ui/react";
+import { Button, Text } from "@chakra-ui/react";
 import type { SongDTO } from "../types/song";
-import { IoIosAddCircleOutline } from "react-icons/io";
+import "./SongList.css";
 
 interface Props {
+  addToBook: (song: SongDTO) => void;
   items: SongDTO[] | undefined;
   isLoading: boolean;
   onClick?: (index: number) => void;
-  selectedIndex?: number | null;
-  addToBook: (song: SongDTO) => void;
+  selected?: number | null;
 }
 
 const SongList = ({
   isLoading,
   items,
   onClick,
-  selectedIndex,
+  selected,
   addToBook,
 }: Props) => {
   if (isLoading) return "Cargando...";
 
   return (
-    <List.Root gap={2}>
+    <div className="songList">
       {items?.map((song, index) => (
-        <List.Item key={song.id}>
-          <Button
-            width="400px"
-            justifyContent="flex-start"
-            variant={selectedIndex === index ? "solid" : "ghost"}
-            colorPalette={selectedIndex === index ? "white" : "gray"}
-            onClick={() => onClick?.(index)}
-            whiteSpace={"normal"}
-            textAlign={"left"}
-          >
-            {song.title || <Text opacity={0.6}>Sin título</Text>}
-            {selectedIndex === index && (
-              <IoIosAddCircleOutline
-                onClick={() => addToBook(items[selectedIndex!])}
-              />
-            )}
-          </Button>
-        </List.Item>
+        <div key={index} onClick={() => onClick?.(index)}>
+          <div className={selected === index ? "song selected" : "song"}>
+            <div className="title">
+              {song.title || <Text opacity={0.6}>Sin título</Text>}
+            </div>
+            <div>
+              {selected === index && (
+                <Button
+                  onClick={() => addToBook(items[selected!])}
+                  colorPalette={"blue"}
+                  h={"50px"}
+                  borderRadius={"0"}
+                >
+                  Agregar
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
       ))}
-    </List.Root>
+    </div>
   );
 };
 

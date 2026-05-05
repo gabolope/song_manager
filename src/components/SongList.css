@@ -1,0 +1,21 @@
+.songList {
+  padding: 10px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.song {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 50px;
+  flex: 0 0 auto;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.selected {
+  background-color: white;
+  color: black;
+}
