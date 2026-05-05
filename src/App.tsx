@@ -6,14 +6,23 @@ import SongViewer from "./components/SongViewer";
 import { Grid, GridItem, Splitter } from "@chakra-ui/react";
 import useBook from "./hooks/useBook";
 import { useBookMutations } from "./hooks/useBookMutations";
+import LiveBar from "./components/LiveBar";
+import { useLiveSong } from "./hooks/useLiveSong";
 
 const App = () => {
+  // Hooks de fetching data
   const { data: songs, error, isLoading } = useSongs();
   const { data: book } = useBook();
   const { addToBook, removeFromBook } = useBookMutations(book);
+  const { setLiveSong } = useLiveSong();
 
+  // Estados de selección de canción
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
   const [selectedBookSong, setSelectedBookSong] = useState<number | null>(null);
+
+  // Estados de modo director y canción en vivo
+  const [isLive, setIsLive] = useState(false);
+  const [isDirector, setIsDirector] = useState(false);
 
   // Manejo de selección de list y book
   const listClick = (index: number) => {
@@ -31,6 +40,29 @@ const App = () => {
       : selectedBookSong !== null
         ? book?.[selectedBookSong]
         : null;
+
+  // Manejo de left y right
+  const onLeft = (id: string) => {
+    if (!book) return;
+    const currentIndex = book.findIndex((song) => song.id === id);
+    if (currentIndex > 0) {
+      const nextSong = book[currentIndex - 1];
+      setSelectedBookSong(currentIndex - 1);
+      setSelectedListSong(null);
+      if (isDirector) setLiveSong.mutate(nextSong);
+    }
+  };
+
+  const onRight = (id: string) => {
+    if (!book) return;
+    const currentIndex = book.findIndex((song) => song.id === id);
+    if (currentIndex < book.length - 1) {
+      const nextSong = book[currentIndex + 1];
+      setSelectedBookSong(currentIndex + 1);
+      setSelectedListSong(null);
+      if (isDirector) setLiveSong.mutate(nextSong);
+    }
+  };
 
   if (error) return <p>{error.message}</p>;
 
@@ -54,6 +86,7 @@ const App = () => {
         h="100%"
         display="flex"
         flexDirection="column"
+        hideBelow={"lg"}
       >
         <div style={{ height: "100%", width: "100%" }}>
           <Splitter.Root
@@ -85,10 +118,19 @@ const App = () => {
         </div>
       </GridItem>
       <GridItem area="viewer" h="100%" overflow="hidden">
+        <LiveBar
+          isLive={isLive}
+          isDirector={isDirector}
+          goLive={() => setIsLive(!isLive)}
+          setDirector={() => setIsDirector(!isDirector)}
+        />
         <SongViewer
           displayedSong={currentSong}
-          onLeft={() => {}}
-          onRight={() => {}}
+          isLive={isLive}
+          isDirector={isDirector}
+          onLiveChange={setIsLive}
+          onLeft={(i) => onLeft(i)}
+          onRight={(i) => onRight(i)}
         />
       </GridItem>
     </Grid>
