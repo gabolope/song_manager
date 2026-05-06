@@ -54,14 +54,17 @@ const SongViewer = ({
   }, [onLiveChange]);
 
   if (!displayedSong) {
-    return (
-      <div className="card songViewerContainer">Seleccioná una canción</div>
-    );
+    return <div className="songViewerContainer">Seleccioná una canción</div>;
   }
 
   return (
     <>
-      <div className="card songViewerContainer" ref={viewerRef}>
+      <div
+        className={
+          isDirector ? "songViewerContainer director" : "songViewerContainer"
+        }
+        ref={viewerRef}
+      >
         <div className="songTitle">{displayedSong.title}</div>
         <div className="tono">Tono: {displayedSong.key ?? "-"}</div>
         <div>{parse(html)}</div>

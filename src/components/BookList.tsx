@@ -1,5 +1,6 @@
 import type { SongDTO } from "@/types/song";
 import { Button } from "@chakra-ui/react";
+import { MdDeleteOutline } from "react-icons/md";
 import "./SongList.css";
 
 interface Props {
@@ -20,10 +21,10 @@ const BookList = ({ items, onClick, onDelete, selected }: Props) => {
                 <Button
                   onClick={() => onDelete(song.id)}
                   colorPalette={"red"}
-                  h={"50px"}
+                  h={"60px"}
                   borderRadius={"0"}
                 >
-                  Eliminar
+                  <MdDeleteOutline />
                 </Button>
               )}
             </div>

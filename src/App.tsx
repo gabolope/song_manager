@@ -94,15 +94,16 @@ const App = () => {
             orientation="vertical"
             borderWidth="1px"
             minH="60"
-            style={{ height: "100%" }}
+            style={{ height: "100%", borderRadius: "10px" }}
           >
             <Splitter.Panel id="a">
               <SongList
+                addToBook={(song) => addToBook.mutate(song)}
+                book={book}
                 items={songs}
                 isLoading={isLoading}
                 onClick={(index) => listClick(index)}
                 selected={selectedListSong}
-                addToBook={(song) => addToBook.mutate(song)}
               ></SongList>
             </Splitter.Panel>
             <Splitter.ResizeTrigger id="a:b" />
@@ -117,7 +118,7 @@ const App = () => {
           </Splitter.Root>
         </div>
       </GridItem>
-      <GridItem area="viewer" h="100%" overflow="hidden">
+      <GridItem area="viewer" h="100%" overflow="hidden" padding="10px">
         <LiveBar
           isLive={isLive}
           isDirector={isDirector}

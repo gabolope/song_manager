@@ -7,10 +7,10 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  min-height: 50px;
+  height: 60px;
   flex: 0 0 auto;
   border-radius: 5px;
-  overflow: hidden;
+  font-size: 0.9rem;
 }
 .songList {
   padding: 10px;
