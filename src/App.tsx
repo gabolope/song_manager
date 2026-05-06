@@ -14,7 +14,7 @@ const App = () => {
   const { data: songs, error, isLoading } = useSongs();
   const { data: book } = useBook();
   const { addToBook, removeFromBook } = useBookMutations(book);
-  const { setLiveSong } = useLiveSong();
+  const { liveSong, setLiveSong } = useLiveSong();
 
   // Estados de selección de canción
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
@@ -46,10 +46,10 @@ const App = () => {
     if (!book) return;
     const currentIndex = book.findIndex((song) => song.id === id);
     if (currentIndex > 0) {
-      const nextSong = book[currentIndex - 1];
+      const previousSong = book[currentIndex - 1];
       setSelectedBookSong(currentIndex - 1);
       setSelectedListSong(null);
-      if (isDirector) setLiveSong.mutate(nextSong);
+      if (isDirector) setLiveSong.mutate(previousSong);
     }
   };
 
@@ -125,7 +125,7 @@ const App = () => {
           setDirector={() => setIsDirector(!isDirector)}
         />
         <SongViewer
-          displayedSong={currentSong}
+          displayedSong={isDirector ? currentSong : liveSong.data}
           isLive={isLive}
           isDirector={isDirector}
           onLiveChange={setIsLive}
