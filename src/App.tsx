@@ -121,7 +121,10 @@ const App = () => {
         <LiveBar
           isLive={isLive}
           isDirector={isDirector}
-          goLive={() => setIsLive(!isLive)}
+          goLive={() => {
+            setIsLive(!isLive);
+            if (isDirector && currentSong) setLiveSong.mutate(currentSong); // hace que cuando el director apreta goLive cambie la cancion
+          }}
           setDirector={() => setIsDirector(!isDirector)}
         />
         <SongViewer
