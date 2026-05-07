@@ -8,6 +8,7 @@ import useBook from "./hooks/useBook";
 import { useBookMutations } from "./hooks/useBookMutations";
 import LiveBar from "./components/LiveBar";
 import { useLiveSong } from "./hooks/useLiveSong";
+import { useBookNavigation } from "./hooks/useBookNavigation";
 
 const App = () => {
   // Hooks de fetching data
@@ -42,27 +43,15 @@ const App = () => {
         : null;
 
   // Manejo de left y right
-  const onLeft = (id: string) => {
-    if (!book) return;
-    const currentIndex = book.findIndex((song) => song.id === id);
-    if (currentIndex > 0) {
-      const previousSong = book[currentIndex - 1];
-      setSelectedBookSong(currentIndex - 1);
+  const { onLeft, onRight } = useBookNavigation(
+    book,
+    isDirector,
+    currentSong,
+    (index) => {
+      setSelectedBookSong(index);
       setSelectedListSong(null);
-      if (isDirector) setLiveSong.mutate(previousSong);
-    }
-  };
-
-  const onRight = (id: string) => {
-    if (!book) return;
-    const currentIndex = book.findIndex((song) => song.id === id);
-    if (currentIndex < book.length - 1) {
-      const nextSong = book[currentIndex + 1];
-      setSelectedBookSong(currentIndex + 1);
-      setSelectedListSong(null);
-      if (isDirector) setLiveSong.mutate(nextSong);
-    }
-  };
+    },
+  );
 
   if (error) return <p>{error.message}</p>;
 
