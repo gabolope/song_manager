@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { doc, deleteDoc, setDoc } from "firebase/firestore";
+import { doc, deleteDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
 import type { SongDTO } from "../types/song";
 
@@ -11,7 +11,7 @@ export function useBookMutations(book?: SongDTO[]) {
       if (book?.some((s) => s.id === song.id)) return;
 
       const ref = doc(db, "book", song.id);
-      await setDoc(ref, song);
+      await setDoc(ref, { ...song, createdAt: serverTimestamp() });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["book"] });
