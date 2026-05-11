@@ -11,6 +11,7 @@ interface Props {
   displayedSong?: SongDTO | null;
   isLive: boolean;
   isDirector: boolean;
+  nextSong: SongDTO | undefined;
   onLiveChange: (value: boolean) => void;
   onLeft: (id: string) => void;
   onRight: (id: string) => void;
@@ -20,6 +21,7 @@ const SongViewer = ({
   displayedSong,
   isLive,
   isDirector,
+  nextSong,
   onLiveChange,
   onLeft,
   onRight,
@@ -68,19 +70,26 @@ const SongViewer = ({
         <div className="songTitle">{displayedSong.title}</div>
         <div className="tono">Tono: {displayedSong.key ?? "-"}</div>
         <div>{parse(html)}</div>
+        <div className="nextSong">
+          {nextSong?.title ? (
+            <>
+              <p>Próxima canción:</p> <p>{nextSong?.title}</p>
+            </>
+          ) : (
+            "Fin de la lista."
+          )}
+        </div>
         <ActionBar.Root open={isLive}>
           <Portal container={viewerRef}>
             <ActionBar.Positioner>
               <ActionBar.Content>
-                {isDirector && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onLeft(displayedSong.id)}
-                  >
-                    <FaAngleDoubleLeft />
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onLeft(displayedSong.id)}
+                >
+                  <FaAngleDoubleLeft />
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -89,15 +98,13 @@ const SongViewer = ({
                   <IoIosExit />
                   Salir
                 </Button>
-                {isDirector && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onRight(displayedSong.id)}
-                  >
-                    <FaAngleDoubleRight />
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onRight(displayedSong.id)}
+                >
+                  <FaAngleDoubleRight />
+                </Button>
               </ActionBar.Content>
             </ActionBar.Positioner>
           </Portal>

@@ -52,15 +52,21 @@
 
 .chord-sheet {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  flex-direction: column;
+}
+
+@media (min-width: 660px) {
+  .chord-sheet {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }
 
 .paragraph {
   margin-bottom: 0.75rem;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 660px) {
   .paragraph {
     padding: 0 1rem 1rem 0;
     margin-bottom: 1rem;
@@ -105,4 +111,11 @@
 
 .director {
   border: 1px solid #2563eb;
+}
+.nextSong {
+  font-style: italic;
+  :last-child {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
 }

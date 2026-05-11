@@ -1,44 +1,47 @@
 import { useLiveSong } from "./useLiveSong";
 import type { SongDTO } from "../types/song";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 export function useBookNavigation(
   book?: SongDTO[],
   isDirector?: boolean,
-  currentSong?: SongDTO | null,
+  displayedSong?: SongDTO | null,
   onNavigate?: (index: number) => void,
 ) {
   const { setLiveSong } = useLiveSong();
 
-  const navigate = (id: string, direction: 1 | -1) => {
-    if (!book) return;
-    const currentIndex = book.findIndex((song) => song.id === id);
-    const nextIndex = currentIndex + direction;
-    if (nextIndex < 0 || nextIndex >= book.length) return;
+  const navigate = useCallback(
+    (id: string, direction: 1 | -1) => {
+      if (!book) return;
+      const currentIndex = book.findIndex((song) => song.id === id);
+      const nextIndex = currentIndex + direction;
+      if (nextIndex < 0 || nextIndex >= book.length) return;
 
-    onNavigate?.(nextIndex);
-    if (isDirector) setLiveSong.mutate(book[nextIndex]);
-  };
+      onNavigate?.(nextIndex);
+      if (isDirector) setLiveSong.mutate(book[nextIndex]);
+    },
+    [book, isDirector, onNavigate, setLiveSong],
+  );
 
-  const onLeft = (id: string) => navigate(id, -1);
-  const onRight = (id: string) => navigate(id, 1);
+  const onLeft = useCallback((id: string) => navigate(id, -1), [navigate]);
+  const onRight = useCallback((id: string) => navigate(id, 1), [navigate]);
 
   // Teclado
   useEffect(() => {
-    if (!currentSong) return;
+    if (!displayedSong) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") onLeft(currentSong.id);
-      if (e.key === "ArrowRight") onRight(currentSong.id);
+      if (e.key === "ArrowLeft") onLeft(displayedSong.id);
+      if (e.key === "ArrowRight") onRight(displayedSong.id);
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentSong]);
+  }, [displayedSong, onLeft, onRight]); // ← agregás onLeft y onRight
 
   // Swipe táctil
   useEffect(() => {
-    if (!currentSong) return;
+    if (!displayedSong) return;
 
     let startX = 0;
 
@@ -49,8 +52,8 @@ export function useBookNavigation(
     const handleTouchEnd = (e: TouchEvent) => {
       const diff = startX - e.changedTouches[0].clientX;
       if (Math.abs(diff) < 50) return;
-      if (diff > 0) onRight(currentSong.id);
-      else onLeft(currentSong.id);
+      if (diff > 0) onRight(displayedSong.id);
+      else onLeft(displayedSong.id);
     };
 
     window.addEventListener("touchstart", handleTouchStart);
@@ -59,7 +62,7 @@ export function useBookNavigation(
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [currentSong]);
+  }, [displayedSong, onLeft, onRight]); // ← agregás onLeft y onRight
 
   return { onLeft, onRight };
 }
