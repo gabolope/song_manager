@@ -64,6 +64,19 @@ const App = () => {
     }
   }, [liveSong.data, isDirector, book]);
 
+  // Variable para mostrar recuadro rojo en la canción en vivo
+  const isCurrentLive = displayedSong?.id === liveSong.data?.id;
+
+  const backToLive = () => {
+    if (!liveSong.data || !book) return;
+    const index = book.findIndex((s) => s.id === liveSong.data!.id);
+    if (index !== -1) {
+      setSelectedBookSong(index);
+      setSelectedListSong(null);
+      setLocalSong(liveSong.data);
+    }
+  };
+
   // Manejo de left y right
   const { onLeft, onRight } = useBookNavigation(
     book,
@@ -143,9 +156,11 @@ const App = () => {
           />
           <SongViewer
             displayedSong={displayedSong}
+            isCurrentLive={isCurrentLive}
             isLive={isLive}
             isDirector={isDirector}
             nextSong={nextSong}
+            onBackToLive={backToLive}
             onLiveChange={setIsLive}
             onLeft={(i) => onLeft(i)}
             onRight={(i) => onRight(i)}

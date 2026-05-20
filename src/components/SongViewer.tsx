@@ -1,17 +1,19 @@
+import { ActionBar, Button, Portal } from "@chakra-ui/react";
 import parse from "html-react-parser";
 import { useEffect, useMemo, useRef } from "react";
-import "./SongViewer.css";
-import { formatSong } from "../services/chordpro.service";
-import type { SongDTO } from "../types/song";
-import { ActionBar, Portal, Button } from "@chakra-ui/react";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import { IoIosExit } from "react-icons/io";
+import { formatSong } from "../services/chordpro.service";
+import type { SongDTO } from "../types/song";
+import "./SongViewer.css";
 
 interface Props {
   displayedSong?: SongDTO | null;
+  isCurrentLive: boolean;
   isLive: boolean;
   isDirector: boolean;
   nextSong: SongDTO | undefined;
+  onBackToLive: () => void;
   onLiveChange: (value: boolean) => void;
   onLeft: (id: string) => void;
   onRight: (id: string) => void;
@@ -19,9 +21,11 @@ interface Props {
 
 const SongViewer = ({
   displayedSong,
+  isCurrentLive,
   isLive,
   isDirector,
   nextSong,
+  onBackToLive,
   onLiveChange,
   onLeft,
   onRight,
@@ -63,7 +67,7 @@ const SongViewer = ({
     <>
       <div
         className={
-          isDirector ? "songViewerContainer director" : "songViewerContainer"
+          isCurrentLive ? "songViewerContainer isLive" : "songViewerContainer"
         }
         ref={viewerRef}
       >
@@ -109,6 +113,14 @@ const SongViewer = ({
             </ActionBar.Positioner>
           </Portal>
         </ActionBar.Root>
+        <Button
+          onClick={onBackToLive}
+          colorPalette="red"
+          className="backToLive"
+          visibility={!isCurrentLive && isLive ? "visible" : "hidden"}
+        >
+          Volver al Vivo
+        </Button>
       </div>
     </>
   );
