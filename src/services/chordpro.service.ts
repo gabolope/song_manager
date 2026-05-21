@@ -9,5 +9,7 @@ export function parseChordPro(content: string) {
 
 export function formatSong(content: string): string {
   const song = parser.parse(content);
-  return formatter.format(song);
+  const html = formatter.format(song);
+
+  return html.replace(/<div class="paragraph[^"]*">\s*<\/div>/g, "");
 }

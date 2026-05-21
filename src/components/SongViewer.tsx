@@ -23,7 +23,6 @@ const SongViewer = ({
   displayedSong,
   isCurrentLive,
   isLive,
-  isDirector,
   nextSong,
   onBackToLive,
   onLiveChange,
