@@ -44,15 +44,22 @@ export function useBookNavigation(
     if (!displayedSong) return;
 
     let startX = 0;
+    let startY = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
       startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      const diff = startX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) < 50) return;
-      if (diff > 0) onRight(displayedSong.id);
+      const diffX = startX - e.changedTouches[0].clientX;
+      const diffY = startY - e.changedTouches[0].clientY;
+
+      // Si el movimiento vertical es mayor que el horizontal, es scroll → ignorar
+      if (Math.abs(diffY) > Math.abs(diffX)) return;
+
+      if (Math.abs(diffX) < 50) return;
+      if (diffX > 0) onRight(displayedSong.id);
       else onLeft(displayedSong.id);
     };
 

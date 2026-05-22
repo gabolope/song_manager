@@ -74,6 +74,7 @@ const SongViewer = ({
         <div className="tono">Tono: {displayedSong.key ?? "-"}</div>
         <div>{parse(html)}</div>
         <div className="nextSong">
+          <hr />
           {nextSong?.title ? (
             <>
               <p>Próxima canción:</p> <p>{nextSong?.title}</p>
