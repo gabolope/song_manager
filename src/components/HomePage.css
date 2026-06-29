@@ -1,0 +1,107 @@
+/* HomePage.css */
+.home-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+}
+
+.home-title {
+  font-size: 22px;
+  font-weight: 500;
+  color: white;
+  margin: 0;
+}
+
+.home-subtitle {
+  font-size: 15px;
+  color: gray;
+  margin: -0.75rem 0 0;
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 520px;
+  @media (min-width: 660px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.role-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+  @media (min-width: 660px) {
+    flex-direction: column;
+  }
+}
+
+.role-card:hover {
+  border-color: #555;
+  background: #222;
+}
+
+.role-card:active {
+  transform: scale(0.98);
+}
+
+.role-icon {
+  width: 150px;
+  height: 150px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.role-icon.director {
+  background: #7aa3da;
+}
+
+.role-icon.player {
+  background: #49b875;
+}
+
+.role-text-container {
+  p:first-child {
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+}
+.role-label {
+  font-size: 18px;
+  font-weight: 500;
+  color: white;
+  margin: 0;
+}
+
+.role-desc {
+  font-size: 13px;
+  color: gray;
+  text-align: center;
+  margin: -0.5rem 0 0;
+  line-height: 1.5;
+}
+
+.role-arrow {
+  font-size: 16px;
+  color: gray;
+  margin-top: auto;
+}

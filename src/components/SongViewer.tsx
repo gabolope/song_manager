@@ -6,6 +6,7 @@ import { IoIosExit } from "react-icons/io";
 import { formatSong } from "../services/chordpro.service";
 import type { SongDTO } from "../types/song";
 import "./SongViewer.css";
+import Configuration from "./Configuration";
 
 interface Props {
   displayedSong?: SongDTO | null;
@@ -64,6 +65,7 @@ const SongViewer = ({
 
   return (
     <>
+      <Configuration />
       <div
         className={
           isCurrentLive ? "songViewerContainer isLive" : "songViewerContainer"
