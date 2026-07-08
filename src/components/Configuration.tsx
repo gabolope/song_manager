@@ -2,7 +2,11 @@ import { CiSettings } from "react-icons/ci";
 import { Button, CloseButton, Dialog, Portal } from "@chakra-ui/react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const Configuration = () => {
+interface Props {
+  height: number;
+}
+
+const Configuration = ({ height }: Props) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -11,7 +15,7 @@ const Configuration = () => {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" h={height}>
           <CiSettings />
         </Button>
       </Dialog.Trigger>

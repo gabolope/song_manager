@@ -1,35 +1,29 @@
-import { ActionBar, Button, Portal } from "@chakra-ui/react";
 import parse from "html-react-parser";
-import { useEffect, useMemo, useRef } from "react";
-import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
-import { IoIosExit } from "react-icons/io";
+import { useContext, useEffect, useMemo, useRef } from "react";
+import DirectorContext from "../contexts/DirectorContext";
+import PlayerContext from "../contexts/PlayerContext";
+import { useSession } from "../contexts/SessionContext";
 import { formatSong } from "../services/chordpro.service";
-import type { SongDTO } from "../types/song";
+import LiveBar from "./LiveBar";
+import NextSong from "./NextSong";
 import "./SongViewer.css";
-import Configuration from "./Configuration";
 
-interface Props {
-  displayedSong?: SongDTO | null;
-  isCurrentLive: boolean;
-  isLive: boolean;
-  isDirector: boolean;
-  nextSong: SongDTO | undefined;
-  onBackToLive: () => void;
-  onLiveChange: (value: boolean) => void;
-  onLeft: (id: string) => void;
-  onRight: (id: string) => void;
-}
+const SongViewer = () => {
+  const {
+    isLive,
+    setIsLive: onLiveChange,
+    isCurrentLive,
+    backToLive,
+    nextSong,
+  } = useSession();
 
-const SongViewer = ({
-  displayedSong,
-  isCurrentLive,
-  isLive,
-  nextSong,
-  onBackToLive,
-  onLiveChange,
-  onLeft,
-  onRight,
-}: Props) => {
+  const directorCtx = useContext(DirectorContext);
+  const playerCtx = useContext(PlayerContext);
+
+  const displayedSong = directorCtx?.currentSong ?? playerCtx?.displayedSong;
+  const onLeft = directorCtx?.onLeft ?? playerCtx?.onLeft ?? (() => {});
+  const onRight = directorCtx?.onRight ?? playerCtx?.onRight ?? (() => {});
+
   const html = useMemo(() => {
     if (!displayedSong) return "";
     return formatSong(displayedSong.content);
@@ -65,64 +59,26 @@ const SongViewer = ({
 
   return (
     <>
-      <Configuration />
       <div
         className={
-          isCurrentLive ? "songViewerContainer isLive" : "songViewerContainer"
+          isCurrentLive() ? "songViewerContainer isLive" : "songViewerContainer"
         }
         ref={viewerRef}
       >
         <div className="songTitle">{displayedSong.title}</div>
         <div className="tono">Tono: {displayedSong.key ?? "-"}</div>
         <div>{parse(html)}</div>
-        <div className="nextSong">
-          <hr />
-          {nextSong?.title ? (
-            <>
-              <p>Próxima canción:</p> <p>{nextSong?.title}</p>
-            </>
-          ) : (
-            "Fin de la lista."
-          )}
-        </div>
-        <ActionBar.Root open={isLive}>
-          <Portal container={viewerRef}>
-            <ActionBar.Positioner>
-              <ActionBar.Content>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onLeft(displayedSong.id)}
-                >
-                  <FaAngleDoubleLeft />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onLiveChange(false)}
-                >
-                  <IoIosExit />
-                  Salir
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onRight(displayedSong.id)}
-                >
-                  <FaAngleDoubleRight />
-                </Button>
-              </ActionBar.Content>
-            </ActionBar.Positioner>
-          </Portal>
-        </ActionBar.Root>
-        <Button
-          onClick={onBackToLive}
-          colorPalette="red"
-          className="backToLive"
-          visibility={!isCurrentLive && isLive ? "visible" : "hidden"}
-        >
-          Volver al Vivo
-        </Button>
+        <NextSong nextSong={nextSong} />
+        <LiveBar
+          songId={displayedSong.id}
+          isLive={isLive}
+          viewerRef={viewerRef}
+          onLiveChange={onLiveChange}
+          onLeft={onLeft}
+          onRight={onRight}
+          isCurrentLive={isCurrentLive()}
+          onBackToLive={backToLive}
+        />
       </div>
     </>
   );

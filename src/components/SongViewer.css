@@ -120,13 +120,6 @@
 .isLive {
   border: 1px solid red;
 }
-.nextSong {
-  font-style: italic;
-  :last-child {
-    font-weight: bold;
-    font-size: 1.1rem;
-  }
-}
 .backToLive {
   position: fixed;
   bottom: 20px;

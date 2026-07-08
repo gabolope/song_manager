@@ -1,39 +1,60 @@
 import { ActionBar, Button, Portal } from "@chakra-ui/react";
-import { IoIosExit } from "react-icons/io";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
+import { IoIosExit } from "react-icons/io";
 
 interface Props {
+  songId: string;
   isLive: boolean;
-  goLive: () => void;
+  viewerRef: React.RefObject<HTMLDivElement | null>;
+  onLiveChange: (value: boolean) => void;
+  onLeft: (id: string) => void;
+  onRight: (id: string) => void;
+  isCurrentLive: boolean;
+  onBackToLive: () => void;
 }
 
-const LiveBar = ({ isLive, goLive }: Props) => {
+const LiveBar = ({
+  songId,
+  isLive,
+  viewerRef,
+  onLiveChange,
+  onLeft,
+  onRight,
+  isCurrentLive,
+  onBackToLive,
+}: Props) => {
   return (
-    <>
-      <Button colorPalette="red" variant="outline" onClick={() => goLive()}>
-        Go Live
-      </Button>
-      <ActionBar.Root open={isLive}>
-        <Portal>
-          <ActionBar.Positioner>
-            <ActionBar.Content>
-              <Button variant="outline" size="sm">
-                <FaAngleDoubleLeft />
-              </Button>
-
-              <Button variant="outline" size="sm" onClick={() => goLive()}>
-                <IoIosExit />
-                Salir
-              </Button>
-
-              <Button variant="outline" size="sm">
-                <FaAngleDoubleRight />
-              </Button>
-            </ActionBar.Content>
-          </ActionBar.Positioner>
-        </Portal>
-      </ActionBar.Root>
-    </>
+    <ActionBar.Root open={isLive}>
+      <Portal container={viewerRef}>
+        <ActionBar.Positioner>
+          <ActionBar.Content>
+            <Button variant="outline" size="sm" onClick={() => onLeft(songId)}>
+              <FaAngleDoubleLeft />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onLiveChange(false)}
+            >
+              <IoIosExit />
+              Salir
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => onRight(songId)}>
+              <FaAngleDoubleRight />
+            </Button>
+            <Button
+              onClick={onBackToLive}
+              colorPalette="red"
+              className="backToLive"
+              visibility={!isCurrentLive && isLive ? "visible" : "hidden"}
+            >
+              Volver al Vivo
+            </Button>
+          </ActionBar.Content>
+        </ActionBar.Positioner>
+      </Portal>
+    </ActionBar.Root>
   );
 };
+
 export default LiveBar;

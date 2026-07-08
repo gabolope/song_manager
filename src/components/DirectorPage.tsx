@@ -1,14 +1,15 @@
 import { Grid, GridItem, Splitter } from "@chakra-ui/react";
 import { useState } from "react";
 import BookList from "../components/BookList";
-import LiveBar from "../components/LiveBar";
 import SongList from "../components/SongList";
 import SongUploader from "../components/SongUploader";
 import SongViewer from "../components/SongViewer";
+import DirectorContext from "../contexts/DirectorContext";
+import { useSession } from "../contexts/SessionContext";
 import { useBookMutations } from "../hooks/useBookMutations";
 import { useBookNavigation } from "../hooks/useBookNavigation";
-import { useSessionState } from "../hooks/useSessionState";
 import useSongs from "../hooks/useSongs";
+import ViewerBar from "./ViewerBar";
 
 const DirectorPage = () => {
   const { data: songs, error, isLoading } = useSongs();
@@ -19,10 +20,8 @@ const DirectorPage = () => {
     setSelectedBookSong,
     isLive,
     setIsLive,
-    isCurrentLive,
-    backToLive,
-    nextSong,
-  } = useSessionState();
+  } = useSession();
+
   const { addToBook, removeFromBook } = useBookMutations(book);
 
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
@@ -56,7 +55,16 @@ const DirectorPage = () => {
   if (error) return <p>{error.message}</p>;
 
   return (
-    <>
+    <DirectorContext.Provider
+      value={{
+        currentSong,
+        selectedListSong,
+        listClick,
+        bookClick,
+        onLeft,
+        onRight,
+      }}
+    >
       <Grid
         templateAreas={{ base: `"viewer"`, lg: `"aside viewer"` }}
         templateColumns={{ base: "1fr", lg: "400px 1fr" }}
@@ -103,28 +111,18 @@ const DirectorPage = () => {
           </div>
         </GridItem>
         <GridItem area="viewer" h="100%" overflow="hidden" padding="10px">
-          <LiveBar
+          <ViewerBar
             isLive={isLive}
             goLive={() => {
               setIsLive(!isLive);
               if (currentSong) setLiveSong.mutate(currentSong);
             }}
           />
-          <SongViewer
-            displayedSong={currentSong}
-            isCurrentLive={isCurrentLive(currentSong)}
-            isLive={isLive}
-            isDirector={true}
-            nextSong={nextSong}
-            onBackToLive={backToLive}
-            onLiveChange={setIsLive}
-            onLeft={onLeft}
-            onRight={onRight}
-          />
+          <SongViewer />
         </GridItem>
       </Grid>
       <SongUploader />
-    </>
+    </DirectorContext.Provider>
   );
 };
 

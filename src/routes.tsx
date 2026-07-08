@@ -4,6 +4,7 @@ import ErrorPage from "./components/ErrorPage";
 import HomePage from "./components/HomePage";
 import Layout from "./components/Layout";
 import PlayerPage from "./components/PlayerPage";
+import SessionProvider from "./contexts/SessionProvider";
 
 const router = createBrowserRouter([
   {
@@ -12,8 +13,22 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "director", element: <DirectorPage /> },
-      { path: "player", element: <PlayerPage /> },
+      {
+        path: "director",
+        element: (
+          <SessionProvider>
+            <DirectorPage />
+          </SessionProvider>
+        ),
+      },
+      {
+        path: "player",
+        element: (
+          <SessionProvider>
+            <PlayerPage />
+          </SessionProvider>
+        ),
+      },
     ],
   },
 ]);
