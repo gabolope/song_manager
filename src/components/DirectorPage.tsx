@@ -2,7 +2,6 @@ import { Grid, GridItem, Splitter } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
 import BookList from "../components/BookList";
 import SongList from "../components/SongList";
-import SongUploader from "../components/SongUploader";
 import SongViewer from "../components/SongViewer";
 import DirectorContext from "../contexts/DirectorContext";
 import { useSession } from "../contexts/SessionContext";
@@ -169,7 +168,6 @@ const DirectorPage = () => {
           <SongViewer />
         </GridItem>
       </Grid>
-      <SongUploader />
     </DirectorContext.Provider>
   );
 };

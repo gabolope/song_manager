@@ -2,6 +2,7 @@ import { ActionBar, Button, HStack, Portal } from "@chakra-ui/react";
 import { IoIosExit } from "react-icons/io";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import Configuration from "./Configuration";
+import { ColorModeButton } from "./ui/color-mode";
 
 interface Props {
   isLive: boolean;
@@ -24,6 +25,7 @@ const ViewerBar = ({ isLive, goLive, songId, onLeft, onRight }: Props) => {
           Go Live
         </Button>
         <Configuration height={10} />
+        <ColorModeButton />
       </HStack>
       <ActionBar.Root open={isLive}>
         <Portal>

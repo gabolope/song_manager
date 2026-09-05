@@ -1,5 +1,21 @@
 /* Ajustes de clases de chordsheetjs */
 
+:root {
+  --viewer-text: #1a1a1a;
+  --viewer-border: #ccc;
+  --chord-color: #a15c00;
+  --chorus-color: #7a6f00;
+  --tono-color: #2a3eb1;
+}
+
+.dark {
+  --viewer-text: white;
+  --viewer-border: white;
+  --chord-color: #ffd998;
+  --chorus-color: #e9de5a;
+  --tono-color: rgb(201, 201, 255);
+}
+
 .songViewerContainer {
   overflow: hidden;
   display: flex;
@@ -38,12 +54,12 @@
 }
 
 .chord {
-  color: #ffd998;
+  color: var(--chord-color);
   font-weight: 500;
 }
 
 .chorus {
-  color: #e9de5a;
+  color: var(--chorus-color);
 }
 
 /* .chorus::before {
@@ -99,13 +115,13 @@
 
 .tono {
   font-size: 1.25rem;
-  color: rgb(201, 201, 255);
+  color: var(--tono-color);
 }
 
 .songViewerContainer {
-  border: 1px solid white;
+  border: 1px solid var(--viewer-border);
   border-radius: 10px;
-  color: white;
+  color: var(--viewer-text);
   flex: 1;
   max-height: 100%;
   margin-top: 10px;

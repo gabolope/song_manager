@@ -1,6 +1,7 @@
 import { CiSettings } from "react-icons/ci";
-import { Button, CloseButton, Dialog, Portal } from "@chakra-ui/react";
+import { Button, CloseButton, Dialog, Portal, Stack } from "@chakra-ui/react";
 import { useLocation, useNavigate } from "react-router-dom";
+import SongUploader from "./SongUploader";
 
 interface Props {
   height: number;
@@ -27,12 +28,15 @@ const Configuration = ({ height }: Props) => {
               <Dialog.Title>Opciones</Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
-              <Button
-                variant="outline"
-                onClick={() => navigate(isDirector ? "/player" : "/director")}
-              >
-                Cambiar a Modo {isDirector ? "Músico" : "Director"}
-              </Button>
+              <Stack gap={3} align="flex-start">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(isDirector ? "/player" : "/director")}
+                >
+                  Cambiar a Modo {isDirector ? "Músico" : "Director"}
+                </Button>
+                {isDirector && <SongUploader />}
+              </Stack>
             </Dialog.Body>
             <Dialog.CloseTrigger asChild>
               <CloseButton size="sm" />
