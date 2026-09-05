@@ -1,4 +1,5 @@
 import { Button } from "@chakra-ui/react";
+import { useState } from "react";
 import { MdFullscreen } from "react-icons/md";
 import SongViewer from "../components/SongViewer";
 import PlayerContext from "../contexts/PlayerContext";
@@ -6,15 +7,11 @@ import { useSession } from "../contexts/SessionContext";
 import { useBookNavigation } from "../hooks/useBookNavigation";
 
 const PlayerPage = () => {
-  const {
-    book,
-    liveSong,
-    setSelectedBookSong,
-    isLive,
-    setIsLive,
-    localSong,
-    setLocalSong,
-  } = useSession();
+  const { book, liveSong, setSelectedBookSong, localSong, setLocalSong } =
+    useSession();
+
+  // Pantalla completa es local a esta pestaña, no se comparte con Director.
+  const [fullscreen, setFullscreen] = useState(false);
 
   const displayedSong = localSong ?? liveSong.data;
 
@@ -29,7 +26,9 @@ const PlayerPage = () => {
   );
 
   return (
-    <PlayerContext.Provider value={{ displayedSong, onLeft, onRight }}>
+    <PlayerContext.Provider
+      value={{ displayedSong, onLeft, onRight, fullscreen, setFullscreen }}
+    >
       <div
         style={{
           height: "100vh",
@@ -39,7 +38,7 @@ const PlayerPage = () => {
         }}
       >
         <Button
-          onClick={() => setIsLive(!isLive)}
+          onClick={() => setFullscreen(!fullscreen)}
           variant="outline"
           size="sm"
           alignSelf="flex-start"

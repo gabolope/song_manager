@@ -1,4 +1,4 @@
-import { isRouteErrorResponse, useRouteError } from "react-router-dom";
+import { isRouteErrorResponse, useRouteError, Link } from "react-router-dom";
 
 const ErrorPage = () => {
   const error = useRouteError();
@@ -7,6 +7,7 @@ const ErrorPage = () => {
     <>
       <h1>Oops...</h1>
       <p>{isRouteErrorResponse(error) ? "InvalidPage" : "Unexpected Error"}</p>
+      <Link to="/">Volver al inicio</Link>
     </>
   );
 };

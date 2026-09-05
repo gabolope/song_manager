@@ -8,6 +8,10 @@ interface DirectorContextType {
   bookClick: (index: number) => void;
   onLeft: (id: string) => void;
   onRight: (id: string) => void;
+  // Pantalla completa es un concepto por pestaña/dispositivo, no de la sesión
+  // compartida (Director y Player pueden estar en pantallas distintas).
+  fullscreen: boolean;
+  setFullscreen: (value: boolean) => void;
 }
 
 const DirectorContext = React.createContext<DirectorContextType | null>(null);

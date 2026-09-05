@@ -10,6 +10,7 @@ interface Props {
   isLoading: boolean;
   onClick?: (index: number) => void;
   selected?: number | null;
+  isAdding?: boolean;
 }
 
 const SongList = ({
@@ -19,6 +20,7 @@ const SongList = ({
   onClick,
   selected,
   addToBook,
+  isAdding,
 }: Props) => {
   if (isLoading) return "Cargando...";
 
@@ -28,7 +30,7 @@ const SongList = ({
         const isInBook = book?.some((i) => i.id === song.id) ?? false;
 
         return (
-          <div key={index} onClick={() => onClick?.(index)}>
+          <div key={song.id} onClick={() => onClick?.(index)}>
             <div className={selected === index ? "song selected" : "song"}>
               <div>{song.title || <Text opacity={0.6}>Sin título</Text>}</div>
               <div>
@@ -38,6 +40,8 @@ const SongList = ({
                     colorPalette={"blue"}
                     h={"60px"}
                     borderRadius={"0"}
+                    loading={isAdding}
+                    disabled={isAdding}
                   >
                     <IoAddCircleOutline />
                   </Button>

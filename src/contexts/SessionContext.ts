@@ -8,7 +8,7 @@ interface SessionContextType {
   setLiveSong: UseMutationResult<void, Error, SongDTO, unknown>;
   clearLiveSong: UseMutationResult<void, Error, void, unknown>;
   selectedBookSong: number | null;
-  setSelectedBookSong: React.Dispatch<React.SetStateAction<number | null>>;
+  setSelectedBookSong: (index: number | null) => void;
   isLive: boolean;
   setIsLive: React.Dispatch<React.SetStateAction<boolean>>;
   localSong: SongDTO | null;

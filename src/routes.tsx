@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Outlet } from "react-router-dom";
 import DirectorPage from "./components/DirectorPage";
 import ErrorPage from "./components/ErrorPage";
 import HomePage from "./components/HomePage";
@@ -14,22 +14,26 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       {
-        path: "director",
+        // Un único SessionProvider compartido entre Director y Player: así
+        // cambiar de vista (ej. desde Configuration) no reinicia la selección
+        // ni la navegación en curso.
         element: (
           <SessionProvider>
-            <DirectorPage />
+            <Outlet />
           </SessionProvider>
         ),
-        errorElement: <ErrorPage />,
-      },
-      {
-        path: "player",
-        element: (
-          <SessionProvider>
-            <PlayerPage />
-          </SessionProvider>
-        ),
-        errorElement: <ErrorPage />,
+        children: [
+          {
+            path: "director",
+            element: <DirectorPage />,
+            errorElement: <ErrorPage />,
+          },
+          {
+            path: "player",
+            element: <PlayerPage />,
+            errorElement: <ErrorPage />,
+          },
+        ],
       },
     ],
   },

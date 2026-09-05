@@ -4,6 +4,7 @@ import { onSnapshot } from "firebase/firestore";
 import { db } from "../services/firebase";
 import type { SongDTO } from "../types/song";
 import { useEffect } from "react";
+import { toaster } from "../components/ui/toaster";
 
 const LIVE_SONG_DOC = "current"; // documento fijo, siempre el mismo
 
@@ -13,13 +14,26 @@ export function useLiveSong() {
   useEffect(() => {
     const ref = doc(db, "liveSong", LIVE_SONG_DOC);
 
-    const unsubscribe = onSnapshot(ref, (snapshot) => {
-      if (snapshot.exists()) {
-        queryClient.setQueryData(["liveSong"], snapshot.data() as SongDTO);
-      } else {
-        queryClient.setQueryData(["liveSong"], null);
-      }
-    });
+    const unsubscribe = onSnapshot(
+      ref,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          queryClient.setQueryData(["liveSong"], snapshot.data() as SongDTO);
+        } else {
+          queryClient.setQueryData(["liveSong"], null);
+        }
+      },
+      (error) => {
+        // Si el listener falla (permisos, desconexión), avisar en vez de
+        // quedar desactualizado en silencio para siempre.
+        console.error("Error escuchando la canción en vivo:", error);
+        toaster.create({
+          type: "error",
+          title: "Se perdió la conexión en vivo",
+          description: "Recargá la página para volver a sincronizarte.",
+        });
+      },
+    );
 
     return () => unsubscribe();
   }, [queryClient]);

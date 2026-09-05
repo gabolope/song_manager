@@ -26,6 +26,8 @@ const DirectorPage = () => {
   const { addToBook, removeFromBook } = useBookMutations(book);
 
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
+  // Pantalla completa es local a esta pestaña, no se comparte con Player.
+  const [fullscreen, setFullscreen] = useState(false);
 
   const listClick = (index: number) => {
     setSelectedListSong(index);
@@ -65,6 +67,8 @@ const DirectorPage = () => {
         bookClick,
         onLeft,
         onRight,
+        fullscreen,
+        setFullscreen,
       }}
     >
       <Grid
@@ -92,7 +96,12 @@ const DirectorPage = () => {
             >
               <Splitter.Panel id="a">
                 <SongList
-                  addToBook={(song) => addToBook.mutate(song)}
+                  addToBook={(song) => {
+                    // Evita duplicar la escritura si el click llega dos
+                    // veces antes de que se refleje el book actualizado.
+                    if (!addToBook.isPending) addToBook.mutate(song);
+                  }}
+                  isAdding={addToBook.isPending}
                   book={book}
                   items={songs}
                   isLoading={isLoading}
@@ -115,9 +124,13 @@ const DirectorPage = () => {
         <GridItem area="viewer" h="100%" overflow="hidden" padding="10px">
           <ViewerBar
             isLive={isLive}
+            songId={currentSong?.id}
+            onLeft={onLeft}
+            onRight={onRight}
             goLive={() => {
               const next = !isLive;
               setIsLive(next);
+              setFullscreen(next);
               if (next) {
                 // Entrando en vivo: publica la canción actual.
                 if (currentSong) setLiveSong.mutate(currentSong);

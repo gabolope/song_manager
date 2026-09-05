@@ -9,14 +9,8 @@ import NextSong from "./NextSong";
 import "./SongViewer.css";
 
 const SongViewer = () => {
-  const {
-    isLive,
-    setIsLive,
-    isCurrentLive,
-    backToLive,
-    nextSong,
-    clearLiveSong,
-  } = useSession();
+  const { setIsLive, isCurrentLive, backToLive, nextSong, clearLiveSong } =
+    useSession();
 
   const directorCtx = useContext(DirectorContext);
   const playerCtx = useContext(PlayerContext);
@@ -24,18 +18,24 @@ const SongViewer = () => {
   const displayedSong = directorCtx?.currentSong ?? playerCtx?.displayedSong;
   const onLeft = directorCtx?.onLeft ?? playerCtx?.onLeft ?? (() => {});
   const onRight = directorCtx?.onRight ?? playerCtx?.onRight ?? (() => {});
+  // Pantalla completa es un estado por pestaña (Director y Player pueden estar
+  // en dispositivos distintos), lo aporta el contexto de cada página.
+  const fullscreen = directorCtx?.fullscreen ?? playerCtx?.fullscreen ?? false;
 
-  // Cuando quien sale de "vivo" es el Director (por el botón Salir o por salir
-  // de pantalla completa con Escape), también se termina la sesión en vivo
-  // para que los viewers no se queden viendo la última canción para siempre.
-  const onLiveChange = useCallback(
+  // Cuando quien sale de pantalla completa es el Director (por el botón Salir
+  // o por salir con Escape), también se termina la sesión en vivo para que
+  // los viewers no se queden viendo la última canción para siempre.
+  const exitFullscreen = useCallback(
     (value: boolean) => {
-      setIsLive(value);
+      (directorCtx?.setFullscreen ?? playerCtx?.setFullscreen ?? (() => {}))(
+        value,
+      );
       if (!value && directorCtx) {
+        setIsLive(false);
         clearLiveSong.mutate();
       }
     },
-    [setIsLive, directorCtx, clearLiveSong],
+    [directorCtx, playerCtx, setIsLive, clearLiveSong],
   );
 
   const html = useMemo(() => {
@@ -47,25 +47,30 @@ const SongViewer = () => {
   const viewerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isLive) {
-      viewerRef.current?.requestFullscreen();
+    if (fullscreen) {
+      viewerRef.current?.requestFullscreen().catch((error) => {
+        // El navegador puede rechazar el pedido (falta de gesto de usuario,
+        // permisos, etc.); si pasa, no dejar el estado como si sí lo estuviera.
+        console.error("No se pudo entrar en pantalla completa:", error);
+        exitFullscreen(false);
+      });
     } else if (document.fullscreenElement) {
       document.exitFullscreen();
     }
-  }, [isLive]);
+  }, [fullscreen, exitFullscreen]);
 
   // Manejo de salida manual del fullscreen
   useEffect(() => {
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement) {
-        onLiveChange(false);
+        exitFullscreen(false);
       }
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () =>
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, [onLiveChange]);
+  }, [exitFullscreen]);
 
   if (!displayedSong) {
     return <div className="songViewerContainer">Seleccioná una canción</div>;
@@ -85,9 +90,9 @@ const SongViewer = () => {
         <NextSong nextSong={nextSong} />
         <LiveBar
           songId={displayedSong.id}
-          isLive={isLive}
+          isLive={fullscreen}
           viewerRef={viewerRef}
-          onLiveChange={onLiveChange}
+          onLiveChange={exitFullscreen}
           onLeft={onLeft}
           onRight={onRight}
           isCurrentLive={isCurrentLive()}

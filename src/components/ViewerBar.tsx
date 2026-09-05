@@ -6,9 +6,12 @@ import Configuration from "./Configuration";
 interface Props {
   isLive: boolean;
   goLive: () => void;
+  songId?: string;
+  onLeft?: (id: string) => void;
+  onRight?: (id: string) => void;
 }
 
-const ViewerBar = ({ isLive, goLive }: Props) => {
+const ViewerBar = ({ isLive, goLive, songId, onLeft, onRight }: Props) => {
   return (
     <>
       <HStack>
@@ -26,7 +29,12 @@ const ViewerBar = ({ isLive, goLive }: Props) => {
         <Portal>
           <ActionBar.Positioner>
             <ActionBar.Content>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => songId && onLeft?.(songId)}
+                disabled={!songId}
+              >
                 <FaAngleDoubleLeft />
               </Button>
 
@@ -35,7 +43,12 @@ const ViewerBar = ({ isLive, goLive }: Props) => {
                 Salir
               </Button>
 
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => songId && onRight?.(songId)}
+                disabled={!songId}
+              >
                 <FaAngleDoubleRight />
               </Button>
             </ActionBar.Content>

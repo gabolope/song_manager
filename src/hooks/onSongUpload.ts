@@ -1,7 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { collection, writeBatch, doc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  writeBatch,
+  doc,
+  getDocs,
+  type DocumentReference,
+} from "firebase/firestore";
 import { db } from "../services/firebase";
 import { toaster } from "../components/ui/toaster";
+
+// Firestore no acepta más de 500 operaciones por batch.
+const BATCH_LIMIT = 500;
 
 // Soporta tanto la forma abreviada ({t:}, {k:}) como la forma completa
 // ({title:}, {key:}) del estándar ChordPro.
@@ -48,10 +57,10 @@ export function useSongUpload() {
       const snapshot = await getDocs(collection(db, "songs"));
       const existingTitles = new Set(snapshot.docs.map((d) => d.data().title));
 
-      const batch = writeBatch(db);
+      const pending: { ref: DocumentReference; data: Record<string, string> }[] =
+        [];
       const duplicates: string[] = [];
       const failed: { file: string; error: string }[] = [];
-      let count = 0;
 
       for (const file of files) {
         try {
@@ -66,8 +75,7 @@ export function useSongUpload() {
           // Se agrega de inmediato para detectar duplicados dentro del mismo lote.
           existingTitles.add(title);
           const ref = doc(collection(db, "songs"));
-          batch.set(ref, { title, artist, key, content });
-          count++;
+          pending.push({ ref, data: { title, artist, key, content } });
         } catch (error) {
           failed.push({
             file: file.name,
@@ -76,9 +84,17 @@ export function useSongUpload() {
         }
       }
 
-      if (count > 0) await batch.commit();
+      // Se comitea en lotes de a lo sumo BATCH_LIMIT operaciones, ya que
+      // Firestore rechaza un batch más grande que eso.
+      for (let i = 0; i < pending.length; i += BATCH_LIMIT) {
+        const batch = writeBatch(db);
+        for (const { ref, data } of pending.slice(i, i + BATCH_LIMIT)) {
+          batch.set(ref, data);
+        }
+        await batch.commit();
+      }
 
-      return { added: count, duplicates, failed };
+      return { added: pending.length, duplicates, failed };
     },
     onSuccess: (summary) => {
       queryClient.invalidateQueries({ queryKey: ["songs"] });
