@@ -1,5 +1,5 @@
 import { Grid, GridItem, Splitter } from "@chakra-ui/react";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import BookList from "../components/BookList";
 import SongList from "../components/SongList";
 import SongUploader from "../components/SongUploader";
@@ -29,14 +29,20 @@ const DirectorPage = () => {
   // Pantalla completa es local a esta pestaña, no se comparte con Player.
   const [fullscreen, setFullscreen] = useState(false);
 
-  const listClick = (index: number) => {
-    setSelectedListSong(index);
-    setSelectedBookSong(null);
-  };
-  const bookClick = (index: number) => {
-    setSelectedBookSong(index);
-    setSelectedListSong(null);
-  };
+  const listClick = useCallback(
+    (index: number) => {
+      setSelectedListSong(index);
+      setSelectedBookSong(null);
+    },
+    [setSelectedBookSong],
+  );
+  const bookClick = useCallback(
+    (index: number) => {
+      setSelectedBookSong(index);
+      setSelectedListSong(null);
+    },
+    [setSelectedBookSong],
+  );
 
   const currentSong =
     selectedListSong !== null
@@ -45,32 +51,52 @@ const DirectorPage = () => {
         ? book?.[selectedBookSong]
         : null;
 
+  const onBookNavigate = useCallback(
+    (index: number) => {
+      setSelectedBookSong(index);
+      setSelectedListSong(null);
+    },
+    [setSelectedBookSong],
+  );
+
   const { onLeft, onRight } = useBookNavigation(
     book,
     true, // siempre es director
     currentSong,
-    (index) => {
-      setSelectedBookSong(index);
-      setSelectedListSong(null);
-    },
+    onBookNavigate,
     isLive,
+  );
+
+  // Memoizado: si este objeto fuera nuevo en cada render, exitFullscreen en
+  // SongViewer cambiaría de identidad y volvería a disparar requestFullscreen()
+  // sin gesto de usuario, provocando que el navegador lo rechace y se salga
+  // de pantalla completa apenas se entra ("Go Live" parpadeando).
+  const directorContextValue = useMemo(
+    () => ({
+      currentSong,
+      selectedListSong,
+      listClick,
+      bookClick,
+      onLeft,
+      onRight,
+      fullscreen,
+      setFullscreen,
+    }),
+    [
+      currentSong,
+      selectedListSong,
+      listClick,
+      bookClick,
+      onLeft,
+      onRight,
+      fullscreen,
+    ],
   );
 
   if (error) return <p>{error.message}</p>;
 
   return (
-    <DirectorContext.Provider
-      value={{
-        currentSong,
-        selectedListSong,
-        listClick,
-        bookClick,
-        onLeft,
-        onRight,
-        fullscreen,
-        setFullscreen,
-      }}
-    >
+    <DirectorContext.Provider value={directorContextValue}>
       <Grid
         templateAreas={{ base: `"viewer"`, lg: `"aside viewer"` }}
         templateColumns={{ base: "1fr", lg: "400px 1fr" }}

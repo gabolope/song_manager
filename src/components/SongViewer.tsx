@@ -14,6 +14,13 @@ const SongViewer = () => {
 
   const directorCtx = useContext(DirectorContext);
   const playerCtx = useContext(PlayerContext);
+  // useMutation devuelve un objeto nuevo en cada render aunque nada haya
+  // cambiado; sólo `.mutate` es estable. Depender del objeto completo hacía
+  // que exitFullscreen (y por lo tanto el efecto de pantalla completa) se
+  // recreara en cada snapshot de Firestore, disparando un segundo
+  // requestFullscreen() sin gesto de usuario que el navegador rechaza y
+  // termina saliendo de pantalla completa apenas se entra.
+  const clearLiveSongMutate = clearLiveSong.mutate;
 
   const displayedSong = directorCtx?.currentSong ?? playerCtx?.displayedSong;
   const onLeft = directorCtx?.onLeft ?? playerCtx?.onLeft ?? (() => {});
@@ -21,21 +28,28 @@ const SongViewer = () => {
   // Pantalla completa es un estado por pestaña (Director y Player pueden estar
   // en dispositivos distintos), lo aporta el contexto de cada página.
   const fullscreen = directorCtx?.fullscreen ?? playerCtx?.fullscreen ?? false;
+  // exitFullscreen sólo necesita estas dos piezas de directorCtx/playerCtx,
+  // ambas estables (setFullscreen es un setter de useState, isDirector no
+  // cambia en la vida de la página). Depender de los objetos de contexto
+  // completos hacía que exitFullscreen se recreara cada vez que cambiaba
+  // cualquier otro campo (p. ej. currentSong al navegar de canción), lo que
+  // volvía a disparar requestFullscreen() sin gesto de usuario y el
+  // navegador lo rechazaba, saliendo de pantalla completa apenas se entraba.
+  const setFullscreenFn = directorCtx?.setFullscreen ?? playerCtx?.setFullscreen;
+  const isDirector = !!directorCtx;
 
   // Cuando quien sale de pantalla completa es el Director (por el botón Salir
   // o por salir con Escape), también se termina la sesión en vivo para que
   // los viewers no se queden viendo la última canción para siempre.
   const exitFullscreen = useCallback(
     (value: boolean) => {
-      (directorCtx?.setFullscreen ?? playerCtx?.setFullscreen ?? (() => {}))(
-        value,
-      );
-      if (!value && directorCtx) {
+      setFullscreenFn?.(value);
+      if (!value && isDirector) {
         setIsLive(false);
-        clearLiveSong.mutate();
+        clearLiveSongMutate();
       }
     },
-    [directorCtx, playerCtx, setIsLive, clearLiveSong],
+    [setFullscreenFn, isDirector, setIsLive, clearLiveSongMutate],
   );
 
   const html = useMemo(() => {

@@ -1,5 +1,5 @@
 import { Button } from "@chakra-ui/react";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { MdFullscreen } from "react-icons/md";
 import SongViewer from "../components/SongViewer";
 import PlayerContext from "../contexts/PlayerContext";
@@ -15,20 +15,31 @@ const PlayerPage = () => {
 
   const displayedSong = localSong ?? liveSong.data;
 
+  const onBookNavigate = useCallback(
+    (index: number) => {
+      setSelectedBookSong(index);
+      if (book) setLocalSong(book[index]);
+    },
+    [book, setSelectedBookSong, setLocalSong],
+  );
+
   const { onLeft, onRight } = useBookNavigation(
     book,
     false,
     displayedSong,
-    (index) => {
-      setSelectedBookSong(index);
-      if (book) setLocalSong(book[index]);
-    },
+    onBookNavigate,
+  );
+
+  // Memoizado por la misma razón que en DirectorPage: un objeto nuevo en
+  // cada render rompe la estabilidad de exitFullscreen en SongViewer y hace
+  // que el pedido de pantalla completa se repita sin gesto de usuario.
+  const playerContextValue = useMemo(
+    () => ({ displayedSong, onLeft, onRight, fullscreen, setFullscreen }),
+    [displayedSong, onLeft, onRight, fullscreen],
   );
 
   return (
-    <PlayerContext.Provider
-      value={{ displayedSong, onLeft, onRight, fullscreen, setFullscreen }}
-    >
+    <PlayerContext.Provider value={playerContextValue}>
       <div
         style={{
           height: "100vh",

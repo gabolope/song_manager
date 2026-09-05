@@ -20,6 +20,11 @@ export function useBookNavigation(
   isLive?: boolean,
 ) {
   const { setLiveSong } = useLiveSong();
+  // useMutation devuelve un objeto nuevo en cada render aunque nada haya
+  // cambiado; sólo `.mutate` es estable. Usar el objeto completo como
+  // dependencia rompe la memoización de navigate/onLeft/onRight en cada
+  // render (por ej. cada vez que llega un snapshot de Firestore).
+  const setLiveSongMutate = setLiveSong.mutate;
 
   const navigate = useCallback(
     (id: string, direction: 1 | -1) => {
@@ -31,9 +36,9 @@ export function useBookNavigation(
 
       onNavigate?.(nextIndex);
       // Solo se retransmite a los viewers si el Director está efectivamente "en vivo".
-      if (isDirector && isLive) setLiveSong.mutate(book[nextIndex]);
+      if (isDirector && isLive) setLiveSongMutate(book[nextIndex]);
     },
-    [book, isDirector, isLive, onNavigate, setLiveSong],
+    [book, isDirector, isLive, onNavigate, setLiveSongMutate],
   );
 
   const onLeft = useCallback((id: string) => navigate(id, -1), [navigate]);
