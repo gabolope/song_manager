@@ -11,6 +11,7 @@ interface Props {
   onRight: (id: string) => void;
   isCurrentLive: boolean;
   onBackToLive: () => void;
+  hasLiveSession: boolean;
 }
 
 const LiveBar = ({
@@ -22,6 +23,7 @@ const LiveBar = ({
   onRight,
   isCurrentLive,
   onBackToLive,
+  hasLiveSession,
 }: Props) => {
   return (
     <ActionBar.Root open={isLive}>
@@ -46,7 +48,11 @@ const LiveBar = ({
               onClick={onBackToLive}
               colorPalette="red"
               className="backToLive"
-              visibility={!isCurrentLive && isLive ? "visible" : "hidden"}
+              visibility={
+                !isCurrentLive && isLive && hasLiveSession
+                  ? "visible"
+                  : "hidden"
+              }
             >
               Volver al Vivo
             </Button>

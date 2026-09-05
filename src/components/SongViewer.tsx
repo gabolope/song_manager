@@ -9,8 +9,14 @@ import NextSong from "./NextSong";
 import "./SongViewer.css";
 
 const SongViewer = () => {
-  const { setIsLive, isCurrentLive, backToLive, nextSong, clearLiveSong } =
-    useSession();
+  const {
+    setIsLive,
+    isCurrentLive,
+    backToLive,
+    nextSong,
+    clearLiveSong,
+    liveSong,
+  } = useSession();
 
   const directorCtx = useContext(DirectorContext);
   const playerCtx = useContext(PlayerContext);
@@ -117,6 +123,7 @@ const SongViewer = () => {
           onRight={onRight}
           isCurrentLive={isCurrentLive(displayedSong)}
           onBackToLive={backToLive}
+          hasLiveSession={!!liveSong.data}
         />
       </div>
     </>

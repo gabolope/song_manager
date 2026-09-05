@@ -3,13 +3,15 @@ import {
   Button,
   CloseButton,
   Drawer,
+  Grid,
+  GridItem,
   HStack,
   IconButton,
   Portal,
   Text,
 } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
-import { MdFullscreen } from "react-icons/md";
+import { MdFullscreen, MdOutlineSensors } from "react-icons/md";
 import { RxHamburgerMenu } from "react-icons/rx";
 import BookList from "../components/BookList";
 import Configuration from "../components/Configuration";
@@ -62,56 +64,84 @@ const PlayerPage = () => {
 
   return (
     <PlayerContext.Provider value={playerContextValue}>
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
+      <Grid
+        templateAreas={{
+          base: `"header" "viewer"`,
+          lg: `"header header" "aside viewer"`,
         }}
+        templateColumns={{ base: "1fr", lg: "340px 1fr" }}
+        templateRows="auto 1fr"
+        h="100vh"
+        w="100vw"
+        overflow="hidden"
       >
-        <HStack
-          justify="space-between"
-          paddingX={{ base: "8px", sm: "16px" }}
-          paddingY="10px"
-          borderBottom="1px solid var(--border)"
-          background="var(--bg-panel)"
-          gap="6px"
+        <GridItem area="header">
+          <HStack
+            justify="space-between"
+            paddingX={{ base: "8px", sm: "16px" }}
+            paddingY="10px"
+            borderBottom="1px solid var(--border)"
+            background="var(--bg-panel)"
+            gap="6px"
+          >
+            <HStack gap="10px">
+              <IconButton
+                aria-label="Abrir book"
+                variant="outline"
+                size="sm"
+                hideFrom="lg"
+                onClick={() => setMobileMenuOpen(true)}
+              >
+                <RxHamburgerMenu />
+              </IconButton>
+              <Text fontWeight="700" fontSize="1.05rem" className="hideOnNarrow">
+                Song Manager
+              </Text>
+              <Badge colorPalette="green" variant="subtle">
+                Músico
+              </Badge>
+              <Badge
+                colorPalette={liveSong.data ? "red" : "gray"}
+                variant={liveSong.data ? "solid" : "subtle"}
+              >
+                <MdOutlineSensors />
+                {liveSong.data ? "Sesión en vivo" : "Sin sesión en vivo"}
+              </Badge>
+            </HStack>
+            <HStack gap="8px">
+              <Button
+                onClick={() => setFullscreen(!fullscreen)}
+                variant="outline"
+                size="sm"
+              >
+                <MdFullscreen />
+                <span className="hideOnNarrow">Pantalla completa</span>
+              </Button>
+              <Configuration height={10} />
+              <ColorModeButton />
+            </HStack>
+          </HStack>
+        </GridItem>
+        <GridItem
+          area="aside"
+          padding="10px"
+          h="100%"
+          display="flex"
+          flexDirection="column"
+          hideBelow="lg"
         >
-          <HStack gap="10px">
-            <IconButton
-              aria-label="Abrir book"
-              variant="outline"
-              size="sm"
-              hideFrom="lg"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <RxHamburgerMenu />
-            </IconButton>
-            <Text fontWeight="700" fontSize="1.05rem" className="hideOnNarrow">
-              Song Manager
-            </Text>
-            <Badge colorPalette="green" variant="subtle">
-              Músico
-            </Badge>
-          </HStack>
-          <HStack gap="8px">
-            <Button
-              onClick={() => setFullscreen(!fullscreen)}
-              variant="outline"
-              size="sm"
-            >
-              <MdFullscreen />
-              <span className="hideOnNarrow">Pantalla completa</span>
-            </Button>
-            <Configuration height={10} />
-            <ColorModeButton />
-          </HStack>
-        </HStack>
-        <div style={{ flex: 1, padding: "10px", minHeight: 0, display: "flex" }}>
+          <BookList
+            items={book}
+            selected={selectedBookSong}
+            onClick={onBookNavigate}
+            title="Book"
+            emptyMessage="El director todavía no armó el book."
+          />
+        </GridItem>
+        <GridItem area="viewer" h="100%" overflow="hidden" padding="10px">
           <SongViewer />
-        </div>
-      </div>
+        </GridItem>
+      </Grid>
 
       <Drawer.Root
         open={mobileMenuOpen}
