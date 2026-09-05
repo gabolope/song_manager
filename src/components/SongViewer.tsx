@@ -87,14 +87,20 @@ const SongViewer = () => {
   }, [exitFullscreen]);
 
   if (!displayedSong) {
-    return <div className="songViewerContainer">Seleccioná una canción</div>;
+    return (
+      <div className="songViewerContainer songViewerEmpty">
+        Seleccioná una canción para empezar
+      </div>
+    );
   }
 
   return (
     <>
       <div
         className={
-          isCurrentLive() ? "songViewerContainer isLive" : "songViewerContainer"
+          isCurrentLive(displayedSong)
+            ? "songViewerContainer isLive"
+            : "songViewerContainer"
         }
         ref={viewerRef}
       >
@@ -109,7 +115,7 @@ const SongViewer = () => {
           onLiveChange={exitFullscreen}
           onLeft={onLeft}
           onRight={onRight}
-          isCurrentLive={isCurrentLive()}
+          isCurrentLive={isCurrentLive(displayedSong)}
           onBackToLive={backToLive}
         />
       </div>

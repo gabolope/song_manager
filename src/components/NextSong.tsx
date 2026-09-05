@@ -7,19 +7,33 @@ interface Props {
 
 const NextSong = ({ nextSong }: Props) => {
   return (
-    <>
+    <div style={{ marginTop: "1.5rem" }}>
       <Separator size="lg" />
-      {nextSong?.title ? (
-        <>
-          <p style={{ fontStyle: "italic" }}>Próxima canción:</p>
-          <p style={{ fontWeight: "bold", fontSize: "1.1rem" }}>
-            {nextSong?.title}
+      <div style={{ marginTop: "0.75rem" }}>
+        {nextSong?.title ? (
+          <>
+            <p
+              style={{
+                fontSize: "0.8rem",
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+                color: "var(--text-muted)",
+                margin: 0,
+              }}
+            >
+              Próxima canción
+            </p>
+            <p style={{ fontWeight: 600, fontSize: "1.1rem", margin: "0.2rem 0 0" }}>
+              {nextSong?.title}
+            </p>
+          </>
+        ) : (
+          <p style={{ color: "var(--text-muted)", margin: 0 }}>
+            Fin de la lista.
           </p>
-        </>
-      ) : (
-        "Fin de la lista."
-      )}
-    </>
+        )}
+      </div>
+    </div>
   );
 };
 

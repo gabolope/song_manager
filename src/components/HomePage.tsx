@@ -4,8 +4,11 @@ import "./HomePage.css";
 const HomePage = () => {
   return (
     <div className="home-wrap">
-      <p className="home-title">Song Manager</p>
-      <p className="home-subtitle">Seleccioná tu rol:</p>
+      <div className="home-heading">
+        <img src="/musica.png" alt="" aria-hidden="true" className="home-logo" />
+        <p className="home-title">Song Manager</p>
+        <p className="home-subtitle">Seleccioná tu rol para empezar</p>
+      </div>
 
       <div className="role-grid">
         <Link to="/director" className="role-card accent">

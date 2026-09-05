@@ -1,17 +1,38 @@
-import { Button } from "@chakra-ui/react";
+import {
+  Badge,
+  Button,
+  CloseButton,
+  Drawer,
+  HStack,
+  IconButton,
+  Portal,
+  Text,
+} from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
 import { MdFullscreen } from "react-icons/md";
+import { RxHamburgerMenu } from "react-icons/rx";
+import BookList from "../components/BookList";
+import Configuration from "../components/Configuration";
 import SongViewer from "../components/SongViewer";
+import { ColorModeButton } from "../components/ui/color-mode";
 import PlayerContext from "../contexts/PlayerContext";
 import { useSession } from "../contexts/SessionContext";
 import { useBookNavigation } from "../hooks/useBookNavigation";
 
 const PlayerPage = () => {
-  const { book, liveSong, setSelectedBookSong, localSong, setLocalSong } =
-    useSession();
+  const {
+    book,
+    liveSong,
+    selectedBookSong,
+    setSelectedBookSong,
+    localSong,
+    setLocalSong,
+  } = useSession();
 
   // Pantalla completa es local a esta pestaña, no se comparte con Director.
   const [fullscreen, setFullscreen] = useState(false);
+  // En mobile, el book se accede desde un Drawer en vez de un panel fijo.
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const displayedSong = localSong ?? liveSong.data;
 
@@ -19,6 +40,7 @@ const PlayerPage = () => {
     (index: number) => {
       setSelectedBookSong(index);
       if (book) setLocalSong(book[index]);
+      setMobileMenuOpen(false);
     },
     [book, setSelectedBookSong, setLocalSong],
   );
@@ -43,23 +65,80 @@ const PlayerPage = () => {
       <div
         style={{
           height: "100vh",
-          padding: "10px",
           display: "flex",
           flexDirection: "column",
+          overflow: "hidden",
         }}
       >
-        <Button
-          onClick={() => setFullscreen(!fullscreen)}
-          variant="outline"
-          size="sm"
-          alignSelf="flex-start"
-          mb="10px"
+        <HStack
+          justify="space-between"
+          paddingX={{ base: "8px", sm: "16px" }}
+          paddingY="10px"
+          borderBottom="1px solid var(--border)"
+          background="var(--bg-panel)"
+          gap="6px"
         >
-          <MdFullscreen />
-          Pantalla completa
-        </Button>
-        <SongViewer />
+          <HStack gap="10px">
+            <IconButton
+              aria-label="Abrir book"
+              variant="outline"
+              size="sm"
+              hideFrom="lg"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <RxHamburgerMenu />
+            </IconButton>
+            <Text fontWeight="700" fontSize="1.05rem" className="hideOnNarrow">
+              Song Manager
+            </Text>
+            <Badge colorPalette="green" variant="subtle">
+              Músico
+            </Badge>
+          </HStack>
+          <HStack gap="8px">
+            <Button
+              onClick={() => setFullscreen(!fullscreen)}
+              variant="outline"
+              size="sm"
+            >
+              <MdFullscreen />
+              <span className="hideOnNarrow">Pantalla completa</span>
+            </Button>
+            <Configuration height={10} />
+            <ColorModeButton />
+          </HStack>
+        </HStack>
+        <div style={{ flex: 1, padding: "10px", minHeight: 0, display: "flex" }}>
+          <SongViewer />
+        </div>
       </div>
+
+      <Drawer.Root
+        open={mobileMenuOpen}
+        placement="start"
+        size="xs"
+        onOpenChange={(e) => setMobileMenuOpen(e.open)}
+      >
+        <Portal>
+          <Drawer.Backdrop />
+          <Drawer.Positioner>
+            <Drawer.Content height="100%" background="var(--bg-panel)">
+              <Drawer.CloseTrigger asChild>
+                <CloseButton size="sm" />
+              </Drawer.CloseTrigger>
+              <div style={{ height: "100%", padding: "60px 10px 10px" }}>
+                <BookList
+                  items={book}
+                  selected={selectedBookSong}
+                  onClick={onBookNavigate}
+                  title="Book"
+                  emptyMessage="El director todavía no armó el book."
+                />
+              </div>
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Portal>
+      </Drawer.Root>
     </PlayerContext.Provider>
   );
 };

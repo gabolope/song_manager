@@ -20,6 +20,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 .row {
   display: flex;
@@ -105,7 +106,10 @@
 
 /* Modifico el título que yo inserto */
 .songTitle {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 0.15rem;
+  white-space: normal;
 }
 
 /* Quito el título mostrado por el parser */
@@ -114,30 +118,70 @@
 }
 
 .tono {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
+  font-weight: 500;
   color: var(--tono-color);
+  margin-bottom: 0.75rem;
 }
 
 .songViewerContainer {
-  border: 1px solid var(--viewer-border);
-  border-radius: 10px;
+  border: 1px solid var(--border, var(--viewer-border));
+  border-radius: var(--radius-lg, 10px);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-sm);
   color: var(--viewer-text);
   flex: 1;
   max-height: 100%;
-  margin-top: 10px;
-  padding: 1rem;
+  padding: 1.25rem 1.5rem;
   white-space: nowrap;
   overflow: auto;
+}
+
+.songViewerEmpty {
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 1rem;
+  white-space: normal;
 }
 
 .director {
   border: 1px solid #2563eb;
 }
+
 .isLive {
-  border: 1px solid red;
+  border: 1px solid var(--live, red);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
 }
+
+.isLive::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--live, red);
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+  animation: live-pulse 1.6s ease-out infinite;
+}
+
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
 .backToLive {
   position: fixed;
   bottom: 20px;
   right: 20px;
+  box-shadow: var(--shadow-md);
 }

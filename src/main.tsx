@@ -6,6 +6,7 @@ import { RouterProvider } from "react-router-dom";
 import { Provider } from "./components/ui/provider";
 import { Toaster } from "./components/ui/toaster";
 import router from "./routes.tsx";
+import "./index.css";
 
 const queryClient = new QueryClient();
 
