@@ -20,6 +20,7 @@ const router = createBrowserRouter([
             <DirectorPage />
           </SessionProvider>
         ),
+        errorElement: <ErrorPage />,
       },
       {
         path: "player",
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
             <PlayerPage />
           </SessionProvider>
         ),
+        errorElement: <ErrorPage />,
       },
     ],
   },

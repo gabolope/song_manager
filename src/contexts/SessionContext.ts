@@ -6,12 +6,13 @@ interface SessionContextType {
   book: SongDTO[] | undefined;
   liveSong: UseQueryResult<SongDTO | null, Error>;
   setLiveSong: UseMutationResult<void, Error, SongDTO, unknown>;
+  clearLiveSong: UseMutationResult<void, Error, void, unknown>;
   selectedBookSong: number | null;
   setSelectedBookSong: React.Dispatch<React.SetStateAction<number | null>>;
   isLive: boolean;
   setIsLive: React.Dispatch<React.SetStateAction<boolean>>;
   localSong: SongDTO | null;
-  setLocalSong: React.Dispatch<React.SetStateAction<SongDTO | null>>;
+  setLocalSong: (song: SongDTO | null) => void;
   isCurrentLive: (displayedSong?: SongDTO | null | undefined) => boolean;
   backToLive: () => void;
   nextSong: SongDTO | undefined;

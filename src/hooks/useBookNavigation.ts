@@ -2,11 +2,22 @@ import { useLiveSong } from "./useLiveSong";
 import type { SongDTO } from "../types/song";
 import { useCallback, useEffect } from "react";
 
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  return (
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.tagName === "SELECT" ||
+    target.isContentEditable
+  );
+}
+
 export function useBookNavigation(
   book?: SongDTO[],
   isDirector?: boolean,
   displayedSong?: SongDTO | null,
   onNavigate?: (index: number) => void,
+  isLive?: boolean,
 ) {
   const { setLiveSong } = useLiveSong();
 
@@ -14,13 +25,15 @@ export function useBookNavigation(
     (id: string, direction: 1 | -1) => {
       if (!book) return;
       const currentIndex = book.findIndex((song) => song.id === id);
+      if (currentIndex === -1) return; // la canción mostrada no pertenece al book
       const nextIndex = currentIndex + direction;
       if (nextIndex < 0 || nextIndex >= book.length) return;
 
       onNavigate?.(nextIndex);
-      if (isDirector) setLiveSong.mutate(book[nextIndex]);
+      // Solo se retransmite a los viewers si el Director está efectivamente "en vivo".
+      if (isDirector && isLive) setLiveSong.mutate(book[nextIndex]);
     },
-    [book, isDirector, onNavigate, setLiveSong],
+    [book, isDirector, isLive, onNavigate, setLiveSong],
   );
 
   const onLeft = useCallback((id: string) => navigate(id, -1), [navigate]);
@@ -31,6 +44,7 @@ export function useBookNavigation(
     if (!displayedSong) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isEditableTarget(e.target)) return; // no interferir con inputs de texto
       if (e.key === "ArrowLeft") onLeft(displayedSong.id);
       if (e.key === "ArrowRight") onRight(displayedSong.id);
     };
@@ -47,11 +61,13 @@ export function useBookNavigation(
     let startY = 0;
 
     const handleTouchStart = (e: TouchEvent) => {
+      if (isEditableTarget(e.target)) return;
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
+      if (isEditableTarget(e.target)) return;
       const diffX = startX - e.changedTouches[0].clientX;
       const diffY = startY - e.changedTouches[0].clientY;
 

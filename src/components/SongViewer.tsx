@@ -1,5 +1,5 @@
 import parse from "html-react-parser";
-import { useContext, useEffect, useMemo, useRef } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import DirectorContext from "../contexts/DirectorContext";
 import PlayerContext from "../contexts/PlayerContext";
 import { useSession } from "../contexts/SessionContext";
@@ -11,10 +11,11 @@ import "./SongViewer.css";
 const SongViewer = () => {
   const {
     isLive,
-    setIsLive: onLiveChange,
+    setIsLive,
     isCurrentLive,
     backToLive,
     nextSong,
+    clearLiveSong,
   } = useSession();
 
   const directorCtx = useContext(DirectorContext);
@@ -23,6 +24,19 @@ const SongViewer = () => {
   const displayedSong = directorCtx?.currentSong ?? playerCtx?.displayedSong;
   const onLeft = directorCtx?.onLeft ?? playerCtx?.onLeft ?? (() => {});
   const onRight = directorCtx?.onRight ?? playerCtx?.onRight ?? (() => {});
+
+  // Cuando quien sale de "vivo" es el Director (por el botón Salir o por salir
+  // de pantalla completa con Escape), también se termina la sesión en vivo
+  // para que los viewers no se queden viendo la última canción para siempre.
+  const onLiveChange = useCallback(
+    (value: boolean) => {
+      setIsLive(value);
+      if (!value && directorCtx) {
+        clearLiveSong.mutate();
+      }
+    },
+    [setIsLive, directorCtx, clearLiveSong],
+  );
 
   const html = useMemo(() => {
     if (!displayedSong) return "";

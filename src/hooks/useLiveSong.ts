@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { onSnapshot } from "firebase/firestore";
 import { db } from "../services/firebase";
 import type { SongDTO } from "../types/song";
@@ -40,5 +40,14 @@ export function useLiveSong() {
     },
   });
 
-  return { liveSong, setLiveSong };
+  // Termina la sesión en vivo: borra el documento para que los viewers
+  // dejen de ver la última canción publicada.
+  const clearLiveSong = useMutation({
+    mutationFn: async () => {
+      const ref = doc(db, "liveSong", LIVE_SONG_DOC);
+      await deleteDoc(ref);
+    },
+  });
+
+  return { liveSong, setLiveSong, clearLiveSong };
 }

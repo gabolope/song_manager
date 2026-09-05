@@ -16,6 +16,7 @@ const DirectorPage = () => {
   const {
     book,
     setLiveSong,
+    clearLiveSong,
     selectedBookSong,
     setSelectedBookSong,
     isLive,
@@ -50,6 +51,7 @@ const DirectorPage = () => {
       setSelectedBookSong(index);
       setSelectedListSong(null);
     },
+    isLive,
   );
 
   if (error) return <p>{error.message}</p>;
@@ -114,8 +116,15 @@ const DirectorPage = () => {
           <ViewerBar
             isLive={isLive}
             goLive={() => {
-              setIsLive(!isLive);
-              if (currentSong) setLiveSong.mutate(currentSong);
+              const next = !isLive;
+              setIsLive(next);
+              if (next) {
+                // Entrando en vivo: publica la canción actual.
+                if (currentSong) setLiveSong.mutate(currentSong);
+              } else {
+                // Saliendo: termina la sesión en vivo en vez de re-publicarla.
+                clearLiveSong.mutate();
+              }
             }}
           />
           <SongViewer />
