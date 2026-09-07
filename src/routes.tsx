@@ -4,6 +4,7 @@ import ErrorPage from "./components/ErrorPage";
 import HomePage from "./components/HomePage";
 import Layout from "./components/Layout";
 import PlayerPage from "./components/PlayerPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import SessionProvider from "./contexts/SessionProvider";
 
 const router = createBrowserRouter([
@@ -24,14 +25,14 @@ const router = createBrowserRouter([
         ),
         children: [
           {
-            path: "director",
-            element: <DirectorPage />,
+            element: <ProtectedRoute requireAdmin />,
             errorElement: <ErrorPage />,
+            children: [{ path: "director", element: <DirectorPage /> }],
           },
           {
-            path: "player",
-            element: <PlayerPage />,
+            element: <ProtectedRoute />,
             errorElement: <ErrorPage />,
+            children: [{ path: "player", element: <PlayerPage /> }],
           },
         ],
       },

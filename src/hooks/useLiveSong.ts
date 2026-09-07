@@ -5,13 +5,25 @@ import { db } from "../services/firebase";
 import type { SongDTO } from "../types/song";
 import { useEffect } from "react";
 import { toaster } from "../components/ui/toaster";
+import { useAuth } from "../contexts/AuthContext";
 
 const LIVE_SONG_DOC = "current"; // documento fijo, siempre el mismo
 
 export function useLiveSong() {
   const queryClient = useQueryClient();
+  const { isDemo } = useAuth();
+
   // Listener en tiempo real
   useEffect(() => {
+    // En demo no hay viewers en otro dispositivo escuchando: alcanza con el
+    // cache local, que actualizan setLiveSong/clearLiveSong más abajo. Se
+    // resetea siempre a null para no arrastrar la sesión en vivo real que
+    // haya quedado cacheada de una sesión anterior.
+    if (isDemo) {
+      queryClient.setQueryData<SongDTO | null>(["liveSong"], null);
+      return;
+    }
+
     const ref = doc(db, "liveSong", LIVE_SONG_DOC);
 
     const unsubscribe = onSnapshot(
@@ -36,7 +48,7 @@ export function useLiveSong() {
     );
 
     return () => unsubscribe();
-  }, [queryClient]);
+  }, [queryClient, isDemo]);
 
   // Lectura del cache
   const liveSong = useQuery<SongDTO | null>({
@@ -49,6 +61,10 @@ export function useLiveSong() {
   // Escritura del cache
   const setLiveSong = useMutation({
     mutationFn: async (song: SongDTO) => {
+      if (isDemo) {
+        queryClient.setQueryData(["liveSong"], song);
+        return;
+      }
       const ref = doc(db, "liveSong", LIVE_SONG_DOC);
       await setDoc(ref, song); // sobreescribe, no acumula
     },
@@ -58,6 +74,10 @@ export function useLiveSong() {
   // dejen de ver la última canción publicada.
   const clearLiveSong = useMutation({
     mutationFn: async () => {
+      if (isDemo) {
+        queryClient.setQueryData(["liveSong"], null);
+        return;
+      }
       const ref = doc(db, "liveSong", LIVE_SONG_DOC);
       await deleteDoc(ref);
     },

@@ -16,6 +16,7 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import BookList from "../components/BookList";
 import Configuration from "../components/Configuration";
 import SongViewer from "../components/SongViewer";
+import UserBadge from "../components/UserBadge";
 import { ColorModeButton } from "../components/ui/color-mode";
 import PlayerContext from "../contexts/PlayerContext";
 import { useSession } from "../contexts/SessionContext";
@@ -109,6 +110,7 @@ const PlayerPage = () => {
               </Badge>
             </HStack>
             <HStack gap="8px">
+              <UserBadge />
               <Button
                 onClick={() => setFullscreen(!fullscreen)}
                 variant="outline"

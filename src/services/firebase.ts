@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyCrDtz6GBIbxyXIVpeJg863xtZAXoZMASA",
   authDomain: "song-manager-5b3bb.firebaseapp.com",
   projectId: "song-manager-5b3bb",
@@ -13,3 +14,4 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const auth = getAuth(app);

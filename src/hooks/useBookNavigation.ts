@@ -1,4 +1,3 @@
-import { useLiveSong } from "./useLiveSong";
 import type { SongDTO } from "../types/song";
 import { useCallback, useEffect } from "react";
 
@@ -18,14 +17,11 @@ export function useBookNavigation(
   displayedSong?: SongDTO | null,
   onNavigate?: (index: number) => void,
   isLive?: boolean,
+  // Se recibe en vez de llamar a useLiveSong() acá adentro: así no se abre
+  // una segunda suscripción a "liveSong" en paralelo a la de SessionContext,
+  // y el hook funciona igual con el "liveSong" real o el del modo demo.
+  setLiveSongMutate?: (song: SongDTO) => void,
 ) {
-  const { setLiveSong } = useLiveSong();
-  // useMutation devuelve un objeto nuevo en cada render aunque nada haya
-  // cambiado; sólo `.mutate` es estable. Usar el objeto completo como
-  // dependencia rompe la memoización de navigate/onLeft/onRight en cada
-  // render (por ej. cada vez que llega un snapshot de Firestore).
-  const setLiveSongMutate = setLiveSong.mutate;
-
   const navigate = useCallback(
     (id: string, direction: 1 | -1) => {
       if (!book) return;
@@ -36,7 +32,7 @@ export function useBookNavigation(
 
       onNavigate?.(nextIndex);
       // Solo se retransmite a los viewers si el Director está efectivamente "en vivo".
-      if (isDirector && isLive) setLiveSongMutate(book[nextIndex]);
+      if (isDirector && isLive) setLiveSongMutate?.(book[nextIndex]);
     },
     [book, isDirector, isLive, onNavigate, setLiveSongMutate],
   );

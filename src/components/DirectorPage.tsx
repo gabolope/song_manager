@@ -67,6 +67,7 @@ const DirectorPage = () => {
     currentSong,
     onBookNavigate,
     isLive,
+    setLiveSong.mutate,
   );
 
   // Memoizado: si este objeto fuera nuevo en cada render, exitFullscreen en

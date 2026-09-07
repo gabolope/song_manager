@@ -4,10 +4,22 @@ import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { useEffect } from "react";
 import { toaster } from "../components/ui/toaster";
+import { useAuth } from "../contexts/AuthContext";
 
 const useBook = () => {
   const queryClient = useQueryClient();
+  const { isDemo } = useAuth();
+
   useEffect(() => {
+    // En demo el "book" vive solo en el cache de react-query (lo escriben
+    // las mutaciones de useBookMutations): no hay nada que suscribir. Se
+    // resetea siempre a [] (no "prev ?? []") para no arrastrar el book real
+    // que haya quedado cacheado de una sesión anterior.
+    if (isDemo) {
+      queryClient.setQueryData<SongDTO[]>(["book"], []);
+      return;
+    }
+
     const q = query(collection(db, "book"), orderBy("createdAt"));
 
     // Utilizo onSnapshot para abrir una conexión persistente con Firestore, cada vez que el book cambia Firestore pushea el cambio
@@ -37,7 +49,7 @@ const useBook = () => {
       },
     );
     return () => unsubscribe();
-  }, [queryClient]);
+  }, [queryClient, isDemo]);
 
   // Ahora uso useQuery solo para leer del cache, sin queryFn que haga fetch
   return useQuery<SongDTO[], Error>({
