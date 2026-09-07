@@ -6,7 +6,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 // Se abre solo una vez, al entrar a modo demo (DirectorPage monta este
@@ -14,7 +14,16 @@ import { useAuth } from "../contexts/AuthContext";
 // no vuelve a aparecer salvo que reinicie la demo.
 const DemoWelcomeDialog = () => {
   const { isDemo } = useAuth();
-  const [open, setOpen] = useState(isDemo);
+  // Arranca cerrado y se abre en un efecto (no useState(isDemo)): si nace ya
+  // abierto, el doble-montaje de efectos de StrictMode en dev corrompe el
+  // lock de scroll/pointer-events que Ark UI aplica al resto de la página
+  // mientras el diálogo está abierto, y queda "pointer-events: none" pegado
+  // en <body> para siempre después de cerrarlo (nada se puede clickear).
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (isDemo) setOpen(true);
+  }, [isDemo]);
 
   if (!isDemo) return null;
 
