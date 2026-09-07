@@ -1,5 +1,6 @@
 import { CloseButton, Drawer, Grid, GridItem, Portal } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
+import DemoWelcomeDialog from "../components/DemoWelcomeDialog";
 import DirectorSidePanels from "../components/DirectorSidePanels";
 import SongViewer from "../components/SongViewer";
 import DirectorContext from "../contexts/DirectorContext";
@@ -113,6 +114,7 @@ const DirectorPage = () => {
 
   return (
     <DirectorContext.Provider value={directorContextValue}>
+      <DemoWelcomeDialog />
       <Grid
         templateAreas={{
           base: `"header" "viewer"`,
@@ -158,6 +160,7 @@ const DirectorPage = () => {
               songs={songs}
               book={book}
               isLoading={isLoading}
+              isBookLoading={book === undefined}
               isAdding={addToBook.isPending}
               selectedListSong={selectedListSong}
               selectedBookSong={selectedBookSong}
@@ -195,6 +198,7 @@ const DirectorPage = () => {
                   songs={songs}
                   book={book}
                   isLoading={isLoading}
+                  isBookLoading={book === undefined}
                   isAdding={addToBook.isPending}
                   selectedListSong={selectedListSong}
                   selectedBookSong={selectedBookSong}

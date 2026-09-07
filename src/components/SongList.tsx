@@ -3,6 +3,9 @@ import { useMemo, useState } from "react";
 import type { SongDTO } from "../types/song";
 import { IoAddCircleOutline } from "react-icons/io5";
 import { IoSearch } from "react-icons/io5";
+import { stripChordProMarkup } from "../services/chordpro.service";
+import { normalizeForSearch } from "../utils/text";
+import ListSkeleton from "./ListSkeleton";
 import "./SongList.css";
 
 interface Props {
@@ -26,17 +29,31 @@ const SongList = ({
 }: Props) => {
   const [query, setQuery] = useState("");
 
+  // Se precalcula una sola vez por lista (no en cada tecleo) el texto sobre
+  // el que se busca: título + letra sin acordes ni directivas, para que
+  // "Eres" encuentre "Ere[Bb]s" igual.
+  const searchable = useMemo(
+    () =>
+      items?.map((song) => ({
+        song,
+        text: normalizeForSearch(
+          `${song.title ?? ""} ${stripChordProMarkup(song.content ?? "")}`,
+        ),
+      })),
+    [items],
+  );
+
   const filtered = useMemo(() => {
-    if (!items) return items;
-    const q = query.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((song) => (song.title ?? "").toLowerCase().includes(q));
-  }, [items, query]);
+    if (!searchable) return undefined;
+    const q = normalizeForSearch(query.trim());
+    if (!q) return searchable.map((s) => s.song);
+    return searchable.filter((s) => s.text.includes(q)).map((s) => s.song);
+  }, [searchable, query]);
 
   return (
     <div className="panel">
       <div className="panelHeader">
-        <h2>Canciones</h2>
+        <h2>Repertorio</h2>
         <span className="panelCount">{items?.length ?? 0}</span>
       </div>
       <div className="panelSearch">
@@ -61,7 +78,7 @@ const SongList = ({
       </div>
 
       {isLoading ? (
-        <div className="panelEmpty">Cargando...</div>
+        <ListSkeleton />
       ) : !filtered?.length ? (
         <div className="panelEmpty">
           {query ? "Sin resultados." : "No hay canciones cargadas."}

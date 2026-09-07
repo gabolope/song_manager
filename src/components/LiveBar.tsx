@@ -1,6 +1,7 @@
 import { ActionBar, Button, Portal } from "@chakra-ui/react";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import { IoIosExit } from "react-icons/io";
+import { MdOutlineSensors } from "react-icons/md";
 
 interface Props {
   songId: string;
@@ -12,6 +13,8 @@ interface Props {
   isCurrentLive: boolean;
   onBackToLive: () => void;
   hasLiveSession: boolean;
+  // El director es quien publica el vivo: nunca necesita "volver" a él.
+  isDirector: boolean;
 }
 
 const LiveBar = ({
@@ -24,6 +27,7 @@ const LiveBar = ({
   isCurrentLive,
   onBackToLive,
   hasLiveSession,
+  isDirector,
 }: Props) => {
   return (
     <ActionBar.Root open={isLive}>
@@ -44,18 +48,15 @@ const LiveBar = ({
             <Button variant="outline" size="sm" onClick={() => onRight(songId)}>
               <FaAngleDoubleRight />
             </Button>
-            <Button
-              onClick={onBackToLive}
-              colorPalette="red"
-              className="backToLive"
-              visibility={
-                !isCurrentLive && isLive && hasLiveSession
-                  ? "visible"
-                  : "hidden"
-              }
-            >
-              Volver al Vivo
-            </Button>
+            {/* Solo se renderiza cuando realmente hace falta: con
+            visibility:hidden quedaba un hueco vacío del tamaño del botón en
+            la barra todo el tiempo, como si faltara algo. */}
+            {!isDirector && !isCurrentLive && isLive && hasLiveSession && (
+              <Button onClick={onBackToLive} colorPalette="red" size="sm">
+                <MdOutlineSensors />
+                Volver al Vivo
+              </Button>
+            )}
           </ActionBar.Content>
         </ActionBar.Positioner>
       </Portal>

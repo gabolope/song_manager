@@ -7,6 +7,7 @@ interface Props {
   songs: SongDTO[] | undefined;
   book: SongDTO[] | undefined;
   isLoading: boolean;
+  isBookLoading?: boolean;
   isAdding: boolean;
   selectedListSong: number | null;
   selectedBookSong: number | null;
@@ -20,6 +21,7 @@ const DirectorSidePanels = ({
   songs,
   book,
   isLoading,
+  isBookLoading,
   isAdding,
   selectedListSong,
   selectedBookSong,
@@ -54,10 +56,19 @@ const DirectorSidePanels = ({
           selected={selectedListSong}
         />
       </Splitter.Panel>
-      <Splitter.ResizeTrigger id="a:b" />
+      <Splitter.ResizeTrigger
+        id="a:b"
+        height="14px"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        cursor="row-resize"
+        _hover={{ background: "var(--bg-hover)" }}
+      />
       <Splitter.Panel id="b">
         <BookList
           items={book}
+          isLoading={isBookLoading}
           selected={selectedBookSong}
           onClick={onBookClick}
           onDelete={onRemoveFromBook}

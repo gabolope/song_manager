@@ -124,6 +124,7 @@ const SongViewer = () => {
           isCurrentLive={isCurrentLive(displayedSong)}
           onBackToLive={backToLive}
           hasLiveSession={!!liveSong.data}
+          isDirector={isDirector}
         />
       </div>
     </>

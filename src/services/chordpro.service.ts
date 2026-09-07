@@ -8,6 +8,13 @@ export function parseChordPro(content: string) {
   return parser.parse(content);
 }
 
+// Letra "limpia" para buscar: saca directivas ({title:...}) y acordes
+// ([Bb]) para que una palabra partida por un acorde en medio (ej. "Ere[Bb]s")
+// siga siendo encontrable como "Eres".
+export function stripChordProMarkup(content: string): string {
+  return content.replace(/\{[^}]*\}/g, " ").replace(/\[[^\]]*\]/g, "");
+}
+
 export function formatSong(content: string): string {
   try {
     const song = parser.parse(content);

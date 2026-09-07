@@ -1,6 +1,7 @@
 import type { SongDTO } from "@/types/song";
 import { Button } from "@chakra-ui/react";
 import { MdDeleteOutline } from "react-icons/md";
+import ListSkeleton from "./ListSkeleton";
 import "./SongList.css";
 
 interface Props {
@@ -10,14 +11,16 @@ interface Props {
   selected: number | null;
   title?: string;
   emptyMessage?: string;
+  isLoading?: boolean;
 }
 const BookList = ({
   items,
   onClick,
   onDelete,
   selected,
-  title = "Book",
-  emptyMessage = "Agregá canciones desde la lista para armar el book.",
+  title = "Sesión",
+  emptyMessage = "Agregá canciones desde el repertorio para armar la sesión.",
+  isLoading,
 }: Props) => {
   return (
     <div className="panel">
@@ -26,7 +29,9 @@ const BookList = ({
         <span className="panelCount">{items?.length ?? 0}</span>
       </div>
 
-      {!items?.length ? (
+      {isLoading ? (
+        <ListSkeleton />
+      ) : !items?.length ? (
         <div className="panelEmpty">{emptyMessage}</div>
       ) : (
         <div className="songList">

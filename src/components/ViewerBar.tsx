@@ -36,6 +36,7 @@ const ViewerBar = ({
     <>
       <HStack
         justify="space-between"
+        position="relative"
         paddingX={{ base: "8px", sm: "16px" }}
         paddingY="10px"
         borderBottom="1px solid var(--border)"
@@ -45,7 +46,7 @@ const ViewerBar = ({
         <HStack gap="10px">
           {onMenuClick && (
             <IconButton
-              aria-label="Abrir canciones"
+              aria-label="Abrir menú"
               variant="outline"
               size="sm"
               hideFrom="lg"
@@ -61,19 +62,26 @@ const ViewerBar = ({
             Director
           </Badge>
         </HStack>
+        <Button
+          colorPalette="red"
+          variant={isLive ? "solid" : "outline"}
+          onClick={() => goLive()}
+          h={10}
+          position="absolute"
+          left="50%"
+          top="50%"
+          transform="translate(-50%, -50%)"
+          // Sin canción seleccionada no hay nada que publicar; una vez en
+          // vivo, el botón sigue habilitado para poder salir.
+          disabled={!isLive && !songId}
+        >
+          <MdOutlineSensors />
+          <span className="hideOnNarrow">
+            {isLive ? "En vivo" : "Go Live"}
+          </span>
+        </Button>
         <HStack gap="8px">
           <UserBadge />
-          <Button
-            colorPalette="red"
-            variant={isLive ? "solid" : "outline"}
-            onClick={() => goLive()}
-            h={10}
-          >
-            <MdOutlineSensors />
-            <span className="hideOnNarrow">
-              {isLive ? "En vivo" : "Go Live"}
-            </span>
-          </Button>
           <Configuration height={10} />
           <ColorModeButton />
         </HStack>

@@ -87,7 +87,7 @@ const PlayerPage = () => {
           >
             <HStack gap="10px">
               <IconButton
-                aria-label="Abrir book"
+                aria-label="Abrir sesión"
                 variant="outline"
                 size="sm"
                 hideFrom="lg"
@@ -134,10 +134,9 @@ const PlayerPage = () => {
         >
           <BookList
             items={book}
+            isLoading={book === undefined}
             selected={selectedBookSong}
             onClick={onBookNavigate}
-            title="Book"
-            emptyMessage="El director todavía no armó el book."
           />
         </GridItem>
         <GridItem area="viewer" h="100%" overflow="hidden" padding="10px">
@@ -161,10 +160,9 @@ const PlayerPage = () => {
               <div style={{ height: "100%", padding: "60px 10px 10px" }}>
                 <BookList
                   items={book}
+                  isLoading={book === undefined}
                   selected={selectedBookSong}
                   onClick={onBookNavigate}
-                  title="Book"
-                  emptyMessage="El director todavía no armó el book."
                 />
               </div>
             </Drawer.Content>
