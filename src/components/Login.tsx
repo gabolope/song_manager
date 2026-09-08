@@ -3,10 +3,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { toaster } from "./ui/toaster";
+import { useColorModeValue } from "./ui/color-mode";
 import "./HomePage.css";
 
 const Login = () => {
   const { login, enterDemo } = useAuth();
+  const logoSrc = useColorModeValue("/logo_black.svg", "/logo_white.svg");
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +38,7 @@ const Login = () => {
   return (
     <div className="home-wrap">
       <div className="home-heading">
-        <img src="/musica.png" alt="" aria-hidden="true" className="home-logo" />
+        <img src={logoSrc} alt="" aria-hidden="true" className="home-logo" />
         <p className="home-title">Song Manager</p>
         <p className="home-subtitle">Ingresá con tu cuenta</p>
       </div>

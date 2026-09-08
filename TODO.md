@@ -10,8 +10,9 @@ Menores:
 - [x] Cambiar: "Canciones" por "Repertorio", y "Book" por "Sesión"
 - [x] Agregar skelletons en listas de repertorio y sesión
 - [x] Mover "Go Live" al centro
-- [ ] "Crear usuario" debe cerrar el Dialog actual y abrir otro dialog independiente
-- [ ] Buscador debe ignorar caracteres especiales y no ser case sensitive, tomar ñ como n, tomar á como a, etc.
+- [x] "Crear usuario" debe cerrar el Dialog actual y abrir otro dialog independiente
+- [x] Buscador debe ignorar caracteres especiales y no ser case sensitive, tomar ñ como n, tomar á como a, etc.
+- [ ] Buscador debe ignorar comas y puntos
 
 Intermedios:
 
