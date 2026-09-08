@@ -21,6 +21,7 @@ Intermedios:
 - [ ] Agregar habilidad de editar y borrar usuarios sólo para admins.
 - [ ] Indicador de si la canción que se está viendo es del repertorio o de la sesión
 - [ ] Canciones vistas del repertorio no deben tener indicador de siguiente en la lista.
+- [ ] Optimizar DB para subir canciones de formato chordle. Debe seguir las siguientes reglas: eliminar las notaciones manuales (A1, B2, C3). Y debe clasificarlas en rápidas (\_1), intermedias (\_2) y lentas (\_3)
 
 Mayores:
 
@@ -29,3 +30,4 @@ Mayores:
 - [ ] Agregar habilidad de editar canciones.
 - [ ] Agregar habilidad de crear distintas listas (sesiones)
 - [ ] Agregar botones de aumentar tamaño de letra
+- [ ] Agregar habilidad de subir y bajar tono en vivo para directores

@@ -17,7 +17,6 @@ import BookList from "../components/BookList";
 import Configuration from "../components/Configuration";
 import SongViewer from "../components/SongViewer";
 import UserBadge from "../components/UserBadge";
-import { ColorModeButton } from "../components/ui/color-mode";
 import PlayerContext from "../contexts/PlayerContext";
 import { useSession } from "../contexts/SessionContext";
 import { useBookNavigation } from "../hooks/useBookNavigation";
@@ -120,7 +119,6 @@ const PlayerPage = () => {
                 <span className="hideOnNarrow">Pantalla completa</span>
               </Button>
               <Configuration height={10} />
-              <ColorModeButton />
             </HStack>
           </HStack>
         </GridItem>

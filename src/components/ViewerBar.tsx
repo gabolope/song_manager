@@ -13,7 +13,6 @@ import { MdOutlineSensors } from "react-icons/md";
 import { RxHamburgerMenu } from "react-icons/rx";
 import Configuration from "./Configuration";
 import UserBadge from "./UserBadge";
-import { ColorModeButton } from "./ui/color-mode";
 
 interface Props {
   isLive: boolean;
@@ -83,7 +82,6 @@ const ViewerBar = ({
         <HStack gap="8px">
           <UserBadge />
           <Configuration height={10} />
-          <ColorModeButton />
         </HStack>
       </HStack>
       <ActionBar.Root open={isLive}>
