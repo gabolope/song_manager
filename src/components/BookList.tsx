@@ -2,6 +2,7 @@ import type { SongDTO } from "@/types/song";
 import { Button } from "@chakra-ui/react";
 import { MdDeleteOutline } from "react-icons/md";
 import ListSkeleton from "./ListSkeleton";
+import { formatSongMeta } from "../utils/song";
 import "./SongList.css";
 
 interface Props {
@@ -38,7 +39,12 @@ const BookList = ({
           {items.map((song, index) => (
             <div key={song.id} onClick={() => onClick?.(index)}>
               <div className={selected === index ? "song selected" : "song"}>
-                <div>{song.title}</div>
+                <div className="songInfo">
+                  <div className="songRowTitle">{song.title}</div>
+                  {formatSongMeta(song) && (
+                    <div className="songRowMeta">{formatSongMeta(song)}</div>
+                  )}
+                </div>
                 <div>
                   {selected === index && onDelete && (
                     <Button

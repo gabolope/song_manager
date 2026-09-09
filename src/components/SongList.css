@@ -58,6 +58,29 @@
   border-color: var(--accent);
 }
 
+.filterSelectRow {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.filterSelect {
+  flex: 1 1 0;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.filterSelect:focus {
+  border-color: var(--accent);
+}
+
 .panelEmpty {
   display: flex;
   flex: 1;
@@ -90,7 +113,7 @@
   flex: 0 0 auto;
   border-radius: var(--radius-sm);
   border-left: 3px solid transparent;
-  padding: 0 0.15rem 0 0.6rem;
+  padding: 0.25rem 0.15rem 0.25rem 0.6rem;
   font-size: 0.9rem;
   color: var(--text);
   cursor: pointer;
@@ -99,10 +122,51 @@
     border-color 0.12s ease;
 }
 
-.song > div:first-child {
+.songInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.songRowTitle {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.songRowMeta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.songGroupDivider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem 0.2rem;
+}
+
+.songGroupDivider:first-child {
+  padding-top: 0.15rem;
+}
+
+.songGroupDivider span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.songGroupDivider hr {
+  flex: 1;
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
 }
 
 .song:hover {
