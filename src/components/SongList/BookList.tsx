@@ -70,7 +70,7 @@ const BookRow = ({ song, selected, draggable, onClick, onDelete }: RowProps) => 
       }}
       onClick={onClick}
     >
-      <div className={selected ? "song selected" : "song"}>
+      <div className={selected ? "song bookSong selected" : "song bookSong"}>
         <div className="songMain">
           {draggable && (
             <button

@@ -34,6 +34,12 @@ const SongViewer = () => {
   const clearLiveSongMutate = clearLiveSong.mutate;
 
   const displayedSong = directorCtx?.currentSong ?? playerCtx?.displayedSong;
+  // Si se está viendo una canción del repertorio general (no del book/sesión),
+  // no tiene sentido mostrar "próxima canción": esa noción sólo existe dentro
+  // del orden del book.
+  const isFromRepertoire = directorCtx
+    ? directorCtx.selectedListSong !== null
+    : false;
   const onLeft = directorCtx?.onLeft ?? playerCtx?.onLeft ?? (() => {});
   const onRight = directorCtx?.onRight ?? playerCtx?.onRight ?? (() => {});
   // Pantalla completa es un estado por pestaña (Director y Player pueden estar
@@ -136,7 +142,7 @@ const SongViewer = () => {
         <div className="songTitle">{displayedSong.title}</div>
         <div className="tono">Tono: {displayedSong.key ?? "-"}</div>
         <div>{parse(html)}</div>
-        <NextSong nextSong={nextSong} />
+        {!isFromRepertoire && <NextSong nextSong={nextSong} />}
         <LiveBar
           songId={displayedSong.id}
           isLive={fullscreen}

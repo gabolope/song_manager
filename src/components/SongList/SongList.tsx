@@ -123,34 +123,42 @@ const SongList = ({
         {(availableKeys.length > 0 || availableTipos.length > 0) && (
           <div className="filterSelectRow">
             {availableKeys.length > 0 && (
-              <select
-                className="filterSelect"
-                value={keyFilter}
-                onChange={(e) => setKeyFilter(e.target.value)}
-                aria-label="Filtrar por tono"
-              >
-                <option value="">Todos los tonos</option>
-                {availableKeys.map(({ key, count }) => (
-                  <option key={key} value={key}>
-                    {key} ({count})
-                  </option>
-                ))}
-              </select>
+              <div className="filterSelectWrap">
+                <select
+                  className="filterSelect"
+                  value={keyFilter}
+                  onChange={(e) => setKeyFilter(e.target.value)}
+                  aria-label="Filtrar por tono"
+                >
+                  <option value="">Tono</option>
+                  {availableKeys.map(({ key, count }) => (
+                    <option key={key} value={key}>
+                      {key} ({count})
+                    </option>
+                  ))}
+                </select>
+                <span className="filterSelectIcon" aria-hidden="true" />
+              </div>
             )}
             {availableTipos.length > 0 && (
-              <select
-                className="filterSelect"
-                value={tipoFilter}
-                onChange={(e) => setTipoFilter(e.target.value as SongTipo | "")}
-                aria-label="Filtrar por tipo"
-              >
-                <option value="">Todos los tipos</option>
-                {availableTipos.map(({ tipo, count }) => (
-                  <option key={tipo} value={tipo}>
-                    {TIPO_LABEL[tipo]} ({count})
-                  </option>
-                ))}
-              </select>
+              <div className="filterSelectWrap">
+                <select
+                  className="filterSelect"
+                  value={tipoFilter}
+                  onChange={(e) =>
+                    setTipoFilter(e.target.value as SongTipo | "")
+                  }
+                  aria-label="Filtrar por tipo"
+                >
+                  <option value="">Tipo</option>
+                  {availableTipos.map(({ tipo, count }) => (
+                    <option key={tipo} value={tipo}>
+                      {TIPO_LABEL[tipo]} ({count})
+                    </option>
+                  ))}
+                </select>
+                <span className="filterSelectIcon" aria-hidden="true" />
+              </div>
             )}
           </div>
         )}
