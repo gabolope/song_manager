@@ -1,7 +1,10 @@
 import { Splitter } from "@chakra-ui/react";
+import { useState } from "react";
 import type { SongDTO } from "@/types/song";
 import BookList from "@/components/SongList/BookList";
 import SongList from "@/components/SongList/SongList";
+
+const DEFAULT_SIZE = [50, 50];
 
 interface Props {
   songs: SongDTO[] | undefined;
@@ -30,12 +33,24 @@ const DirectorSidePanels = ({
   onAddToBook,
   onRemoveFromBook,
 }: Props) => {
+  const [size, setSize] = useState<number[]>(DEFAULT_SIZE);
+
+  const toggleExpand = (panel: "a" | "b") => {
+    setSize((prev) => {
+      const isExpanded = panel === "a" ? prev[0] === 100 : prev[1] === 100;
+      if (isExpanded) return DEFAULT_SIZE;
+      return panel === "a" ? [100, 0] : [0, 100];
+    });
+  };
+
   return (
     <Splitter.Root
       panels={[{ id: "a" }, { id: "b" }]}
       orientation="vertical"
       borderWidth="1px"
       minH="60"
+      size={size}
+      onResize={(details) => setSize(details.size)}
       style={{
         height: "100%",
         borderRadius: "12px",
@@ -54,6 +69,8 @@ const DirectorSidePanels = ({
           isLoading={isLoading}
           onClick={onListClick}
           selected={selectedListSong}
+          isExpanded={size[0] === 100}
+          onToggleExpand={() => toggleExpand("a")}
         />
       </Splitter.Panel>
       <Splitter.ResizeTrigger
@@ -72,6 +89,8 @@ const DirectorSidePanels = ({
           selected={selectedBookSong}
           onClick={onBookClick}
           onDelete={onRemoveFromBook}
+          isExpanded={size[1] === 100}
+          onToggleExpand={() => toggleExpand("b")}
         />
       </Splitter.Panel>
     </Splitter.Root>

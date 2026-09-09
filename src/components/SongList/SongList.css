@@ -12,8 +12,16 @@
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0.65rem 0.75rem;
+  background: var(--bg);
   border-bottom: 1px solid var(--border);
   flex: 0 0 auto;
+}
+
+.panelHeaderTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
 .panelHeader h2 {
@@ -23,6 +31,25 @@
   letter-spacing: 0.04em;
   color: var(--text-muted);
   margin: 0;
+}
+
+.panelExpandBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.panelExpandBtn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text);
 }
 
 .panelCount {

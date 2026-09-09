@@ -3,6 +3,7 @@ import { Fragment, useMemo, useState } from "react";
 import type { SongDTO, SongTipo } from "@/types/song";
 import { IoAddCircleOutline } from "react-icons/io5";
 import { IoSearch } from "react-icons/io5";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { stripChordProMarkup } from "@/services/chordpro.service";
 import { normalizeForSearch } from "@/utils/text";
 import ListSkeleton from "./ListSkeleton";
@@ -17,6 +18,8 @@ interface Props {
   onClick?: (index: number) => void;
   selected?: number | null;
   isAdding?: boolean;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 const SongList = ({
@@ -27,6 +30,8 @@ const SongList = ({
   selected,
   addToBook,
   isAdding,
+  isExpanded,
+  onToggleExpand,
 }: Props) => {
   const [query, setQuery] = useState("");
   const [keyFilter, setKeyFilter] = useState("");
@@ -80,8 +85,21 @@ const SongList = ({
   return (
     <div className="panel">
       <div className="panelHeader">
-        <h2>Repertorio</h2>
-        <span className="panelCount">{items?.length ?? 0}</span>
+        <div className="panelHeaderTitle">
+          <h2>Repertorio</h2>
+          <span className="panelCount">{items?.length ?? 0}</span>
+        </div>
+        {onToggleExpand && (
+          <button
+            type="button"
+            className="panelExpandBtn"
+            onClick={onToggleExpand}
+            aria-label={isExpanded ? "Restaurar tamaño" : "Expandir panel"}
+            title={isExpanded ? "Restaurar tamaño" : "Expandir panel"}
+          >
+            {isExpanded ? <IoIosArrowUp /> : <IoIosArrowDown />}
+          </button>
+        )}
       </div>
       <div className="panelSearch">
         <div style={{ position: "relative" }}>
@@ -123,9 +141,7 @@ const SongList = ({
               <select
                 className="filterSelect"
                 value={tipoFilter}
-                onChange={(e) =>
-                  setTipoFilter(e.target.value as SongTipo | "")
-                }
+                onChange={(e) => setTipoFilter(e.target.value as SongTipo | "")}
                 aria-label="Filtrar por tipo"
               >
                 <option value="">Todos los tipos</option>

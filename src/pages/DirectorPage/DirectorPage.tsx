@@ -1,4 +1,4 @@
-import { CloseButton, Drawer, Grid, GridItem, Portal } from "@chakra-ui/react";
+import { Drawer, Grid, GridItem, Portal } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
 import SongViewer from "@/components/SongViewer/SongViewer";
 import DirectorContext from "@/contexts/DirectorContext";
@@ -34,7 +34,6 @@ const DirectorPage = () => {
     (index: number) => {
       setSelectedListSong(index);
       setSelectedBookSong(null);
-      setMobileMenuOpen(false);
     },
     [setSelectedBookSong],
   );
@@ -42,7 +41,6 @@ const DirectorPage = () => {
     (index: number) => {
       setSelectedBookSong(index);
       setSelectedListSong(null);
-      setMobileMenuOpen(false);
     },
     [setSelectedBookSong],
   );
@@ -190,10 +188,7 @@ const DirectorPage = () => {
           <Drawer.Backdrop />
           <Drawer.Positioner>
             <Drawer.Content height="100%" background="var(--bg-panel)">
-              <Drawer.CloseTrigger asChild>
-                <CloseButton size="sm" />
-              </Drawer.CloseTrigger>
-              <div style={{ height: "100%", padding: "60px 10px 10px" }}>
+              <div style={{ height: "100%", padding: "10px" }}>
                 <DirectorSidePanels
                   songs={songs}
                   book={book}
