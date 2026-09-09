@@ -8,6 +8,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { toaster } from "../components/ui/toaster";
+import type { SongTipo } from "../types/song";
 
 // Firestore no acepta más de 500 operaciones por batch.
 const BATCH_LIMIT = 500;
@@ -25,11 +26,46 @@ function matchDirective(
   return undefined;
 }
 
+const TIPO_BY_DIGIT: Record<string, SongTipo> = {
+  "1": "rapida",
+  "2": "intermedia",
+  "3": "lenta",
+};
+
+// Los títulos viejos de Chordle traen notación manual pegada al frente
+// (ej. "A1 Danzaré, cantaré", "Am3 Dios ha sido fiel"): una letra de nota
+// musical (redundante con {key:}) seguida de un dígito 1/2/3 que el usuario
+// usaba para marcar velocidad. Se extrae ese dígito como `tipo` y se saca el
+// prefijo del título. Solo se reconoce el patrón cuando el separador después
+// del dígito es un espacio, para no comerse texto de títulos irregulares
+// (ej. "F3-G Cristo..." queda intacto y sin tipo, a revisar a mano).
+function extractTipoAndCleanTitle(rawTitle: string): {
+  title: string;
+  tipo?: SongTipo;
+} {
+  const match = rawTitle.match(/^[A-G](?:#|b)?m?([1-3])\s+/i);
+  if (!match) return { title: rawTitle };
+
+  const title = rawTitle
+    .slice(match[0].length)
+    .replace(/^[-–]\s*/, "") // ej. "D3 - Se Que..." -> "Se Que..."
+    .trim();
+
+  return { title, tipo: TIPO_BY_DIGIT[match[1]] };
+}
+
 function extractMetadata(content: string) {
+  const rawTitle = matchDirective(content, "title", "t") ?? "Sin título";
+  const { title, tipo } = extractTipoAndCleanTitle(rawTitle);
+  const tempoRaw = matchDirective(content, "tempo");
+  const tempo = tempoRaw ? Number(tempoRaw) : undefined;
+
   return {
-    title: matchDirective(content, "title", "t") ?? "Sin título",
+    title,
     artist: matchDirective(content, "artist") ?? "",
     key: matchDirective(content, "key", "k") ?? "",
+    ...(tipo ? { tipo } : {}),
+    ...(tempo && !Number.isNaN(tempo) ? { tempo } : {}),
   };
 }
 
@@ -57,15 +93,17 @@ export function useSongUpload() {
       const snapshot = await getDocs(collection(db, "songs"));
       const existingTitles = new Set(snapshot.docs.map((d) => d.data().title));
 
-      const pending: { ref: DocumentReference; data: Record<string, string> }[] =
-        [];
+      const pending: {
+        ref: DocumentReference;
+        data: Record<string, string | number>;
+      }[] = [];
       const duplicates: string[] = [];
       const failed: { file: string; error: string }[] = [];
 
       for (const file of files) {
         try {
           const content = await readFileAsText(file);
-          const { title, artist, key } = extractMetadata(content);
+          const { title, artist, key, tipo, tempo } = extractMetadata(content);
 
           if (existingTitles.has(title)) {
             duplicates.push(file.name);
@@ -75,7 +113,17 @@ export function useSongUpload() {
           // Se agrega de inmediato para detectar duplicados dentro del mismo lote.
           existingTitles.add(title);
           const ref = doc(collection(db, "songs"));
-          pending.push({ ref, data: { title, artist, key, content } });
+          pending.push({
+            ref,
+            data: {
+              title,
+              artist,
+              key,
+              content,
+              ...(tipo ? { tipo } : {}),
+              ...(tempo !== undefined ? { tempo } : {}),
+            },
+          });
         } catch (error) {
           failed.push({
             file: file.name,

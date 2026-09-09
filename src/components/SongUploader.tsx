@@ -7,7 +7,7 @@ const SongUploader = () => {
 
   return (
     <FileUpload.Root
-      maxFiles={200}
+      maxFiles={500}
       accept={{ "text/plain": [".chordpro", ".cho"] }}
       onFileAccept={({ files }) => uploadSongs(files)}
     >
