@@ -154,6 +154,13 @@
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
 }
 
+.editSongBtn {
+  position: absolute;
+  top: 12px;
+  right: 40px;
+  z-index: 2;
+}
+
 .isLive::before {
   content: "";
   position: absolute;

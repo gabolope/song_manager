@@ -23,9 +23,16 @@ const NextSong = ({ nextSong }: Props) => {
             >
               Próxima canción
             </p>
-            <p style={{ fontWeight: 600, fontSize: "1.1rem", margin: "0.2rem 0 0" }}>
+            <p
+              style={{
+                fontWeight: 600,
+                fontSize: "1.1rem",
+                margin: "0.2rem 0 0",
+              }}
+            >
               {nextSong?.title}
             </p>
+            <p style={{ fontSize: ".9rem" }}>Tono: {nextSong?.key}</p>
           </>
         ) : (
           <p style={{ color: "var(--text-muted)", margin: 0 }}>

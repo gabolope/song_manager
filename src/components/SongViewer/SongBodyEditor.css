@@ -1,0 +1,154 @@
+.bodyEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  white-space: normal;
+}
+
+.bodySection {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  padding: 0.6rem 0.7rem;
+}
+
+.bodySection.isChorus {
+  border-color: var(--chorus-color);
+}
+
+.bodySectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.bodySectionKind {
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.4rem;
+  font-size: 0.8rem;
+}
+
+.bodySectionLabel {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.bodySectionActions {
+  display: flex;
+  gap: 0.1rem;
+  flex: 0 0 auto;
+}
+
+.bodySectionLines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.bodyLine {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.bodyLineSegments {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.15rem;
+  row-gap: 0.3rem;
+}
+
+.bodySegment {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.bodyChordInput {
+  border: none;
+  border-bottom: 1px dashed var(--border-strong);
+  background: transparent;
+  color: var(--chord-color);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0 2px;
+  outline: none;
+}
+
+.bodyChordInput:focus {
+  border-bottom-color: var(--accent);
+}
+
+.bodyLyricInput {
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.9rem;
+  padding: 0 2px;
+  outline: none;
+}
+
+.bodyLyricInput:focus {
+  border-bottom-color: var(--accent);
+}
+
+.bodySegmentRemove {
+  opacity: 0.35;
+  transform: translateY(-4px);
+}
+
+.bodySegmentRemove:hover {
+  opacity: 1;
+}
+
+.bodyRawInput {
+  flex: 1;
+  min-width: 0;
+  font-family: monospace;
+  font-size: 0.8rem;
+  border: 1px dashed var(--border-strong);
+  background: var(--bg-panel);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem 0.4rem;
+}
+
+.bodyAddLineBtn,
+.bodyAddSectionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  align-self: flex-start;
+  border: 1px dashed var(--border-strong);
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.55rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.bodyAddLineBtn:hover,
+.bodyAddSectionBtn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text);
+}
+
+.bodyAddSectionRow {
+  display: flex;
+  gap: 0.5rem;
+}

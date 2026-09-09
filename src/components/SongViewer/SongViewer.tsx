@@ -1,9 +1,14 @@
+import { Button } from "@chakra-ui/react";
 import parse from "html-react-parser";
-import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { IoPencil } from "react-icons/io5";
+import { useAuth } from "@/contexts/AuthContext";
 import DirectorContext from "@/contexts/DirectorContext";
 import PlayerContext from "@/contexts/PlayerContext";
 import { useSession } from "@/contexts/SessionContext";
 import { formatSong } from "@/services/chordpro.service";
+import type { SongDTO } from "@/types/song";
+import EditSongDialog from "./EditSongDialog";
 import LiveBar from "./LiveBar";
 import NextSong from "./NextSong";
 import "./SongViewer.css";
@@ -43,6 +48,12 @@ const SongViewer = () => {
   // navegador lo rechazaba, saliendo de pantalla completa apenas se entraba.
   const setFullscreenFn = directorCtx?.setFullscreen ?? playerCtx?.setFullscreen;
   const isDirector = !!directorCtx;
+
+  const { isDemo } = useAuth();
+  // Editar escribe en Firestore de verdad: en modo demo no hay cuenta real
+  // detrás, así que se oculta (igual que subir canciones).
+  const canEdit = isDirector && !isDemo;
+  const [editingSong, setEditingSong] = useState<SongDTO | null>(null);
 
   // Cuando quien sale de pantalla completa es el Director (por el botón Salir
   // o por salir con Escape), también se termina la sesión en vivo para que
@@ -110,6 +121,18 @@ const SongViewer = () => {
         }
         ref={viewerRef}
       >
+        {canEdit && (
+          <Button
+            className="editSongBtn"
+            onClick={() => setEditingSong(displayedSong)}
+            variant="outline"
+            size="sm"
+            borderRadius="md"
+            aria-label="Editar canción"
+          >
+            <IoPencil />
+          </Button>
+        )}
         <div className="songTitle">{displayedSong.title}</div>
         <div className="tono">Tono: {displayedSong.key ?? "-"}</div>
         <div>{parse(html)}</div>
@@ -127,6 +150,12 @@ const SongViewer = () => {
           isDirector={isDirector}
         />
       </div>
+      {canEdit && (
+        <EditSongDialog
+          song={editingSong}
+          onOpenChange={(open) => !open && setEditingSong(null)}
+        />
+      )}
     </>
   );
 };
