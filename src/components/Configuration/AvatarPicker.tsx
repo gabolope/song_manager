@@ -1,5 +1,5 @@
 import { SimpleGrid, Text } from "@chakra-ui/react";
-import { AVATARS } from "../types/user";
+import { AVATARS } from "@/types/user";
 
 interface Props {
   value: string;

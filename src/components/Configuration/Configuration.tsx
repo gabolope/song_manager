@@ -13,8 +13,8 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { useColorMode } from "./ui/color-mode";
+import { useAuth } from "@/contexts/AuthContext";
+import { useColorMode } from "@/components/ui/color-mode";
 import CreateUserDialog from "./CreateUserDialog";
 import SongUploader from "./SongUploader";
 import UserManager from "./UserManager";

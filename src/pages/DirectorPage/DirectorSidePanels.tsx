@@ -1,7 +1,7 @@
 import { Splitter } from "@chakra-ui/react";
-import type { SongDTO } from "../types/song";
-import BookList from "./BookList";
-import SongList from "./SongList";
+import type { SongDTO } from "@/types/song";
+import BookList from "@/components/SongList/BookList";
+import SongList from "@/components/SongList/SongList";
 
 interface Props {
   songs: SongDTO[] | undefined;

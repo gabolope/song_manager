@@ -1,11 +1,11 @@
 import { createBrowserRouter, Outlet } from "react-router-dom";
-import DirectorPage from "./components/DirectorPage";
-import ErrorPage from "./components/ErrorPage";
-import HomePage from "./components/HomePage";
 import Layout from "./components/Layout";
-import PlayerPage from "./components/PlayerPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SessionProvider from "./contexts/SessionProvider";
+import DirectorPage from "./pages/DirectorPage/DirectorPage";
+import ErrorPage from "./pages/ErrorPage/ErrorPage";
+import HomePage from "./pages/HomePage/HomePage";
+import PlayerPage from "./pages/PlayerPage/PlayerPage";
 
 const router = createBrowserRouter([
   {

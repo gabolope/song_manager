@@ -1,4 +1,4 @@
-import { useSongUpload } from "../hooks/onSongUpload";
+import { useSongUpload } from "@/hooks/onSongUpload";
 import { FileUpload, Button } from "@chakra-ui/react";
 import { LuUpload } from "react-icons/lu";
 

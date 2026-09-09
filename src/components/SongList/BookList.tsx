@@ -2,7 +2,7 @@ import type { SongDTO } from "@/types/song";
 import { Button } from "@chakra-ui/react";
 import { MdDeleteOutline } from "react-icons/md";
 import ListSkeleton from "./ListSkeleton";
-import { formatSongMeta } from "../utils/song";
+import { formatSongMeta } from "@/utils/song";
 import "./SongList.css";
 
 interface Props {

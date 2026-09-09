@@ -2,7 +2,7 @@
 
 Intermedios:
 
-- [ ] Mover páginas y componentes a carpetas separadas.
+- [x] Mover páginas y componentes a carpetas separadas.
 - [ ] Agregar habilidad de editar y borrar usuarios sólo para admins.
 - [ ] Indicador de si la canción que se está viendo es del repertorio o de la sesión
 - [ ] Canciones vistas del repertorio no deben tener indicador de siguiente en la lista.

@@ -1,9 +1,9 @@
 import { Button, Field, Input, Separator, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { toaster } from "./ui/toaster";
-import { useColorModeValue } from "./ui/color-mode";
+import { useAuth } from "@/contexts/AuthContext";
+import { toaster } from "@/components/ui/toaster";
+import { useColorModeValue } from "@/components/ui/color-mode";
 import "./HomePage.css";
 
 const Login = () => {

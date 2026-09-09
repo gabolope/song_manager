@@ -1,13 +1,13 @@
 import { CloseButton, Drawer, Grid, GridItem, Portal } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
-import DemoWelcomeDialog from "../components/DemoWelcomeDialog";
-import DirectorSidePanels from "../components/DirectorSidePanels";
-import SongViewer from "../components/SongViewer";
-import DirectorContext from "../contexts/DirectorContext";
-import { useSession } from "../contexts/SessionContext";
-import { useBookMutations } from "../hooks/useBookMutations";
-import { useBookNavigation } from "../hooks/useBookNavigation";
-import useSongs from "../hooks/useSongs";
+import SongViewer from "@/components/SongViewer/SongViewer";
+import DirectorContext from "@/contexts/DirectorContext";
+import { useSession } from "@/contexts/SessionContext";
+import { useBookMutations } from "@/hooks/useBookMutations";
+import { useBookNavigation } from "@/hooks/useBookNavigation";
+import useSongs from "@/hooks/useSongs";
+import DemoWelcomeDialog from "./DemoWelcomeDialog";
+import DirectorSidePanels from "./DirectorSidePanels";
 import ViewerBar from "./ViewerBar";
 
 const DirectorPage = () => {

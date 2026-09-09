@@ -1,12 +1,12 @@
 import { Button, Text } from "@chakra-ui/react";
 import { Fragment, useMemo, useState } from "react";
-import type { SongDTO, SongTipo } from "../types/song";
+import type { SongDTO, SongTipo } from "@/types/song";
 import { IoAddCircleOutline } from "react-icons/io5";
 import { IoSearch } from "react-icons/io5";
-import { stripChordProMarkup } from "../services/chordpro.service";
-import { normalizeForSearch } from "../utils/text";
+import { stripChordProMarkup } from "@/services/chordpro.service";
+import { normalizeForSearch } from "@/utils/text";
 import ListSkeleton from "./ListSkeleton";
-import { TIPO_LABEL, compareByKeyThenTipo, formatSongMeta } from "../utils/song";
+import { TIPO_LABEL, compareByKeyThenTipo, formatSongMeta } from "@/utils/song";
 import "./SongList.css";
 
 interface Props {

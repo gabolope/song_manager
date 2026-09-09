@@ -11,8 +11,8 @@ import { IoIosExit } from "react-icons/io";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import { MdOutlineSensors } from "react-icons/md";
 import { RxHamburgerMenu } from "react-icons/rx";
-import Configuration from "./Configuration";
-import UserBadge from "./UserBadge";
+import Configuration from "@/components/Configuration/Configuration";
+import UserBadge from "@/components/UserBadge";
 
 interface Props {
   isLive: boolean;

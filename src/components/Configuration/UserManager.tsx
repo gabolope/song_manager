@@ -1,7 +1,7 @@
 import { Badge, Button, HStack, Stack, Text } from "@chakra-ui/react";
 import ContentLoader from "react-content-loader";
-import { useUsers } from "../hooks/useUsers";
-import { getAvatar } from "../types/user";
+import { useUsers } from "@/hooks/useUsers";
+import { getAvatar } from "@/types/user";
 
 interface Props {
   onRequestCreateUser: () => void;

@@ -7,7 +7,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Se abre solo una vez, al entrar a modo demo (DirectorPage monta este
 // componente una única vez por sesión demo). Si el usuario cierra el diálogo

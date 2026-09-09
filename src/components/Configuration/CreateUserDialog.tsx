@@ -9,8 +9,8 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { useCreateUser } from "../hooks/useUsers";
-import type { UserRole } from "../types/user";
+import { useCreateUser } from "@/hooks/useUsers";
+import type { UserRole } from "@/types/user";
 import AvatarPicker from "./AvatarPicker";
 
 interface Props {

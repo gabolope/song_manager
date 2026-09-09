@@ -1,9 +1,9 @@
 import parse from "html-react-parser";
 import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
-import DirectorContext from "../contexts/DirectorContext";
-import PlayerContext from "../contexts/PlayerContext";
-import { useSession } from "../contexts/SessionContext";
-import { formatSong } from "../services/chordpro.service";
+import DirectorContext from "@/contexts/DirectorContext";
+import PlayerContext from "@/contexts/PlayerContext";
+import { useSession } from "@/contexts/SessionContext";
+import { formatSong } from "@/services/chordpro.service";
 import LiveBar from "./LiveBar";
 import NextSong from "./NextSong";
 import "./SongViewer.css";

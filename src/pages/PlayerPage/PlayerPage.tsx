@@ -13,13 +13,13 @@ import {
 import { useCallback, useMemo, useState } from "react";
 import { MdFullscreen, MdOutlineSensors } from "react-icons/md";
 import { RxHamburgerMenu } from "react-icons/rx";
-import BookList from "../components/BookList";
-import Configuration from "../components/Configuration";
-import SongViewer from "../components/SongViewer";
-import UserBadge from "../components/UserBadge";
-import PlayerContext from "../contexts/PlayerContext";
-import { useSession } from "../contexts/SessionContext";
-import { useBookNavigation } from "../hooks/useBookNavigation";
+import BookList from "@/components/SongList/BookList";
+import Configuration from "@/components/Configuration/Configuration";
+import SongViewer from "@/components/SongViewer/SongViewer";
+import UserBadge from "@/components/UserBadge";
+import PlayerContext from "@/contexts/PlayerContext";
+import { useSession } from "@/contexts/SessionContext";
+import { useBookNavigation } from "@/hooks/useBookNavigation";
 
 const PlayerPage = () => {
   const {
