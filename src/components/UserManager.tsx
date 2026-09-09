@@ -1,10 +1,30 @@
 import { Badge, Button, HStack, Stack, Text } from "@chakra-ui/react";
+import ContentLoader from "react-content-loader";
 import { useUsers } from "../hooks/useUsers";
 import { getAvatar } from "../types/user";
 
 interface Props {
   onRequestCreateUser: () => void;
 }
+
+const ROW_HEIGHT = 20;
+
+const UserRowSkeleton = () => (
+  <ContentLoader
+    speed={1.5}
+    width="100%"
+    height={ROW_HEIGHT}
+    viewBox={`0 0 300 ${ROW_HEIGHT}`}
+    preserveAspectRatio="none"
+    backgroundColor="var(--bg-hover)"
+    foregroundColor="var(--border)"
+    title="Cargando..."
+  >
+    <circle cx="10" cy="10" r="10" />
+    <rect x="30" y="4" rx="4" ry="4" width="160" height="12" />
+    <rect x="240" y="2" rx="6" ry="6" width="60" height="16" />
+  </ContentLoader>
+);
 
 const UserManager = ({ onRequestCreateUser }: Props) => {
   const { data: users, isLoading } = useUsers();
@@ -14,7 +34,8 @@ const UserManager = ({ onRequestCreateUser }: Props) => {
       <Text fontWeight="600">Usuarios</Text>
 
       <Stack gap={2}>
-        {isLoading && <Text fontSize="sm">Cargando...</Text>}
+        {isLoading &&
+          Array.from({ length: 3 }).map((_, i) => <UserRowSkeleton key={i} />)}
         {users?.map((u) => {
           const { Icon } = getAvatar(u.avatar);
           return (
