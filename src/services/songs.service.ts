@@ -2,10 +2,11 @@ import {
   collection,
   deleteField,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
-  updateDoc,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import type { SongDTO } from "../types/song";
@@ -32,6 +33,8 @@ export type SongEditInput = Pick<
   "title" | "artist" | "key" | "tipo" | "tempo" | "content"
 >;
 
+const LIVE_SONG_DOC = "current"; // documento fijo, siempre el mismo (ver useLiveSong)
+
 export async function updateSong(
   id: string,
   data: SongEditInput,
@@ -47,5 +50,24 @@ export async function updateSong(
     tempo: data.tempo ?? deleteField(),
     content: data.content,
   };
-  await updateDoc(doc(db, "songs", id), payload);
+
+  const batch = writeBatch(db);
+  batch.update(doc(db, "songs", id), payload);
+
+  // El repertorio ("book") y la canción en vivo guardan una copia propia de
+  // la canción (no una referencia), así que hay que propagarles la edición
+  // a mano para que no queden mostrando la versión vieja.
+  const bookRef = doc(db, "book", id);
+  const bookSnap = await getDoc(bookRef);
+  if (bookSnap.exists()) {
+    batch.update(bookRef, payload);
+  }
+
+  const liveSongRef = doc(db, "liveSong", LIVE_SONG_DOC);
+  const liveSongSnap = await getDoc(liveSongRef);
+  if (liveSongSnap.exists() && liveSongSnap.data()?.id === id) {
+    batch.update(liveSongRef, payload);
+  }
+
+  await batch.commit();
 }
