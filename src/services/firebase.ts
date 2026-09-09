@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore } from "firebase/firestore";
 
 export const firebaseConfig = {
   apiKey: "AIzaSyCrDtz6GBIbxyXIVpeJg863xtZAXoZMASA",
@@ -13,5 +13,8 @@ export const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+// Los SongDTO traen campos opcionales (artist, key, tipo, tempo) que suelen
+// venir undefined; sin esto, setDoc los rechaza y la escritura falla en
+// silencio para cualquier canción con algún campo opcional sin definir.
+export const db = initializeFirestore(app, { ignoreUndefinedProperties: true });
 export const auth = getAuth(app);
