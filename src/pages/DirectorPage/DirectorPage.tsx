@@ -22,7 +22,7 @@ const DirectorPage = () => {
     setIsLive,
   } = useSession();
 
-  const { addToBook, removeFromBook } = useBookMutations(book);
+  const { addToBook, removeFromBook, reorderBook } = useBookMutations(book);
 
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
   // Pantalla completa es local a esta pestaña, no se comparte con Player.
@@ -170,6 +170,7 @@ const DirectorPage = () => {
                 if (!addToBook.isPending) addToBook.mutate(song);
               }}
               onRemoveFromBook={(id) => removeFromBook.mutate(id)}
+              onReorderBook={(items) => reorderBook.mutate(items)}
             />
           </div>
         </GridItem>

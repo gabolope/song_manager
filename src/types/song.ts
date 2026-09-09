@@ -17,4 +17,8 @@ export interface SongDTO {
   // Solo presente en canciones del "book": Firestore lo resuelve a null hasta
   // que el servidor confirma el serverTimestamp() con el que se escribió.
   createdAt?: Timestamp | null;
+  // Solo presente en canciones del "book": posición manual dentro de la
+  // sesión. Ausente en canciones que nunca se reordenaron (se ordenan por
+  // createdAt como fallback, ver useBook.ts).
+  order?: number;
 }

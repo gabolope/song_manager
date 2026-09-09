@@ -1,10 +1,11 @@
 import type { SongDTO } from "../types/song";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { useEffect } from "react";
 import { toaster } from "../components/ui/toaster";
 import { useAuth } from "../contexts/AuthContext";
+import { sortBook } from "../utils/book";
 
 const useBook = () => {
   const queryClient = useQueryClient();
@@ -20,7 +21,11 @@ const useBook = () => {
       return;
     }
 
-    const q = query(collection(db, "book"), orderBy("createdAt"));
+    // Sin orderBy: el orden real ("order", con fallback a createdAt) se
+    // resuelve en el cliente vía sortBook, porque orderBy("order") en
+    // Firestore excluiría las canciones viejas que todavía no tienen ese
+    // campo (se lo asigna recién el primer reordenamiento manual).
+    const q = collection(db, "book");
 
     // Utilizo onSnapshot para abrir una conexión persistente con Firestore, cada vez que el book cambia Firestore pushea el cambio
     const unsubscribe = onSnapshot(
@@ -35,7 +40,7 @@ const useBook = () => {
         })) as SongDTO[];
 
         // Actualizo el cache directamente, sin hacer un fetch
-        queryClient.setQueryData(["book"], songs);
+        queryClient.setQueryData(["book"], sortBook(songs));
       },
       (error) => {
         // Si el listener falla (permisos, desconexión), avisar en vez de

@@ -44,7 +44,9 @@
   border-radius: var(--radius-sm);
   padding: 0.3rem;
   cursor: pointer;
-  transition: background-color 0.12s ease, color 0.12s ease;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
 }
 
 .panelExpandBtn:hover {
@@ -147,6 +149,41 @@
   transition:
     background-color 0.12s ease,
     border-color 0.12s ease;
+}
+
+.songMain {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.songDragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.1rem;
+  margin-left: -0.6rem;
+  cursor: grab;
+  touch-action: none;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.songDragHandle:hover {
+  background-color: var(--bg-hover);
+  color: var(--text);
+}
+
+.songDragHandle:active {
+  cursor: grabbing;
 }
 
 .songInfo {

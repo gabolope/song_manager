@@ -18,6 +18,7 @@ interface Props {
   onBookClick: (index: number) => void;
   onAddToBook: (song: SongDTO) => void;
   onRemoveFromBook: (id: string) => void;
+  onReorderBook: (items: SongDTO[]) => void;
 }
 
 const DirectorSidePanels = ({
@@ -32,6 +33,7 @@ const DirectorSidePanels = ({
   onBookClick,
   onAddToBook,
   onRemoveFromBook,
+  onReorderBook,
 }: Props) => {
   const [size, setSize] = useState<number[]>(DEFAULT_SIZE);
 
@@ -89,6 +91,7 @@ const DirectorSidePanels = ({
           selected={selectedBookSong}
           onClick={onBookClick}
           onDelete={onRemoveFromBook}
+          onReorder={onReorderBook}
           isExpanded={size[1] === 100}
           onToggleExpand={() => toggleExpand("b")}
         />
