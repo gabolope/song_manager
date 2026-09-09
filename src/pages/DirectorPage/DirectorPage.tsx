@@ -204,6 +204,7 @@ const DirectorPage = () => {
                     if (!addToBook.isPending) addToBook.mutate(song);
                   }}
                   onRemoveFromBook={(id) => removeFromBook.mutate(id)}
+                  onReorderBook={(items) => reorderBook.mutate(items)}
                 />
               </div>
             </Drawer.Content>
