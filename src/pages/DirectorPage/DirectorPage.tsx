@@ -184,6 +184,8 @@ const DirectorPage = () => {
         placement="start"
         size="xs"
         onOpenChange={(e) => setMobileMenuOpen(e.open)}
+        lazyMount={false}
+        unmountOnExit={false}
       >
         <Portal>
           <Drawer.Backdrop />
