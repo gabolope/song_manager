@@ -60,7 +60,7 @@ const SongViewer = () => {
   const canEdit = isDirector && !isDemo;
   const [fontScale, setFontScale] = useState(1);
 
-  const { viewerRef, exitFullscreen } = useFullscreen(
+  const { viewerRef, exitFullscreen, usesFullscreenFallback } = useFullscreen(
     fullscreen,
     setFullscreenFn,
     isDirector,
@@ -91,11 +91,13 @@ const SongViewer = () => {
 
   return (
     <div
-      className={
-        isCurrentLive(displayedSong)
-          ? "songViewerContainer isLive"
-          : "songViewerContainer"
-      }
+      className={[
+        "songViewerContainer",
+        isCurrentLive(displayedSong) && "isLive",
+        usesFullscreenFallback && "songViewerFullscreenFallback",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       ref={viewerRef}
     >
       <ViewerControls

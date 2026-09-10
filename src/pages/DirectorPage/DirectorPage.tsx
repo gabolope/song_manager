@@ -174,7 +174,7 @@ const DirectorPage = () => {
             />
           </div>
         </GridItem>
-        <GridItem area="viewer" h="100%" overflow="hidden" padding="10px">
+        <GridItem area="viewer" h="100%" overflow="hidden" paddingTop="10px">
           <SongViewer />
         </GridItem>
       </Grid>

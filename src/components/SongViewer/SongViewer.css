@@ -149,6 +149,20 @@
   border: 1px solid #2563eb;
 }
 
+/* Fallback para navegadores sin Fullscreen API (Safari en iPhone): simula
+   pantalla completa fijando el visor sobre todo el viewport en vez de
+   pedírsela al navegador. 100dvh evita el salto por la barra de
+   direcciones de Safari que 100vh no contempla. */
+.songViewerFullscreenFallback {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+}
+
 .isLive {
   border: 1px solid var(--live, red);
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
