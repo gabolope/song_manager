@@ -5,6 +5,11 @@ import { useColorMode } from "./color-mode";
 export function AppToastContainer() {
   const { colorMode } = useColorMode();
   return (
-    <ToastContainer position="bottom-right" theme={colorMode} pauseOnFocusLoss={false} />
+    <ToastContainer
+      position="bottom-right"
+      theme={colorMode}
+      pauseOnFocusLoss={false}
+      autoClose={3000}
+    />
   );
 }

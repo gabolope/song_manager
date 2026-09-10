@@ -20,6 +20,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { MdDeleteOutline, MdDragIndicator } from "react-icons/md";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import ListSkeleton from "./ListSkeleton";
+import SongTipoTag from "./SongTipoTag";
 import { formatSongMeta } from "@/utils/song";
 import "./SongList.css";
 
@@ -87,8 +88,13 @@ const BookRow = ({ song, selected, draggable, onClick, onDelete }: RowProps) => 
           )}
           <div className="songInfo">
             <div className="songRowTitle">{song.title}</div>
-            {formatSongMeta(song) && (
-              <div className="songRowMeta">{formatSongMeta(song)}</div>
+            {(formatSongMeta(song) || song.tipo) && (
+              <div className="songRowMeta">
+                {formatSongMeta(song) && (
+                  <span className="songRowMetaKey">{formatSongMeta(song)}</span>
+                )}
+                {song.tipo && <SongTipoTag tipo={song.tipo} />}
+              </div>
             )}
           </div>
         </div>

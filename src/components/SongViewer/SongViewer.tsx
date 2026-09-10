@@ -15,6 +15,7 @@ import "./SongViewer.css";
 
 const SongViewer = () => {
   const {
+    book,
     setIsLive,
     isCurrentLive,
     backToLive,
@@ -80,6 +81,14 @@ const SongViewer = () => {
     return formatSong(displayedSong.content);
   }, [displayedSong]);
 
+  // Número de la canción dentro de la sesión (book), no del repertorio
+  // general: es lo que tiene sentido mirar para saber "qué número toca".
+  const bookIndex = useMemo(() => {
+    if (!displayedSong || !book) return null;
+    const index = book.findIndex((song) => song.id === displayedSong.id);
+    return index === -1 ? null : index + 1;
+  }, [book, displayedSong]);
+
   // Manejo de fullscreen
   const viewerRef = useRef<HTMLDivElement>(null);
 
@@ -127,7 +136,7 @@ const SongViewer = () => {
         }
         ref={viewerRef}
       >
-        {canEdit && (
+        {canEdit && !fullscreen && (
           <Button
             className="editSongBtn"
             onClick={() => setEditingSong(displayedSong)}
@@ -139,7 +148,12 @@ const SongViewer = () => {
             <IoPencil />
           </Button>
         )}
-        <div className="songTitle">{displayedSong.title}</div>
+        <div className="songTitle">
+          {!isFromRepertoire && bookIndex !== null && (
+            <span className="songIndex">{bookIndex}. </span>
+          )}
+          {displayedSong.title}
+        </div>
         <div className="tono">Tono: {displayedSong.key ?? "-"}</div>
         <div>{parse(html)}</div>
         {!isFromRepertoire && <NextSong nextSong={nextSong} />}

@@ -6,6 +6,12 @@ export const TIPO_LABEL: Record<SongTipo, string> = {
   lenta: "Lenta",
 };
 
+export const TIPO_COLOR: Record<SongTipo, "blue" | "green" | "red"> = {
+  rapida: "blue",
+  intermedia: "green",
+  lenta: "red",
+};
+
 const TIPO_ORDER: Record<SongTipo, number> = {
   rapida: 0,
   intermedia: 1,
@@ -22,7 +28,5 @@ export function compareByKeyThenTipo(a: SongDTO, b: SongDTO): number {
 }
 
 export function formatSongMeta(song: SongDTO): string {
-  return [song.key, song.tipo ? TIPO_LABEL[song.tipo] : undefined]
-    .filter(Boolean)
-    .join(" · ");
+  return song.key ?? "";
 }

@@ -7,6 +7,7 @@ import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { stripChordProMarkup } from "@/services/chordpro.service";
 import { normalizeForSearch } from "@/utils/text";
 import ListSkeleton from "./ListSkeleton";
+import SongTipoTag from "./SongTipoTag";
 import { TIPO_LABEL, compareByKeyThenTipo, formatSongMeta } from "@/utils/song";
 import "./SongList.css";
 
@@ -87,7 +88,7 @@ const SongList = ({
       <div className="panelHeader">
         <div className="panelHeaderTitle">
           <h2>Repertorio</h2>
-          <span className="panelCount">{items?.length ?? 0}</span>
+          <span className="panelCount">{filtered?.length ?? 0}</span>
         </div>
         {onToggleExpand && (
           <button
@@ -131,9 +132,9 @@ const SongList = ({
                   aria-label="Filtrar por tono"
                 >
                   <option value="">Tono</option>
-                  {availableKeys.map(({ key, count }) => (
+                  {availableKeys.map(({ key }) => (
                     <option key={key} value={key}>
-                      {key} ({count})
+                      {key}
                     </option>
                   ))}
                 </select>
@@ -151,9 +152,9 @@ const SongList = ({
                   aria-label="Filtrar por tipo"
                 >
                   <option value="">Tipo</option>
-                  {availableTipos.map(({ tipo, count }) => (
+                  {availableTipos.map(({ tipo }) => (
                     <option key={tipo} value={tipo}>
-                      {TIPO_LABEL[tipo]} ({count})
+                      {TIPO_LABEL[tipo]}
                     </option>
                   ))}
                 </select>
@@ -195,24 +196,34 @@ const SongList = ({
                       <div className="songRowTitle">
                         {song.title || <Text opacity={0.6}>Sin título</Text>}
                       </div>
-                      {formatSongMeta(song) && (
+                      {(formatSongMeta(song) || song.tipo) && (
                         <div className="songRowMeta">
-                          {formatSongMeta(song)}
+                          {formatSongMeta(song) && (
+                            <span className="songRowMetaKey">
+                              {formatSongMeta(song)}
+                            </span>
+                          )}
+                          {song.tipo && <SongTipoTag tipo={song.tipo} />}
                         </div>
                       )}
                     </div>
                     <div>
-                      {selected === index && !isInBook && (
+                      {selected === index && (
                         <Button
                           onClick={(e) => {
                             e.stopPropagation();
                             addToBook(song);
                           }}
-                          colorPalette={"blue"}
+                          colorPalette={isInBook ? "gray" : "blue"}
                           size="sm"
                           borderRadius={"md"}
                           loading={isAdding}
-                          disabled={isAdding}
+                          disabled={isAdding || isInBook}
+                          css={
+                            isInBook
+                              ? { _disabled: { opacity: 1, bg: "gray.600" } }
+                              : undefined
+                          }
                         >
                           <IoAddCircleOutline />
                         </Button>

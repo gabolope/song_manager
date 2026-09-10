@@ -13,6 +13,7 @@ import { MdOutlineSensors } from "react-icons/md";
 import { RxHamburgerMenu } from "react-icons/rx";
 import Configuration from "@/components/Configuration/Configuration";
 import UserBadge from "@/components/UserBadge";
+import { useColorModeValue } from "@/components/ui/color-mode";
 
 interface Props {
   isLive: boolean;
@@ -31,13 +32,14 @@ const ViewerBar = ({
   onRight,
   onMenuClick,
 }: Props) => {
+  const logoSrc = useColorModeValue("/logo_black.svg", "/logo_white.svg");
   return (
     <>
       <HStack
         justify="space-between"
         position="relative"
         paddingX={{ base: "8px", sm: "16px" }}
-        paddingY="10px"
+        paddingY="6px"
         borderBottom="1px solid var(--border)"
         background="var(--bg-panel)"
         gap="6px"
@@ -54,6 +56,12 @@ const ViewerBar = ({
               <RxHamburgerMenu />
             </IconButton>
           )}
+          <img
+            src={logoSrc}
+            alt=""
+            className="hideOnNarrow"
+            style={{ height: 24, width: 24 }}
+          />
           <Text fontWeight="700" fontSize="1.05rem" className="hideOnNarrow">
             Song Manager
           </Text>
@@ -65,7 +73,7 @@ const ViewerBar = ({
           colorPalette="red"
           variant={isLive ? "solid" : "outline"}
           onClick={() => goLive()}
-          h={10}
+          h={8}
           position="absolute"
           left="50%"
           top="50%"
@@ -81,7 +89,7 @@ const ViewerBar = ({
         </Button>
         <HStack gap="8px">
           <UserBadge />
-          <Configuration height={10} />
+          <Configuration height={8} />
         </HStack>
       </HStack>
       <ActionBar.Root open={isLive}>

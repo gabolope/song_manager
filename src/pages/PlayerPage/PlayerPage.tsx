@@ -17,6 +17,7 @@ import BookList from "@/components/SongList/BookList";
 import Configuration from "@/components/Configuration/Configuration";
 import SongViewer from "@/components/SongViewer/SongViewer";
 import UserBadge from "@/components/UserBadge";
+import { useColorModeValue } from "@/components/ui/color-mode";
 import PlayerContext from "@/contexts/PlayerContext";
 import { useSession } from "@/contexts/SessionContext";
 import { useBookNavigation } from "@/hooks/useBookNavigation";
@@ -37,6 +38,7 @@ const PlayerPage = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const displayedSong = localSong ?? liveSong.data;
+  const logoSrc = useColorModeValue("/logo_black.svg", "/logo_white.svg");
 
   const onBookNavigate = useCallback(
     (index: number) => {
@@ -79,7 +81,7 @@ const PlayerPage = () => {
           <HStack
             justify="space-between"
             paddingX={{ base: "8px", sm: "16px" }}
-            paddingY="10px"
+            paddingY="6px"
             borderBottom="1px solid var(--border)"
             background="var(--bg-panel)"
             gap="6px"
@@ -94,6 +96,12 @@ const PlayerPage = () => {
               >
                 <RxHamburgerMenu />
               </IconButton>
+              <img
+                src={logoSrc}
+                alt=""
+                className="hideOnNarrow"
+                style={{ height: 24, width: 24 }}
+              />
               <Text fontWeight="700" fontSize="1.05rem" className="hideOnNarrow">
                 Song Manager
               </Text>
@@ -118,7 +126,7 @@ const PlayerPage = () => {
                 <MdFullscreen />
                 <span className="hideOnNarrow">Pantalla completa</span>
               </Button>
-              <Configuration height={10} />
+              <Configuration height={8} />
             </HStack>
           </HStack>
         </GridItem>

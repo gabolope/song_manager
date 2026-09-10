@@ -112,6 +112,11 @@
   white-space: normal;
 }
 
+.songIndex {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 /* Quito el título mostrado por el parser */
 .title {
   display: none;
