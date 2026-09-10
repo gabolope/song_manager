@@ -1,15 +1,12 @@
 import { IconButton } from "@chakra-ui/react";
-import { Fragment } from "react";
-import { IoAdd, IoClose, IoTrash } from "react-icons/io5";
+import { IoAdd, IoTrash } from "react-icons/io5";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import {
   newEditorLine,
   newEditorSection,
-  newEditorSegment,
   type EditorLine,
   type EditorSection,
   type SectionKind,
-  type Segment,
 } from "@/utils/chordProBody";
 import "./SongBodyEditor.css";
 
@@ -22,12 +19,6 @@ const SECTION_LABEL: Record<SectionKind, string> = {
   verse: "Estrofa",
   chorus: "Coro",
 };
-
-// Ancho aproximado del input según lo tecleado, para que el editor se vea
-// como el pentagrama de acordes/letra real en vez de una grilla de inputs.
-function chWidth(value: string, min: number): string {
-  return `${Math.max(min, value.length + 1)}ch`;
-}
 
 const SongBodyEditor = ({ sections, onChange }: Props) => {
   const updateSection = (id: string, patch: Partial<EditorSection>) => {
@@ -67,44 +58,6 @@ const SongBodyEditor = ({ sections, onChange }: Props) => {
     const section = sections.find((s) => s.id === sectionId)!;
     updateSection(sectionId, {
       lines: section.lines.filter((l) => l.id !== lineId),
-    });
-  };
-
-  const updateSegment = (
-    sectionId: string,
-    lineId: string,
-    segmentId: string,
-    patch: Partial<Segment>,
-  ) => {
-    const section = sections.find((s) => s.id === sectionId)!;
-    const line = section.lines.find((l) => l.id === lineId)!;
-    if (line.type !== "segments") return;
-    updateLine(sectionId, lineId, {
-      ...line,
-      segments: line.segments.map((seg) =>
-        seg.id === segmentId ? { ...seg, ...patch } : seg,
-      ),
-    });
-  };
-
-  const addSegment = (sectionId: string, lineId: string) => {
-    const section = sections.find((s) => s.id === sectionId)!;
-    const line = section.lines.find((l) => l.id === lineId)!;
-    if (line.type !== "segments") return;
-    updateLine(sectionId, lineId, {
-      ...line,
-      segments: [...line.segments, newEditorSegment()],
-    });
-  };
-
-  const removeSegment = (sectionId: string, lineId: string, segmentId: string) => {
-    const section = sections.find((s) => s.id === sectionId)!;
-    const line = section.lines.find((l) => l.id === lineId)!;
-    if (line.type !== "segments") return;
-    const segments = line.segments.filter((seg) => seg.id !== segmentId);
-    updateLine(sectionId, lineId, {
-      ...line,
-      segments: segments.length ? segments : [newEditorSegment()],
     });
   };
 
@@ -185,54 +138,31 @@ const SongBodyEditor = ({ sections, onChange }: Props) => {
                     }
                   />
                 ) : (
-                  <div className="bodyLineSegments">
-                    {line.segments.map((seg) => (
-                      <Fragment key={seg.id}>
-                        <div className="bodySegment">
-                          <input
-                            className="bodyChordInput"
-                            value={seg.chord}
-                            placeholder="·"
-                            style={{ width: chWidth(seg.chord, 2) }}
-                            onChange={(e) =>
-                              updateSegment(section.id, line.id, seg.id, {
-                                chord: e.target.value,
-                              })
-                            }
-                          />
-                          <input
-                            className="bodyLyricInput"
-                            value={seg.lyric}
-                            placeholder="letra"
-                            style={{ width: chWidth(seg.lyric, 4) }}
-                            onChange={(e) =>
-                              updateSegment(section.id, line.id, seg.id, {
-                                lyric: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                        <IconButton
-                          aria-label="Quitar acorde"
-                          size="2xs"
-                          variant="ghost"
-                          className="bodySegmentRemove"
-                          onClick={() =>
-                            removeSegment(section.id, line.id, seg.id)
-                          }
-                        >
-                          <IoClose />
-                        </IconButton>
-                      </Fragment>
-                    ))}
-                    <IconButton
-                      aria-label="Agregar acorde"
-                      size="2xs"
-                      variant="outline"
-                      onClick={() => addSegment(section.id, line.id)}
-                    >
-                      <IoAdd />
-                    </IconButton>
+                  <div className="bodyLinePair">
+                    <input
+                      className="bodyChordsRow"
+                      value={line.chords}
+                      placeholder=" "
+                      spellCheck={false}
+                      onChange={(e) =>
+                        updateLine(section.id, line.id, {
+                          ...line,
+                          chords: e.target.value,
+                        })
+                      }
+                    />
+                    <input
+                      className="bodyLyricRow"
+                      value={line.lyric}
+                      placeholder="letra"
+                      spellCheck={false}
+                      onChange={(e) =>
+                        updateLine(section.id, line.id, {
+                          ...line,
+                          lyric: e.target.value,
+                        })
+                      }
+                    />
                   </div>
                 )}
                 <IconButton
@@ -240,6 +170,7 @@ const SongBodyEditor = ({ sections, onChange }: Props) => {
                   size="2xs"
                   variant="ghost"
                   colorPalette="red"
+                  className="bodyLineRemove"
                   onClick={() => removeLine(section.id, line.id)}
                 >
                   <IoTrash />

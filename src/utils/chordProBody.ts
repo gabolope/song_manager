@@ -1,7 +1,8 @@
 // Convierte el cuerpo de una canción en ChordPro hacia/desde un modelo de
-// edición estructurado (secciones -> líneas -> pares acorde/letra) para que
-// se pueda editar en el mismo formato visual que muestra SongViewer, en vez
-// de como texto ChordPro crudo.
+// edición estructurado (secciones -> líneas -> par acordes/letra) para que
+// se pueda editar como una tablatura de texto plano: una línea de acordes
+// alineada carácter a carácter sobre su línea de letra correspondiente, tal
+// como se ve en SongViewer, en vez de como texto ChordPro crudo con [acorde].
 //
 // El modelo cubre lo que efectivamente genera el uploader y lo que traen los
 // archivos reales: directivas de metadata al inicio ({t:}/{artist:}/{key:}),
@@ -10,14 +11,8 @@
 // directiva dentro del cuerpo se preserva tal cual como línea "raw" para no
 // perder información, aunque no se pueda editar visualmente.
 
-export interface Segment {
-  id: string;
-  chord: string;
-  lyric: string;
-}
-
 export type EditorLine = { id: string } & (
-  | { type: "segments"; segments: Segment[] }
+  | { type: "pair"; chords: string; lyric: string }
   | { type: "raw"; text: string }
 );
 
@@ -36,8 +31,8 @@ export function nextEditorId(): string {
   return `id${idCounter}`;
 }
 
-function newSegment(chord: string, lyric: string): Segment {
-  return { id: nextEditorId(), chord, lyric };
+function newPairLine(chords: string, lyric: string): EditorLine {
+  return { id: nextEditorId(), type: "pair", chords, lyric };
 }
 
 const SOP_RE =
@@ -48,30 +43,35 @@ const SOC_RE =
 const EOC_RE = /^\{\s*(?:eoc|end_of_chorus)\s*\}\s*$/i;
 const DIRECTIVE_RE = /^\{.*\}\s*$/;
 
-// Separa una línea de letra en segmentos acorde+letra, ej.
+// Separa una línea de letra en su línea de acordes y su línea de letra,
+// alineadas carácter a carácter, ej.
 // "[G]Amazing grace, how [C]sweet" ->
-// [{chord:"G", lyric:"Amazing grace, how "}, {chord:"C", lyric:"sweet"}]
-export function parseLineSegments(line: string): Segment[] {
-  if (!line.includes("[")) return [newSegment("", line)];
+// { chords: "G                   C", lyric: "Amazing grace, how sweet" }
+// El acorde en la posición i de "chords" corresponde a la letra que empieza
+// en la posición i de "lyric".
+export function lineToChordsLyricPair(line: string): {
+  chords: string;
+  lyric: string;
+} {
+  if (!line.includes("[")) return { chords: "", lyric: line };
 
-  const segments: Segment[] = [];
-  const parts = line.split(/(\[[^\]]*\])/);
-  let pendingChord = "";
+  let lyric = "";
+  let chords = "";
 
-  for (const part of parts) {
+  for (const part of line.split(/(\[[^\]]*\])/)) {
     if (part === "") continue;
     const bracketMatch = part.match(/^\[([^\]]*)\]$/);
     if (bracketMatch) {
-      if (pendingChord) segments.push(newSegment(pendingChord, ""));
-      pendingChord = bracketMatch[1];
+      const chord = bracketMatch[1];
+      if (!chord) continue;
+      const insertAt = Math.max(chords.length, lyric.length);
+      chords += " ".repeat(insertAt - chords.length) + chord;
     } else {
-      segments.push(newSegment(pendingChord, part));
-      pendingChord = "";
+      lyric += part;
     }
   }
-  if (pendingChord) segments.push(newSegment(pendingChord, ""));
 
-  return segments;
+  return { chords: chords.trimEnd(), lyric };
 }
 
 export function parseChordProBody(content: string): {
@@ -118,7 +118,7 @@ export function parseChordProBody(content: string): {
 
     if (trimmed === "") {
       if (current && currentExplicit) {
-        current.lines.push({ id: nextEditorId(), type: "segments", segments: [] });
+        current.lines.push(newPairLine("", ""));
       } else if (current) {
         closeCurrent();
       }
@@ -151,11 +151,8 @@ export function parseChordProBody(content: string): {
     if (DIRECTIVE_RE.test(trimmed)) {
       current.lines.push({ id: nextEditorId(), type: "raw", text: line });
     } else {
-      current.lines.push({
-        id: nextEditorId(),
-        type: "segments",
-        segments: parseLineSegments(line),
-      });
+      const { chords, lyric } = lineToChordsLyricPair(line);
+      current.lines.push(newPairLine(chords, lyric));
     }
   }
   closeCurrent();
@@ -165,29 +162,47 @@ export function parseChordProBody(content: string): {
       id: nextEditorId(),
       kind: "verse",
       label: "",
-      lines: [
-        { id: nextEditorId(), type: "segments", segments: [newSegment("", "")] },
-      ],
+      lines: [newPairLine("", "")],
     });
   }
 
   return { header: headerLines.join("\n"), sections };
 }
 
-export function newEditorSegment(chord = "", lyric = ""): Segment {
-  return newSegment(chord, lyric);
-}
-
 export function newEditorLine(): EditorLine {
-  return { id: nextEditorId(), type: "segments", segments: [newSegment("", "")] };
+  return newPairLine("", "");
 }
 
 export function newEditorSection(kind: SectionKind): EditorSection {
   return { id: nextEditorId(), kind, label: "", lines: [newEditorLine()] };
 }
 
-function serializeSegments(segments: Segment[]): string {
-  return segments.map((s) => (s.chord ? `[${s.chord}]` : "") + s.lyric).join("");
+// Inversa de lineToChordsLyricPair: reconstruye "[G]Amazing grace, how [C]sweet"
+// a partir de una línea de acordes y una de letra alineadas por posición.
+export function chordsLyricPairToLine(chords: string, lyric: string): string {
+  const tokens: { index: number; chord: string }[] = [];
+  let i = 0;
+  while (i < chords.length) {
+    if (chords[i] === " ") {
+      i++;
+      continue;
+    }
+    let j = i + 1;
+    while (j < chords.length && chords[j] !== " ") j++;
+    tokens.push({ index: i, chord: chords.slice(i, j) });
+    i = j;
+  }
+  if (tokens.length === 0) return lyric;
+
+  let result = "";
+  let pos = 0;
+  for (const { index, chord } of tokens) {
+    const at = Math.min(Math.max(index, pos), lyric.length);
+    result += lyric.slice(pos, at) + `[${chord}]`;
+    pos = at;
+  }
+  result += lyric.slice(pos);
+  return result;
 }
 
 export function serializeChordProBody(
@@ -206,7 +221,9 @@ export function serializeChordProBody(
             : "{sop}";
       const close = section.kind === "chorus" ? "{eoc}" : "{eop}";
       const lines = section.lines.map((line) =>
-        line.type === "raw" ? line.text : serializeSegments(line.segments),
+        line.type === "raw"
+          ? line.text
+          : chordsLyricPairToLine(line.chords, line.lyric),
       );
       return [open, ...lines, close].join("\n");
     })
