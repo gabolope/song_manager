@@ -45,9 +45,15 @@ interface RowProps {
 }
 
 // Fila individual de la sesión. Cuando `draggable` es true (solo en la vista
-// del director) expone un handle de arrastre dedicado: así el resto de la
-// fila sigue funcionando para seleccionar/tocar sin pisar el gesto de drag,
-// y en mobile el scroll de la lista no se confunde con un reordenamiento.
+// del director) toda la fila es agarrable: es el área más grande y fácil de
+// tomar con el dedo en mobile. Para no pisar el scroll de la lista, el drag
+// se activa recién tras mantener presionado un instante (delay + tolerance)
+// en vez de con el primer píxel de movimiento, así un swipe corto sigue
+// scrolleando y solo una pulsación sostenida arranca el reordenamiento. El
+// ícono de arrastre es solo una señal visual de que la fila es agarrable:
+// no tiene listeners propios, hereda el gesto de la fila por bubbling. El
+// botón de borrar corta la propagación del pointerdown para quedar afuera
+// de ese gesto.
 const BookRow = ({ song, selected, draggable, onClick, onDelete }: RowProps) => {
   const {
     attributes,
@@ -67,22 +73,17 @@ const BookRow = ({ song, selected, draggable, onClick, onDelete }: RowProps) => 
         opacity: isDragging ? 0.5 : 1,
         zIndex: isDragging ? 1 : "auto",
         position: "relative",
+        cursor: draggable ? (isDragging ? "grabbing" : "grab") : undefined,
       }}
       onClick={onClick}
+      {...(draggable ? { ...attributes, ...listeners } : {})}
     >
       <div className={selected ? "song bookSong selected" : "song bookSong"}>
         <div className="songMain">
           {draggable && (
-            <button
-              type="button"
-              className="songDragHandle"
-              aria-label={`Mover "${song.title}"`}
-              onClick={(e) => e.stopPropagation()}
-              {...attributes}
-              {...listeners}
-            >
+            <span className="songDragHandle" aria-hidden="true">
               <MdDragIndicator />
-            </button>
+            </span>
           )}
           <div className="songInfo">
             <div className="songRowTitle">{song.title}</div>
@@ -94,12 +95,13 @@ const BookRow = ({ song, selected, draggable, onClick, onDelete }: RowProps) => 
         <div>
           {selected && onDelete && (
             <Button
+              onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(song.id);
               }}
               colorPalette={"red"}
-              size="sm"
+              size="xs"
               borderRadius={"md"}
             >
               <MdDeleteOutline />
@@ -123,8 +125,15 @@ const BookList = ({
   isExpanded,
   onToggleExpand,
 }: Props) => {
+  // Delay + tolerance en vez de distance: como ahora toda la fila es
+  // agarrable, un umbral de distancia dispararía el drag apenas el dedo se
+  // mueve un poco, compitiendo con el scroll vertical de la lista. Con un
+  // delay, un swipe corto sigue siendo scroll y solo una pulsación sostenida
+  // (con poco movimiento) arranca el reordenamiento.
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(PointerSensor, {
+      activationConstraint: { delay: 200, tolerance: 8 },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
