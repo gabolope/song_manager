@@ -14,10 +14,6 @@ export function useSessionState() {
   const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
   const [isLive, setIsLive] = useState(false);
   const [localSongState, setLocalSongState] = useState<SongDTO | null>(null);
-  // Mientras es true, la vista sigue automáticamente a la canción en vivo.
-  // Se apaga apenas el usuario navega manualmente (mirar adelante/atrás) y
-  // se reactiva al presionar "Volver al Vivo", para no pisarle la navegación.
-  const [followingLive, setFollowingLive] = useState(true);
 
   const rawIndex =
     selectedSongId !== null
@@ -36,22 +32,23 @@ export function useSessionState() {
   const isCurrentLive = (displayedSong?: SongDTO | null) =>
     displayedSong?.id === liveSong.data?.id;
 
+  // El director es la única fuente de verdad para el músico: cada vez que
+  // cambia la canción en vivo, la vista se sincroniza automáticamente sin
+  // importar a qué canción haya navegado el músico manualmente.
   useEffect(() => {
-    if (!followingLive || !liveSong.data) return;
+    if (!liveSong.data) return;
     const index = book?.findIndex((s) => s.id === liveSong.data!.id) ?? -1;
     if (index !== -1) {
       setSelectedSongId(liveSong.data.id);
       setLocalSongState(liveSong.data);
     }
-  }, [liveSong.data, book, followingLive]);
+  }, [liveSong.data, book]);
 
   const setLocalSong = useCallback((song: SongDTO | null) => {
-    setFollowingLive(false);
     setLocalSongState(song);
   }, []);
 
   const backToLive = () => {
-    setFollowingLive(true);
     if (!liveSong.data || !book) return;
     const index = book.findIndex((s) => s.id === liveSong.data!.id);
     if (index !== -1) {
