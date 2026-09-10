@@ -43,7 +43,8 @@
 }
 
 .label {
-  font-size: 1.5rem;
+  /* em (no rem): debe escalar junto con .songContent, no con la raíz. */
+  font-size: 1.5em;
   font-weight: bold;
   margin-bottom: 0;
 }
@@ -62,14 +63,6 @@
 .chorus {
   color: var(--chorus-color);
 }
-
-/* .chorus::before {
-  content: "Chorus";
-  display: block;
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: white;
-} */
 
 .chord-sheet {
   display: flex;
@@ -106,7 +99,7 @@
 
 /* Modifico el título que yo inserto */
 .songTitle {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 700;
   margin-bottom: 0.15rem;
   white-space: normal;
@@ -137,7 +130,9 @@
   color: var(--viewer-text);
   flex: 1;
   max-height: 100%;
-  padding: 1.25rem 1.5rem;
+  /* padding-top reducido para que el título quede a la altura de los
+     botones flotantes de .viewerTopControls (top: 12px). */
+  padding: 0.85rem 1rem 1.25rem;
   white-space: nowrap;
   overflow: auto;
 }
@@ -159,35 +154,35 @@
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
 }
 
-.editSongBtn {
-  position: absolute;
-  top: 12px;
-  right: 40px;
-  z-index: 2;
-}
-
-.isLive::before {
-  content: "";
+/* Columna pegada al borde derecho: crece hacia abajo a medida que se
+   agregan/quitan botones (editar sólo aparece para el Director fuera de
+   pantalla completa) sin desplazar a los demás horizontalmente. */
+.viewerTopControls {
   position: absolute;
   top: 12px;
   right: 16px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--live, red);
-  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
-  animation: live-pulse 1.6s ease-out infinite;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-@keyframes live-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
-  }
+/* En vez de un indicador aparte, el propio número de la canción "respira"
+   con un glow del color de "en vivo". */
+.isLive .songIndex {
+  color: var(--live, red);
+  animation: live-glow 1.8s ease-in-out infinite;
+}
+
+@keyframes live-glow {
+  0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    text-shadow: 0 0 4px var(--live, red);
+  }
+  50% {
+    text-shadow:
+      0 0 10px var(--live, red),
+      0 0 18px var(--live, red);
   }
 }
-

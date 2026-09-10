@@ -1,16 +1,14 @@
-import { Button } from "@chakra-ui/react";
 import parse from "html-react-parser";
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { IoPencil } from "react-icons/io5";
+import { useContext, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import DirectorContext from "@/contexts/DirectorContext";
 import PlayerContext from "@/contexts/PlayerContext";
 import { useSession } from "@/contexts/SessionContext";
+import { useFullscreen } from "@/hooks/useFullscreen";
 import { formatSong } from "@/services/chordpro.service";
-import type { SongDTO } from "@/types/song";
-import EditSongDialog from "./EditSongDialog";
 import LiveBar from "./LiveBar";
 import NextSong from "./NextSong";
+import ViewerControls from "./ViewerControls";
 import "./SongViewer.css";
 
 const SongViewer = () => {
@@ -60,20 +58,14 @@ const SongViewer = () => {
   // Editar escribe en Firestore de verdad: en modo demo no hay cuenta real
   // detrás, así que se oculta (igual que subir canciones).
   const canEdit = isDirector && !isDemo;
-  const [editingSong, setEditingSong] = useState<SongDTO | null>(null);
+  const [fontScale, setFontScale] = useState(1);
 
-  // Cuando quien sale de pantalla completa es el Director (por el botón Salir
-  // o por salir con Escape), también se termina la sesión en vivo para que
-  // los viewers no se queden viendo la última canción para siempre.
-  const exitFullscreen = useCallback(
-    (value: boolean) => {
-      setFullscreenFn?.(value);
-      if (!value && isDirector) {
-        setIsLive(false);
-        clearLiveSongMutate();
-      }
-    },
-    [setFullscreenFn, isDirector, setIsLive, clearLiveSongMutate],
+  const { viewerRef, exitFullscreen } = useFullscreen(
+    fullscreen,
+    setFullscreenFn,
+    isDirector,
+    setIsLive,
+    clearLiveSongMutate,
   );
 
   const html = useMemo(() => {
@@ -89,35 +81,6 @@ const SongViewer = () => {
     return index === -1 ? null : index + 1;
   }, [book, displayedSong]);
 
-  // Manejo de fullscreen
-  const viewerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (fullscreen) {
-      viewerRef.current?.requestFullscreen().catch((error) => {
-        // El navegador puede rechazar el pedido (falta de gesto de usuario,
-        // permisos, etc.); si pasa, no dejar el estado como si sí lo estuviera.
-        console.error("No se pudo entrar en pantalla completa:", error);
-        exitFullscreen(false);
-      });
-    } else if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
-  }, [fullscreen, exitFullscreen]);
-
-  // Manejo de salida manual del fullscreen
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      if (!document.fullscreenElement) {
-        exitFullscreen(false);
-      }
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () =>
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, [exitFullscreen]);
-
   if (!displayedSong) {
     return (
       <div className="songViewerContainer songViewerEmpty">
@@ -127,56 +90,44 @@ const SongViewer = () => {
   }
 
   return (
-    <>
-      <div
-        className={
-          isCurrentLive(displayedSong)
-            ? "songViewerContainer isLive"
-            : "songViewerContainer"
-        }
-        ref={viewerRef}
-      >
-        {canEdit && !fullscreen && (
-          <Button
-            className="editSongBtn"
-            onClick={() => setEditingSong(displayedSong)}
-            variant="outline"
-            size="sm"
-            borderRadius="md"
-            aria-label="Editar canción"
-          >
-            <IoPencil />
-          </Button>
+    <div
+      className={
+        isCurrentLive(displayedSong)
+          ? "songViewerContainer isLive"
+          : "songViewerContainer"
+      }
+      ref={viewerRef}
+    >
+      <ViewerControls
+        song={displayedSong}
+        canEdit={canEdit}
+        fullscreen={fullscreen}
+        onFontScaleChange={setFontScale}
+      />
+      <div className="songTitle">
+        {!isFromRepertoire && bookIndex !== null && (
+          <span className="songIndex">{bookIndex}. </span>
         )}
-        <div className="songTitle">
-          {!isFromRepertoire && bookIndex !== null && (
-            <span className="songIndex">{bookIndex}. </span>
-          )}
-          {displayedSong.title}
-        </div>
-        <div className="tono">Tono: {displayedSong.key ?? "-"}</div>
-        <div>{parse(html)}</div>
-        {!isFromRepertoire && <NextSong nextSong={nextSong} />}
-        <LiveBar
-          songId={displayedSong.id}
-          isLive={fullscreen}
-          viewerRef={viewerRef}
-          onLiveChange={exitFullscreen}
-          onLeft={onLeft}
-          onRight={onRight}
-          isCurrentLive={isCurrentLive(displayedSong)}
-          onBackToLive={backToLive}
-          hasLiveSession={!!liveSong.data}
-          isDirector={isDirector}
-        />
+        {displayedSong.title}
       </div>
-      {canEdit && (
-        <EditSongDialog
-          song={editingSong}
-          onOpenChange={(open) => !open && setEditingSong(null)}
-        />
-      )}
-    </>
+      <div className="tono">Tono: {displayedSong.key ?? "-"}</div>
+      <div className="songContent" style={{ fontSize: `${fontScale}rem` }}>
+        {parse(html)}
+      </div>
+      {!isFromRepertoire && <NextSong nextSong={nextSong} />}
+      <LiveBar
+        songId={displayedSong.id}
+        isLive={fullscreen}
+        viewerRef={viewerRef}
+        onLiveChange={exitFullscreen}
+        onLeft={onLeft}
+        onRight={onRight}
+        isCurrentLive={isCurrentLive(displayedSong)}
+        onBackToLive={backToLive}
+        hasLiveSession={!!liveSong.data}
+        isDirector={isDirector}
+      />
+    </div>
   );
 };
 

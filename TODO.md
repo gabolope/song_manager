@@ -4,9 +4,6 @@ Intermedios:
 
 - [ ] Agregar habilidad de editar y borrar usuarios sólo para admins.
 - [ ] Indicador de si la canción que se está viendo es del repertorio o de la sesión
-- [ ] Canciones vistas del repertorio no deben tener indicador de siguiente en la lista.
-- [ ] Migrar canciones ya subidas a Firestore (title sucio, sin `tipo`/`tempo`) al nuevo esquema
-- [ ] añadir habilidad de reordenar canciones en sesión. puede ser mediante arrastre o mediante dos flechas
 
 Mayores:
 
