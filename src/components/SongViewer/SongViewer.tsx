@@ -1,3 +1,4 @@
+import { Badge } from "@chakra-ui/react";
 import parse from "html-react-parser";
 import { useContext, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -5,7 +6,9 @@ import DirectorContext from "@/contexts/DirectorContext";
 import PlayerContext from "@/contexts/PlayerContext";
 import { useSession } from "@/contexts/SessionContext";
 import { useFullscreen } from "@/hooks/useFullscreen";
-import { formatSong } from "@/services/chordpro.service";
+import { useUsers } from "@/hooks/useUsers";
+import { formatSong, transposeKeyLabel } from "@/services/chordpro.service";
+import { getDirectorColor } from "@/types/user";
 import LiveBar from "./LiveBar";
 import NextSong from "./NextSong";
 import ViewerControls from "./ViewerControls";
@@ -68,10 +71,40 @@ const SongViewer = () => {
     clearLiveSongMutate,
   );
 
+  // Viaja pegada al objeto de la canción (ver DirectorPage y useLiveSong):
+  // así el Player la recibe transparentemente a través de liveSong sin
+  // necesitar su propio estado de sesión.
+  const transpose = displayedSong?.transpose ?? 0;
+
   const html = useMemo(() => {
     if (!displayedSong) return "";
-    return formatSong(displayedSong.content);
-  }, [displayedSong]);
+    return formatSong(displayedSong.content, transpose);
+  }, [displayedSong, transpose]);
+
+  // Tonos particulares de cada director (ver EditSongDialog), solo tiene
+  // sentido mostrarlos mirando el repertorio general: dentro de una sesión
+  // ya se ve/controla el tono efectivo vía transpose.
+  const { data: users } = useUsers();
+  const directorKeys = useMemo(() => {
+    if (!displayedSong?.keysByDirector || !users) return [];
+    const original = displayedSong.key?.trim().toLowerCase() ?? "";
+    return users
+      .filter((u) => u.role === "admin")
+      .map((u) => ({
+        name: u.displayName,
+        key: displayedSong.keysByDirector?.[u.uid]?.trim(),
+        color: getDirectorColor(u.uid),
+      }))
+      .filter(
+        (
+          d,
+        ): d is {
+          name: string;
+          key: string;
+          color: ReturnType<typeof getDirectorColor>;
+        } => !!d.key && d.key.toLowerCase() !== original,
+      );
+  }, [displayedSong, users]);
 
   // Número de la canción dentro de la sesión (book), no del repertorio
   // general: es lo que tiene sentido mirar para saber "qué número toca".
@@ -105,6 +138,8 @@ const SongViewer = () => {
         canEdit={canEdit}
         fullscreen={fullscreen}
         onFontScaleChange={setFontScale}
+        transpose={transpose}
+        onTransposeChange={isDirector ? directorCtx.onTransposeChange : undefined}
       />
       <div className="songTitle">
         {!isFromRepertoire && bookIndex !== null && (
@@ -112,7 +147,27 @@ const SongViewer = () => {
         )}
         {displayedSong.title}
       </div>
-      <div className="tono">Tono: {displayedSong.key ?? "-"}</div>
+      <div className="tono">
+        Tono: {transposeKeyLabel(displayedSong.key, transpose) ?? "-"}
+        {transpose !== 0 && (
+          <span className="transposeBadge">
+            {" "}
+            ({displayedSong.key ?? "-"} {transpose > 0 ? "+" : ""}
+            {transpose})
+          </span>
+        )}
+        {isFromRepertoire &&
+          directorKeys.map((d) => (
+            <Badge
+              key={d.name}
+              colorPalette={d.color}
+              variant="subtle"
+              className="directorKeyBadge"
+            >
+              {d.name}: {d.key}
+            </Badge>
+          ))}
+      </div>
       <div className="songContent" style={{ fontSize: `${fontScale}rem` }}>
         {parse(html)}
       </div>

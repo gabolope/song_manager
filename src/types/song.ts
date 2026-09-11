@@ -21,4 +21,14 @@ export interface SongDTO {
   // sesión. Ausente en canciones que nunca se reordenaron (se ordenan por
   // createdAt como fallback, ver useBook.ts).
   order?: number;
+  // Desplazamiento en semitonos aplicado en vivo dentro de la sesión actual
+  // (ver useSessionState.ts). Nunca se persiste en las colecciones "songs" ni
+  // "book": solo viaja en el documento efímero "liveSong" para sincronizar a
+  // los músicos, y no debe escribirse al editar la canción del repertorio.
+  transpose?: number;
+  // Tono preferido por director (uid -> tono), para que cada uno pueda leer
+  // esta canción en un tono distinto sin afectar a los demás. A diferencia
+  // de `transpose`, esto sí es parte del repertorio: se edita desde
+  // EditSongDialog y persiste en la colección "songs".
+  keysByDirector?: Record<string, string>;
 }

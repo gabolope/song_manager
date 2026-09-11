@@ -14,15 +14,19 @@ const DirectorPage = () => {
   const { data: songs, error, isLoading } = useSongs();
   const {
     book,
+    liveSong,
     setLiveSong,
     clearLiveSong,
     selectedBookSong,
     setSelectedBookSong,
     isLive,
     setIsLive,
+    getTranspose,
+    setSongTranspose,
   } = useSession();
 
-  const { addToBook, removeFromBook, reorderBook } = useBookMutations(book);
+  const { addToBook, removeFromBook, reorderBook, setTranspose } =
+    useBookMutations(book);
 
   const [selectedListSong, setSelectedListSong] = useState<number | null>(null);
   // Pantalla completa es local a esta pestaña, no se comparte con Player.
@@ -45,12 +49,28 @@ const DirectorPage = () => {
     [setSelectedBookSong],
   );
 
-  const currentSong =
+  const baseSong =
     selectedListSong !== null
       ? songs?.[selectedListSong]
       : selectedBookSong !== null
         ? book?.[selectedBookSong]
         : null;
+
+  // Si la canción viene del book, su transposición ya viaja persistida en su
+  // propio documento de Firestore (ver useBookMutations.setTranspose), así
+  // que dura para toda la sesión (sobrevive recargas) sin tocar "songs". Si
+  // es una vista previa del repertorio (todavía no está en el book), no hay
+  // dónde persistirla: se usa el mapa en memoria de la sesión nada más para
+  // ese caso. Memoizado por la misma razón que directorContextValue más
+  // abajo: un objeto nuevo en cada render rompería la estabilidad de
+  // exitFullscreen en SongViewer.
+  const isBookSong = selectedBookSong !== null;
+  const localTranspose = getTranspose(baseSong?.id);
+  const currentSong = useMemo(() => {
+    if (!baseSong) return baseSong;
+    if (isBookSong) return baseSong;
+    return { ...baseSong, transpose: localTranspose };
+  }, [baseSong, isBookSong, localTranspose]);
 
   const onBookNavigate = useCallback(
     (index: number) => {
@@ -69,6 +89,38 @@ const DirectorPage = () => {
     setLiveSong.mutate,
   );
 
+  // Cambia la transposición de la canción actual: se persiste en el book si
+  // la canción pertenece a la sesión, o solo en memoria si es una vista
+  // previa del repertorio. Si además está en vivo, se retransmite de
+  // inmediato para que los músicos vean el mismo tono sin esperar a la
+  // próxima navegación.
+  const onTransposeChange = useCallback(
+    (delta: number) => {
+      if (!currentSong) return;
+      const next = Math.max(
+        -11,
+        Math.min(11, (currentSong.transpose ?? 0) + delta),
+      );
+      if (isBookSong) {
+        setTranspose.mutate({ id: currentSong.id, value: next });
+      } else {
+        setSongTranspose(currentSong.id, next);
+      }
+      if (isLive && liveSong.data?.id === currentSong.id) {
+        setLiveSong.mutate({ ...currentSong, transpose: next });
+      }
+    },
+    [
+      currentSong,
+      isBookSong,
+      setTranspose,
+      setSongTranspose,
+      isLive,
+      liveSong.data,
+      setLiveSong,
+    ],
+  );
+
   // Memoizado: si este objeto fuera nuevo en cada render, exitFullscreen en
   // SongViewer cambiaría de identidad y volvería a disparar requestFullscreen()
   // sin gesto de usuario, provocando que el navegador lo rechace y se salga
@@ -83,6 +135,7 @@ const DirectorPage = () => {
       onRight,
       fullscreen,
       setFullscreen,
+      onTransposeChange,
     }),
     [
       currentSong,
@@ -92,6 +145,7 @@ const DirectorPage = () => {
       onLeft,
       onRight,
       fullscreen,
+      onTransposeChange,
     ],
   );
 

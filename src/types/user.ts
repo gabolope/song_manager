@@ -46,3 +46,27 @@ export const AVATARS: Avatar[] = [
 export function getAvatar(key: string | undefined): Avatar {
   return AVATARS.find((a) => a.key === key) ?? AVATARS[0];
 }
+
+// Paleta de colores de Chakra usada para distinguir directores de un
+// vistazo (ej. badges de "tono por director" en SongViewer). No es
+// configurable: se deriva del uid así que cada director tiene siempre el
+// mismo color en todos lados sin necesitar guardar nada nuevo.
+const DIRECTOR_COLORS = [
+  "purple",
+  "blue",
+  "teal",
+  "orange",
+  "pink",
+  "cyan",
+  "green",
+  "red",
+  "yellow",
+] as const;
+
+export function getDirectorColor(uid: string): (typeof DIRECTOR_COLORS)[number] {
+  let hash = 0;
+  for (let i = 0; i < uid.length; i++) {
+    hash = (hash * 31 + uid.charCodeAt(i)) >>> 0;
+  }
+  return DIRECTOR_COLORS[hash % DIRECTOR_COLORS.length];
+}

@@ -14,6 +14,21 @@ export function useSessionState() {
   const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
   const [isLive, setIsLive] = useState(false);
   const [localSongState, setLocalSongState] = useState<SongDTO | null>(null);
+  // Transposición por canción, solo en memoria: dura lo que dura la sesión
+  // (se pierde al recargar) y nunca se escribe en Firestore, así que no
+  // afecta al repertorio ni al book.
+  const [transposeById, setTransposeById] = useState<Record<string, number>>(
+    {},
+  );
+
+  const getTranspose = useCallback(
+    (songId?: string | null) => (songId ? (transposeById[songId] ?? 0) : 0),
+    [transposeById],
+  );
+
+  const setSongTranspose = useCallback((songId: string, value: number) => {
+    setTransposeById((prev) => ({ ...prev, [songId]: value }));
+  }, []);
 
   const rawIndex =
     selectedSongId !== null
@@ -74,5 +89,7 @@ export function useSessionState() {
     isCurrentLive,
     backToLive,
     nextSong,
+    getTranspose,
+    setSongTranspose,
   };
 }

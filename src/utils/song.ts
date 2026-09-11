@@ -1,3 +1,4 @@
+import { transposeKeyLabel } from "../services/chordpro.service";
 import type { SongDTO, SongTipo } from "../types/song";
 
 export const TIPO_LABEL: Record<SongTipo, string> = {
@@ -27,6 +28,10 @@ export function compareByKeyThenTipo(a: SongDTO, b: SongDTO): number {
   return tipoA - tipoB;
 }
 
+// El asterisco marca que el tono mostrado no es el original de la canción,
+// sino el transportado para esta sesión (ver DirectorPage/useBookMutations).
 export function formatSongMeta(song: SongDTO): string {
-  return song.key ?? "";
+  if (!song.transpose) return song.key ?? "";
+  const transposed = transposeKeyLabel(song.key, song.transpose);
+  return transposed ? `${transposed}*` : "";
 }

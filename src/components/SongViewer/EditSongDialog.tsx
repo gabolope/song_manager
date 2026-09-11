@@ -9,9 +9,11 @@ import {
   Input,
   Portal,
   Stack,
+  Text,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import { useEditSong } from "@/hooks/useEditSong";
+import { useUsers } from "@/hooks/useUsers";
 import type { SongDTO, SongTipo } from "@/types/song";
 import {
   parseChordProBody,
@@ -30,12 +32,23 @@ const TIPOS = Object.keys(TIPO_LABEL) as SongTipo[];
 
 const EditSongDialog = ({ song, onOpenChange }: Props) => {
   const { editSong, isPending } = useEditSong();
+  // Directores: son quienes pueden tener un tono propio para leer la
+  // canción (ver DirectorPage/ProtectedRoute, que reservan esa vista a
+  // role === "admin").
+  const { data: users } = useUsers();
+  const directors = useMemo(
+    () => users?.filter((u) => u.role === "admin"),
+    [users],
+  );
 
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [key, setKey] = useState("");
   const [tipo, setTipo] = useState<SongTipo | "">("");
   const [tempo, setTempo] = useState("");
+  const [keysByDirector, setKeysByDirector] = useState<Record<string, string>>(
+    {},
+  );
   const [header, setHeader] = useState("");
   const [sections, setSections] = useState<EditorSection[]>([]);
   const [initialSnapshot, setInitialSnapshot] = useState("");
@@ -51,6 +64,7 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
     const nextKey = song.key ?? "";
     const nextTipo = song.tipo ?? "";
     const nextTempo = song.tempo !== undefined ? String(song.tempo) : "";
+    const nextKeysByDirector = song.keysByDirector ?? {};
     const { header: nextHeader, sections: nextSections } = parseChordProBody(
       song.content ?? "",
     );
@@ -59,6 +73,7 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
     setKey(nextKey);
     setTipo(nextTipo);
     setTempo(nextTempo);
+    setKeysByDirector(nextKeysByDirector);
     setHeader(nextHeader);
     setSections(nextSections);
     setInitialSnapshot(
@@ -68,6 +83,7 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
         key: nextKey,
         tipo: nextTipo,
         tempo: nextTempo,
+        keysByDirector: nextKeysByDirector,
         header: nextHeader,
         sections: nextSections,
       }),
@@ -76,9 +92,27 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
 
   const hasChanges = useMemo(
     () =>
-      JSON.stringify({ title, artist, key, tipo, tempo, header, sections }) !==
+      JSON.stringify({
+        title,
+        artist,
+        key,
+        tipo,
+        tempo,
+        keysByDirector,
+        header,
+        sections,
+      }) !== initialSnapshot,
+    [
+      title,
+      artist,
+      key,
+      tipo,
+      tempo,
+      keysByDirector,
+      header,
+      sections,
       initialSnapshot,
-    [title, artist, key, tipo, tempo, header, sections, initialSnapshot],
+    ],
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -86,6 +120,11 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
     if (!song) return;
 
     const parsedTempo = tempo.trim() ? Number(tempo) : undefined;
+    const cleanedKeysByDirector = Object.fromEntries(
+      Object.entries(keysByDirector)
+        .map(([uid, k]) => [uid, k.trim()] as const)
+        .filter(([, k]) => k !== ""),
+    );
 
     editSong({
       id: song.id,
@@ -98,6 +137,7 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
           parsedTempo !== undefined && !Number.isNaN(parsedTempo)
             ? parsedTempo
             : undefined,
+        keysByDirector: cleanedKeysByDirector,
         content: serializeChordProBody(header, sections),
       },
     });
@@ -142,12 +182,37 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
                       />
                     </Field.Root>
                     <Field.Root>
-                      <Field.Label>Tono</Field.Label>
+                      <Field.Label>Tono original</Field.Label>
                       <Input
                         value={key}
                         onChange={(e) => setKey(e.target.value)}
                       />
                     </Field.Root>
+                    {!!directors?.length && (
+                      <Stack gap={2}>
+                        <Text fontSize="sm" fontWeight="500">
+                          Tono por director
+                        </Text>
+                        {directors.map((director) => (
+                          <Field.Root key={director.uid}>
+                            <Field.Label fontSize="xs" fontWeight="normal">
+                              {director.displayName}
+                            </Field.Label>
+                            <Input
+                              size="sm"
+                              placeholder={key || "Tono original"}
+                              value={keysByDirector[director.uid] ?? ""}
+                              onChange={(e) =>
+                                setKeysByDirector((prev) => ({
+                                  ...prev,
+                                  [director.uid]: e.target.value,
+                                }))
+                              }
+                            />
+                          </Field.Root>
+                        ))}
+                      </Stack>
+                    )}
                     <Field.Root>
                       <Field.Label>Tipo</Field.Label>
                       <ButtonGroup attached>

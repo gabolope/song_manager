@@ -16,6 +16,8 @@ interface SessionContextType {
   isCurrentLive: (displayedSong?: SongDTO | null | undefined) => boolean;
   backToLive: () => void;
   nextSong: SongDTO | undefined;
+  getTranspose: (songId?: string | null) => number;
+  setSongTranspose: (songId: string, value: number) => void;
 }
 
 const SessionContext = React.createContext<SessionContextType | null>(null);

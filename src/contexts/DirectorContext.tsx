@@ -12,6 +12,9 @@ interface DirectorContextType {
   // compartida (Director y Player pueden estar en pantallas distintas).
   fullscreen: boolean;
   setFullscreen: (value: boolean) => void;
+  // Transposición (en semitonos) de la canción actual. La cambia solo el
+  // Director; si está en vivo se retransmite a los músicos vía liveSong.
+  onTransposeChange: (delta: number) => void;
 }
 
 const DirectorContext = React.createContext<DirectorContextType | null>(null);

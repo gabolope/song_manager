@@ -24,13 +24,14 @@ export async function fetchSongs(): Promise<SongDTO[]> {
       key: data.key ?? "",
       tipo: data.tipo,
       tempo: data.tempo,
+      keysByDirector: data.keysByDirector,
     };
   });
 }
 
 export type SongEditInput = Pick<
   SongDTO,
-  "title" | "artist" | "key" | "tipo" | "tempo" | "content"
+  "title" | "artist" | "key" | "tipo" | "tempo" | "content" | "keysByDirector"
 >;
 
 const LIVE_SONG_DOC = "current"; // documento fijo, siempre el mismo (ver useLiveSong)
@@ -49,6 +50,10 @@ export async function updateSong(
     tipo: data.tipo ?? deleteField(),
     tempo: data.tempo ?? deleteField(),
     content: data.content,
+    keysByDirector:
+      data.keysByDirector && Object.keys(data.keysByDirector).length > 0
+        ? data.keysByDirector
+        : deleteField(),
   };
 
   const batch = writeBatch(db);

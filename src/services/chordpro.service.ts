@@ -1,4 +1,4 @@
-import ChordSheetJS from "chordsheetjs";
+import ChordSheetJS, { Key } from "chordsheetjs";
 import DOMPurify from "dompurify";
 
 const parser = new ChordSheetJS.ChordProParser();
@@ -15,9 +15,12 @@ export function stripChordProMarkup(content: string): string {
   return content.replace(/\{[^}]*\}/g, " ").replace(/\[[^\]]*\]/g, "");
 }
 
-export function formatSong(content: string): string {
+// `transpose` es un desplazamiento en semitonos aplicado solo al render: no
+// modifica `content`, así que nunca se persiste en el repertorio.
+export function formatSong(content: string, transpose = 0): string {
   try {
-    const song = parser.parse(content);
+    let song = parser.parse(content);
+    if (transpose) song = song.transpose(transpose);
     const html = formatter.format(song);
     const cleaned = html.replace(/<div class="paragraph[^"]*">\s*<\/div>/g, "");
     return DOMPurify.sanitize(cleaned);
@@ -25,4 +28,17 @@ export function formatSong(content: string): string {
     console.error("Error al interpretar el archivo ChordPro:", error);
     return `<div class="chordProError">No se pudo mostrar esta canción: el archivo parece estar dañado o mal formateado.</div>`;
   }
+}
+
+// Traspone únicamente la etiqueta de tono mostrada (ej. "Tono: Bb") para que
+// coincida con lo que hace formatSong sobre los acordes, sin tocar el campo
+// `key` original de la canción (ese es el del repertorio).
+export function transposeKeyLabel(
+  key: string | undefined,
+  transpose: number,
+): string | undefined {
+  if (!key || !transpose) return key;
+  const parsed = Key.parse(key);
+  if (!parsed) return key;
+  return parsed.transpose(transpose).toString();
 }

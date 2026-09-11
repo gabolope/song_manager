@@ -6,22 +6,29 @@ import { useSongFontSize } from "@/hooks/useSongFontSize";
 import type { SongDTO } from "@/types/song";
 import EditSongDialog from "./EditSongDialog";
 import FontSizeControls from "./FontSizeControls";
+import TransposeControls from "./TransposeControls";
 
 interface Props {
   song: SongDTO;
   canEdit: boolean;
   fullscreen: boolean;
   onFontScaleChange: (scale: number) => void;
+  transpose: number;
+  // Ausente para el Player: sólo el Director puede transportar (ver
+  // DirectorContext.onTransposeChange).
+  onTransposeChange?: (delta: number) => void;
 }
 
-// Agrupa los controles flotantes del SongViewer (tamaño de letra + editar)
-// junto con la lógica que los sostiene, para no inflar SongViewer con
-// estado que le es ajeno al render de la canción en sí.
+// Agrupa los controles flotantes del SongViewer (tamaño de letra + tono +
+// editar) junto con la lógica que los sostiene, para no inflar SongViewer
+// con estado que le es ajeno al render de la canción en sí.
 const ViewerControls = ({
   song,
   canEdit,
   fullscreen,
   onFontScaleChange,
+  transpose,
+  onTransposeChange,
 }: Props) => {
   const { user } = useAuth();
   const [editingSong, setEditingSong] = useState<SongDTO | null>(null);
@@ -67,6 +74,12 @@ const ViewerControls = ({
           canIncrease={canIncreaseFontSize}
           canDecrease={canDecreaseFontSize}
         />
+        {onTransposeChange && (
+          <TransposeControls
+            transpose={transpose}
+            onChange={onTransposeChange}
+          />
+        )}
       </div>
       {canEdit && (
         <EditSongDialog

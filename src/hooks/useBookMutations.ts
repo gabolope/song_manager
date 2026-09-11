@@ -5,6 +5,7 @@ import {
   setDoc,
   serverTimestamp,
   writeBatch,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import type { SongDTO } from "../types/song";
@@ -84,5 +85,33 @@ export function useBookMutations(book?: SongDTO[]) {
     },
   });
 
-  return { addToBook, removeFromBook, reorderBook };
+  // Transposición de una canción del book: se guarda en su documento (no en
+  // "songs"), así que dura mientras dure la sesión/book actual pero nunca
+  // toca el repertorio. Optimista igual que reorderBook: los clics de
+  // subir/bajar tono deben sentirse instantáneos, no esperar el viaje a
+  // Firestore.
+  const setTranspose = useMutation({
+    mutationFn: async ({ id, value }: { id: string; value: number }) => {
+      if (isDemo) return;
+      await updateDoc(doc(db, "book", id), { transpose: value });
+    },
+    onMutate: async ({ id, value }: { id: string; value: number }) => {
+      await queryClient.cancelQueries({ queryKey: ["book"] });
+      const previousBook = queryClient.getQueryData<SongDTO[]>(["book"]);
+      queryClient.setQueryData<SongDTO[]>(["book"], (prev = []) =>
+        prev.map((s) => (s.id === id ? { ...s, transpose: value } : s)),
+      );
+      return { previousBook };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previousBook) {
+        queryClient.setQueryData(["book"], context.previousBook);
+      }
+    },
+    onSettled: () => {
+      if (!isDemo) queryClient.invalidateQueries({ queryKey: ["book"] });
+    },
+  });
+
+  return { addToBook, removeFromBook, reorderBook, setTranspose };
 }
