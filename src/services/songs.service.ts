@@ -76,3 +76,25 @@ export async function updateSong(
 
   await batch.commit();
 }
+
+export async function deleteSong(id: string): Promise<void> {
+  // Igual que updateSong: "book" y "liveSong" guardan copias propias de la
+  // canción, así que hay que borrarlas a mano para no dejar referencias a
+  // una canción que ya no existe en "songs".
+  const batch = writeBatch(db);
+  batch.delete(doc(db, "songs", id));
+
+  const bookRef = doc(db, "book", id);
+  const bookSnap = await getDoc(bookRef);
+  if (bookSnap.exists()) {
+    batch.delete(bookRef);
+  }
+
+  const liveSongRef = doc(db, "liveSong", LIVE_SONG_DOC);
+  const liveSongSnap = await getDoc(liveSongRef);
+  if (liveSongSnap.exists() && liveSongSnap.data()?.id === id) {
+    batch.delete(liveSongRef);
+  }
+
+  await batch.commit();
+}

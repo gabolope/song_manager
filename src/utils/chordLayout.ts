@@ -12,18 +12,40 @@
 // separación de las palabras partidas por un acorde en medio.
 const MIN_CHORD_GAP_PX = 3;
 
+// Cuando dos acordes quedan seguidos sin letra en el medio (instrumental,
+// ej. "[Am7]     [D]"), preserveChordSpacing (chordpro.service.ts) evita que
+// chordsheetjs descarte esos espacios, así que sobreviven como texto real en
+// el ".lyrics" del acorde anterior. Pero como la fuente es proporcional, el
+// ancho de N espacios sueltos no guarda relación con el ancho de N
+// caracteres cualquiera (un espacio mide bastante menos que, por ejemplo,
+// las letras de "Am7"): el hueco visual termina siendo más chico que la
+// separación que el usuario puso en el ChordPro, a veces casi nula. Para que
+// el hueco sea proporcional a esa cantidad de espacios, se le fuerza un
+// ancho mínimo en "ch" (ancho del carácter "0" en la fuente actual), que
+// funciona como una aproximación de ancho de carácter fijo.
+const ZERO_WIDTH_MARKER = /​/g;
+const ONLY_SPACES_RE = /^ +$/;
+
 export function fixChordCollisions(container: HTMLElement): void {
   const rows = container.querySelectorAll<HTMLElement>(".row");
   rows.forEach((row) => {
     const columns = Array.from(row.querySelectorAll<HTMLElement>(":scope > .column"));
     columns.forEach((column) => {
       column.style.paddingRight = "";
+      const lyrics = column.querySelector<HTMLElement>(".lyrics");
+      if (lyrics) lyrics.style.minWidth = "";
     });
 
     for (let i = 0; i < columns.length - 1; i++) {
       const chordA = columns[i].querySelector<HTMLElement>(".chord");
       const chordB = columns[i + 1].querySelector<HTMLElement>(".chord");
       if (!chordA?.textContent || !chordB?.textContent) continue;
+
+      const gapLyrics = columns[i].querySelector<HTMLElement>(".lyrics");
+      const gapText = gapLyrics?.textContent?.replace(ZERO_WIDTH_MARKER, "") ?? "";
+      if (gapLyrics && ONLY_SPACES_RE.test(gapText)) {
+        gapLyrics.style.minWidth = `${gapText.length}ch`;
+      }
 
       const gap = chordB.getBoundingClientRect().left - chordA.getBoundingClientRect().right;
       if (gap < MIN_CHORD_GAP_PX) {
