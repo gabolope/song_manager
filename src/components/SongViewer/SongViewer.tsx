@@ -1,6 +1,6 @@
 import { Badge } from "@chakra-ui/react";
 import parse from "html-react-parser";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import DirectorContext from "@/contexts/DirectorContext";
 import PlayerContext from "@/contexts/PlayerContext";
@@ -9,6 +9,7 @@ import { useFullscreen } from "@/hooks/useFullscreen";
 import { useUsers } from "@/hooks/useUsers";
 import { formatSong, transposeKeyLabel } from "@/services/chordpro.service";
 import { getDirectorColor } from "@/types/user";
+import { fixChordCollisions } from "@/utils/chordLayout";
 import LiveBar from "./LiveBar";
 import NextSong from "./NextSong";
 import ViewerControls from "./ViewerControls";
@@ -80,6 +81,21 @@ const SongViewer = () => {
     if (!displayedSong) return "";
     return formatSong(displayedSong.content, transpose);
   }, [displayedSong, transpose]);
+
+  // El ancho de cada acorde en píxeles depende de la fuente/tamaño real, así
+  // que sólo se puede corregir colisiones entre acordes después de que el
+  // navegador ya renderizó (ver fixChordCollisions). Se re-corre cuando
+  // cambia el contenido, el tamaño de fuente, o el ancho disponible
+  // (fullscreen, resize, sidebar), ya que todo eso puede mover los acordes.
+  const songContentRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = songContentRef.current;
+    if (!el) return;
+    fixChordCollisions(el);
+    const observer = new ResizeObserver(() => fixChordCollisions(el));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [html, fontScale]);
 
   // Tonos particulares de cada director (ver EditSongDialog), solo tiene
   // sentido mostrarlos mirando el repertorio general: dentro de una sesión
@@ -168,7 +184,11 @@ const SongViewer = () => {
             </Badge>
           ))}
       </div>
-      <div className="songContent" style={{ fontSize: `${fontScale}rem` }}>
+      <div
+        className="songContent"
+        style={{ fontSize: `${fontScale}rem` }}
+        ref={songContentRef}
+      >
         {parse(html)}
       </div>
       {!isFromRepertoire && <NextSong nextSong={nextSong} />}

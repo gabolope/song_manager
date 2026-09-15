@@ -4,6 +4,30 @@ import DOMPurify from "dompurify";
 const parser = new ChordSheetJS.ChordProParser();
 const formatter = new ChordSheetJS.HtmlDivFormatter();
 
+// chordsheetjs descarta cualquier tramo de letra que termine siendo
+// puramente espacios en blanco: tanto al tokenizar (cada "palabra" nueva
+// arranca sin el espacio que la precede) como al renderizar el HTML (su
+// template colapsa con una regex interna cualquier <div class="lyrics">
+// cuyo contenido sea solo whitespace). Eso afecta a los acordes que no
+// tienen letra debajo (instrumentales, o acordes después de la última
+// palabra de una línea): la separación real que tienen en el ChordPro
+// original se pierde por completo y quedan pegados al renderizar, sin
+// importar cuántos espacios haya entre corchetes.
+//
+// Para evitarlo insertamos un caracter de ancho cero (U+200B) justo
+// después de cada "]" que precede a un tramo de espacios seguido de un
+// nuevo acorde "[": al no ser el tramo puramente whitespace, ni el
+// tokenizer ni el template lo tocan, así que los espacios reales
+// sobreviven y el ancho visual refleja la separación real del origen.
+const ZERO_WIDTH_MARKER = "\u200B";
+
+function preserveChordSpacing(content: string): string {
+  return content.replace(
+    /(^|\])( +)(?=\[)/gm,
+    (_match, prefix: string, spaces: string) => `${prefix}${ZERO_WIDTH_MARKER}${spaces}`,
+  );
+}
+
 export function parseChordPro(content: string) {
   return parser.parse(content);
 }
@@ -19,7 +43,7 @@ export function stripChordProMarkup(content: string): string {
 // modifica `content`, así que nunca se persiste en el repertorio.
 export function formatSong(content: string, transpose = 0): string {
   try {
-    let song = parser.parse(content);
+    let song = parser.parse(preserveChordSpacing(content));
     if (transpose) song = song.transpose(transpose);
     const html = formatter.format(song);
     const cleaned = html.replace(/<div class="paragraph[^"]*">\s*<\/div>/g, "");
