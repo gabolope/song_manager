@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-toastify";
+import { toaster } from "../components/ui/toaster";
 import { updateSong, type SongEditInput } from "../services/songs.service";
 import type { SongDTO } from "../types/song";
 import { useAuth } from "../contexts/AuthContext";
@@ -37,13 +37,12 @@ export function useEditSong() {
   });
 
   const editSong = (vars: EditSongVars) =>
-    toast.promise(mutation.mutateAsync(vars), {
-      pending: "Guardando canción...",
-      success: "Canción actualizada",
-      error: {
-        render: ({ data }) =>
-          data instanceof Error ? data.message : "No se pudo actualizar la canción",
-      },
+    toaster.promise(mutation.mutateAsync(vars), {
+      loading: { title: "Guardando canción..." },
+      success: { title: "Canción actualizada" },
+      error: (err) => ({
+        title: err instanceof Error ? err.message : "No se pudo actualizar la canción",
+      }),
     });
 
   return { ...mutation, editSong };

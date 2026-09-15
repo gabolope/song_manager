@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-toastify";
+import { toaster } from "../components/ui/toaster";
 import { deleteSong } from "../services/songs.service";
 import type { SongDTO } from "../types/song";
 import { useAuth } from "../contexts/AuthContext";
@@ -33,13 +33,12 @@ export function useDeleteSong() {
   });
 
   const removeSong = (id: string) =>
-    toast.promise(mutation.mutateAsync(id), {
-      pending: "Eliminando canción...",
-      success: "Canción eliminada",
-      error: {
-        render: ({ data }) =>
-          data instanceof Error ? data.message : "No se pudo eliminar la canción",
-      },
+    toaster.promise(mutation.mutateAsync(id), {
+      loading: { title: "Eliminando canción..." },
+      success: { title: "Canción eliminada" },
+      error: (err) => ({
+        title: err instanceof Error ? err.message : "No se pudo eliminar la canción",
+      }),
     });
 
   return { ...mutation, removeSong };

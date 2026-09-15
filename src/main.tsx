@@ -6,7 +6,6 @@ import { RouterProvider } from "react-router-dom";
 import AuthProvider from "./contexts/AuthProvider";
 import { Provider } from "./components/ui/provider";
 import { Toaster } from "./components/ui/toaster";
-import { AppToastContainer } from "./components/ui/toastify";
 import router from "./routes.tsx";
 import "./index.css";
 
@@ -20,7 +19,6 @@ createRoot(document.getElementById("root")!).render(
           <RouterProvider router={router} />
         </AuthProvider>
         <Toaster />
-        <AppToastContainer />
         <ReactQueryDevtools />
       </QueryClientProvider>
     </Provider>
