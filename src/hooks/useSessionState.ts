@@ -47,29 +47,31 @@ export function useSessionState() {
   const isCurrentLive = (displayedSong?: SongDTO | null) =>
     displayedSong?.id === liveSong.data?.id;
 
+  // Selecciona `song` solo si sigue estando en el book (pudo haberse borrado).
+  const syncToLive = useCallback(
+    (song: SongDTO) => {
+      const isInBook = book?.some((s) => s.id === song.id);
+      if (isInBook) {
+        setSelectedSongId(song.id);
+        setLocalSongState(song);
+      }
+    },
+    [book],
+  );
+
   // El director es la única fuente de verdad para el músico: cada vez que
   // cambia la canción en vivo, la vista se sincroniza automáticamente sin
   // importar a qué canción haya navegado el músico manualmente.
   useEffect(() => {
-    if (!liveSong.data) return;
-    const index = book?.findIndex((s) => s.id === liveSong.data!.id) ?? -1;
-    if (index !== -1) {
-      setSelectedSongId(liveSong.data.id);
-      setLocalSongState(liveSong.data);
-    }
-  }, [liveSong.data, book]);
+    if (liveSong.data) syncToLive(liveSong.data);
+  }, [liveSong.data, syncToLive]);
 
   const setLocalSong = useCallback((song: SongDTO | null) => {
     setLocalSongState(song);
   }, []);
 
   const backToLive = () => {
-    if (!liveSong.data || !book) return;
-    const index = book.findIndex((s) => s.id === liveSong.data!.id);
-    if (index !== -1) {
-      setSelectedSongId(liveSong.data.id);
-      setLocalSongState(liveSong.data);
-    }
+    if (liveSong.data) syncToLive(liveSong.data);
   };
 
   const nextSong =

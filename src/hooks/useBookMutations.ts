@@ -11,6 +11,7 @@ import { db } from "../services/firebase";
 import type { SongDTO } from "../types/song";
 import { useAuth } from "../contexts/AuthContext";
 import { nextBookOrder } from "../utils/book";
+import { useOptimisticMutation } from "./useOptimisticMutation";
 
 export function useBookMutations(book?: SongDTO[]) {
   const queryClient = useQueryClient();
@@ -56,8 +57,9 @@ export function useBookMutations(book?: SongDTO[]) {
   // orden al cache al toque (optimista) para que el arrastre se sienta
   // instantáneo, y si la escritura a Firestore falla, vuelve al orden
   // anterior.
-  const reorderBook = useMutation({
-    mutationFn: async (orderedSongs: SongDTO[]) => {
+  const reorderBook = useOptimisticMutation<SongDTO[]>({
+    queryKey: ["book"],
+    mutationFn: async (orderedSongs) => {
       if (isDemo) return;
 
       const batch = writeBatch(db);
@@ -66,23 +68,9 @@ export function useBookMutations(book?: SongDTO[]) {
       });
       await batch.commit();
     },
-    onMutate: async (orderedSongs: SongDTO[]) => {
-      await queryClient.cancelQueries({ queryKey: ["book"] });
-      const previousBook = queryClient.getQueryData<SongDTO[]>(["book"]);
-      queryClient.setQueryData<SongDTO[]>(
-        ["book"],
-        orderedSongs.map((song, index) => ({ ...song, order: index })),
-      );
-      return { previousBook };
-    },
-    onError: (_err, _orderedSongs, context) => {
-      if (context?.previousBook) {
-        queryClient.setQueryData(["book"], context.previousBook);
-      }
-    },
-    onSettled: () => {
-      if (!isDemo) queryClient.invalidateQueries({ queryKey: ["book"] });
-    },
+    updater: (_old, orderedSongs) =>
+      orderedSongs.map((song, index) => ({ ...song, order: index })),
+    invalidateKeys: isDemo ? [] : [["book"]],
   });
 
   // Transposición de una canción del book: se guarda en su documento (no en
@@ -90,27 +78,15 @@ export function useBookMutations(book?: SongDTO[]) {
   // toca el repertorio. Optimista igual que reorderBook: los clics de
   // subir/bajar tono deben sentirse instantáneos, no esperar el viaje a
   // Firestore.
-  const setTranspose = useMutation({
-    mutationFn: async ({ id, value }: { id: string; value: number }) => {
+  const setTranspose = useOptimisticMutation<{ id: string; value: number }>({
+    queryKey: ["book"],
+    mutationFn: async ({ id, value }) => {
       if (isDemo) return;
       await updateDoc(doc(db, "book", id), { transpose: value });
     },
-    onMutate: async ({ id, value }: { id: string; value: number }) => {
-      await queryClient.cancelQueries({ queryKey: ["book"] });
-      const previousBook = queryClient.getQueryData<SongDTO[]>(["book"]);
-      queryClient.setQueryData<SongDTO[]>(["book"], (prev = []) =>
-        prev.map((s) => (s.id === id ? { ...s, transpose: value } : s)),
-      );
-      return { previousBook };
-    },
-    onError: (_err, _vars, context) => {
-      if (context?.previousBook) {
-        queryClient.setQueryData(["book"], context.previousBook);
-      }
-    },
-    onSettled: () => {
-      if (!isDemo) queryClient.invalidateQueries({ queryKey: ["book"] });
-    },
+    updater: (old = [], { id, value }) =>
+      old.map((s) => (s.id === id ? { ...s, transpose: value } : s)),
+    invalidateKeys: isDemo ? [] : [["book"]],
   });
 
   return { addToBook, removeFromBook, reorderBook, setTranspose };
