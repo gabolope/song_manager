@@ -3,7 +3,8 @@ import { Button } from "@chakra-ui/react";
 import {
   DndContext,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -56,6 +57,9 @@ interface RowProps {
 // botón de borrar corta la propagación del pointerdown para quedar afuera
 // de ese gesto.
 const BookRow = ({ song, selected, draggable, onClick, onDelete }: RowProps) => {
+  // transition: null en vez del default de 200ms: el orden ya se aplica
+  // optimista al soltar (ver reorderBook), así que la fila debe asentarse al
+  // toque en vez de deslizar hasta su lugar.
   const {
     attributes,
     listeners,
@@ -63,7 +67,7 @@ const BookRow = ({ song, selected, draggable, onClick, onDelete }: RowProps) => 
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: song.id, disabled: !draggable });
+  } = useSortable({ id: song.id, disabled: !draggable, transition: null });
 
   return (
     <div
@@ -136,8 +140,16 @@ const BookList = ({
   // mueve un poco, compitiendo con el scroll vertical de la lista. Con un
   // delay, un swipe corto sigue siendo scroll y solo una pulsación sostenida
   // (con poco movimiento) arranca el reordenamiento.
+  // TouchSensor (no PointerSensor) para el dedo: solo TouchSensor puede
+  // dejar pasar el scroll nativo mientras el delay corre y recién hacer
+  // preventDefault si se cumple la constraint. PointerSensor no tiene forma
+  // de prevenir el scroll condicionalmente, así que en mobile el navegador
+  // se lo comía antes de que el delay llegara a activar el drag.
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
+      activationConstraint: { delay: 200, tolerance: 8 },
+    }),
+    useSensor(TouchSensor, {
       activationConstraint: { delay: 200, tolerance: 8 },
     }),
     useSensor(KeyboardSensor, {

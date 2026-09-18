@@ -3,7 +3,6 @@
 Menores:
 
 - [ ] Agregar opcion de no dirigir para directores (en menu de config)
-- [ ] Botón rojo "Sesión en vivo" debe ejecutar el fullScreen
 
 Intermedios:
 
