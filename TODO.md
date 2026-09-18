@@ -2,7 +2,7 @@
 
 Menores:
 
-- [ ] Agregar opcion de no dirigir para directores (en menu de config)
+- [x] Agregar opcion de no dirigir para directores (en menu de config)
 
 Intermedios:
 

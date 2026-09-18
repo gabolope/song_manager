@@ -10,6 +10,10 @@ interface AuthContextType {
   // Modo demo: navegación libre sin cuenta real ni escrituras a Firestore,
   // para que alguien sin credenciales pueda probar la app (ver TODO.md).
   isDemo: boolean;
+  // Un admin puede optar por no dirigir: se comporta como músico (va a
+  // /player) sin dejar de ser admin. Se guarda por uid en localStorage.
+  wantsToDirect: boolean;
+  setWantsToDirect: (value: boolean) => void;
   enterDemo: () => void;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;

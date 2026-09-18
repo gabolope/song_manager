@@ -12,7 +12,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useColorMode } from "@/components/ui/color-mode";
 import CreateUserDialog from "./CreateUserDialog";
@@ -37,7 +37,8 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 
 const Configuration = ({ height }: Props) => {
   const location = useLocation();
-  const { isAdmin, isDemo, logout } = useAuth();
+  const navigate = useNavigate();
+  const { isAdmin, isDemo, wantsToDirect, setWantsToDirect, logout } = useAuth();
   const { colorMode, toggleColorMode } = useColorMode();
   const [open, setOpen] = useState(false);
   const [createUserOpen, setCreateUserOpen] = useState(false);
@@ -87,6 +88,35 @@ const Configuration = ({ height }: Props) => {
                       </Switch.Root>
                     </HStack>
                   </Stack>
+
+                  {isAdmin && (
+                    <>
+                      <Separator />
+                      <Stack gap={2} align="stretch">
+                        <SectionLabel>Sesión</SectionLabel>
+                        <HStack
+                          justify="space-between"
+                          padding="10px 12px"
+                          borderRadius="8px"
+                          background="var(--bg-hover)"
+                        >
+                          <Text fontSize="sm">Dirigir esta sesión</Text>
+                          <Switch.Root
+                            checked={wantsToDirect}
+                            onCheckedChange={(e) => {
+                              setWantsToDirect(e.checked);
+                              navigate(e.checked ? "/director" : "/player", { replace: true });
+                            }}
+                          >
+                            <Switch.HiddenInput />
+                            <Switch.Control>
+                              <Switch.Thumb />
+                            </Switch.Control>
+                          </Switch.Root>
+                        </HStack>
+                      </Stack>
+                    </>
+                  )}
 
                   {isDirector && isRealAdmin && (
                     <>

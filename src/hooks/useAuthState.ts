@@ -4,6 +4,8 @@ import { auth } from "../services/firebase";
 import { fetchUserProfile, login, logout as logoutRequest } from "../services/auth.service";
 import type { UserProfile } from "../types/user";
 
+const wantsToDirectKey = (uid: string) => `wantsToDirect:${uid}`;
+
 export function useAuthState() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -11,6 +13,7 @@ export function useAuthState() {
   // no sabemos si hay que mostrar el login o la app.
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
+  const [wantsToDirect, setWantsToDirectState] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -22,6 +25,7 @@ export function useAuthState() {
       if (firebaseUser) {
         const userProfile = await fetchUserProfile(firebaseUser.uid);
         setProfile(userProfile);
+        setWantsToDirectState(localStorage.getItem(wantsToDirectKey(firebaseUser.uid)) !== "false");
       } else {
         setProfile(null);
       }
@@ -38,6 +42,13 @@ export function useAuthState() {
     if (auth.currentUser) await logoutRequest();
   }, []);
 
+  const setWantsToDirect = useCallback((value: boolean) => {
+    setWantsToDirectState(value);
+    // El modo demo no tiene uid: la preferencia solo se persiste para
+    // cuentas reales, en demo dura lo que dura la pestaña.
+    if (auth.currentUser) localStorage.setItem(wantsToDirectKey(auth.currentUser.uid), String(value));
+  }, []);
+
   return {
     user,
     profile,
@@ -46,6 +57,8 @@ export function useAuthState() {
     // En demo se muestran las mismas capacidades de director, sin que
     // exista una cuenta real detrás.
     isAdmin: isDemo || profile?.role === "admin",
+    wantsToDirect,
+    setWantsToDirect,
     enterDemo,
     login,
     logout,
