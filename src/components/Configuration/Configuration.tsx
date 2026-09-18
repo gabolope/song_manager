@@ -89,34 +89,41 @@ const Configuration = ({ height }: Props) => {
                     </HStack>
                   </Stack>
 
-                  {isAdmin && (
-                    <>
-                      <Separator />
-                      <Stack gap={2} align="stretch">
-                        <SectionLabel>Sesión</SectionLabel>
-                        <HStack
-                          justify="space-between"
-                          padding="10px 12px"
-                          borderRadius="8px"
-                          background="var(--bg-hover)"
+                  <Separator />
+                  <Stack gap={2} align="stretch">
+                    <SectionLabel>Sesión</SectionLabel>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setOpen(false);
+                        navigate("/lyrics");
+                      }}
+                    >
+                      Modo Lyrics
+                    </Button>
+                    {isAdmin && (
+                      <HStack
+                        justify="space-between"
+                        padding="10px 12px"
+                        borderRadius="8px"
+                        background="var(--bg-hover)"
+                      >
+                        <Text fontSize="sm">Dirigir esta sesión</Text>
+                        <Switch.Root
+                          checked={wantsToDirect}
+                          onCheckedChange={(e) => {
+                            setWantsToDirect(e.checked);
+                            navigate(e.checked ? "/director" : "/player", { replace: true });
+                          }}
                         >
-                          <Text fontSize="sm">Dirigir esta sesión</Text>
-                          <Switch.Root
-                            checked={wantsToDirect}
-                            onCheckedChange={(e) => {
-                              setWantsToDirect(e.checked);
-                              navigate(e.checked ? "/director" : "/player", { replace: true });
-                            }}
-                          >
-                            <Switch.HiddenInput />
-                            <Switch.Control>
-                              <Switch.Thumb />
-                            </Switch.Control>
-                          </Switch.Root>
-                        </HStack>
-                      </Stack>
-                    </>
-                  )}
+                          <Switch.HiddenInput />
+                          <Switch.Control>
+                            <Switch.Thumb />
+                          </Switch.Control>
+                        </Switch.Root>
+                      </HStack>
+                    )}
+                  </Stack>
 
                   {isDirector && isRealAdmin && (
                     <>

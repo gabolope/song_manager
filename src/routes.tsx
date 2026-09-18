@@ -5,6 +5,7 @@ import SessionProvider from "./contexts/SessionProvider";
 import DirectorPage from "./pages/DirectorPage/DirectorPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import HomePage from "./pages/HomePage/HomePage";
+import LyricsPage from "./pages/LyricsPage/LyricsPage";
 import PlayerPage from "./pages/PlayerPage/PlayerPage";
 
 const router = createBrowserRouter([
@@ -32,7 +33,10 @@ const router = createBrowserRouter([
           {
             element: <ProtectedRoute />,
             errorElement: <ErrorPage />,
-            children: [{ path: "player", element: <PlayerPage /> }],
+            children: [
+              { path: "player", element: <PlayerPage /> },
+              { path: "lyrics", element: <LyricsPage /> },
+            ],
           },
         ],
       },

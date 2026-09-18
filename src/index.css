@@ -105,6 +105,13 @@ body {
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
+/* Fondo detrás del elemento en pantalla completa nativa (Fullscreen API):
+   por default el navegador lo pinta negro, lo que se nota en modo claro si
+   el elemento no llega a cubrir el 100% (letterboxing/transición). */
+::backdrop {
+  background: var(--bg);
+}
+
 @media (max-width: 600px) {
   .hideOnNarrow {
     display: none;
