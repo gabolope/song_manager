@@ -102,7 +102,11 @@ const PlayerPage = () => {
                 className="hideOnNarrow"
                 style={{ height: 24, width: 24 }}
               />
-              <Text fontWeight="700" fontSize="1.05rem" className="hideOnNarrow">
+              <Text
+                fontWeight="700"
+                fontSize="1.05rem"
+                className="hideOnNarrow"
+              >
                 Song Manager
               </Text>
               <Badge colorPalette="green" variant="subtle">
@@ -111,6 +115,7 @@ const PlayerPage = () => {
               <Badge
                 colorPalette={liveSong.data ? "red" : "gray"}
                 variant={liveSong.data ? "solid" : "subtle"}
+                onClick={() => setFullscreen(!fullscreen)}
               >
                 <MdOutlineSensors />
                 {liveSong.data ? "Sesión en vivo" : "Sin sesión en vivo"}

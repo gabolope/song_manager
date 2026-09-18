@@ -47,6 +47,13 @@ export function fixChordCollisions(container: HTMLElement): void {
         gapLyrics.style.minWidth = `${gapText.length}ch`;
       }
 
+      // Si la letra de esta columna no termina en un separador de palabra,
+      // el siguiente acorde cae en medio de la misma palabra (ej. "escati"
+      // con acorde y luego "mó"): agrandar el hueco acá metería un espacio
+      // visual en medio de la palabra. Se prefiere dejar que los acordes
+      // queden más pegados antes que partir la palabra.
+      if (gapText && !/[\s-]$/.test(gapText)) continue;
+
       const gap = chordB.getBoundingClientRect().left - chordA.getBoundingClientRect().right;
       if (gap < MIN_CHORD_GAP_PX) {
         columns[i].style.paddingRight = `${MIN_CHORD_GAP_PX - gap}px`;
