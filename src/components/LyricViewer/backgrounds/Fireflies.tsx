@@ -30,7 +30,7 @@ type FireflyStyle = CSSProperties & {
   "--ty4"?: string;
 };
 
-const FIREFLY_COUNT = 45;
+const FIREFLY_COUNT = 50;
 
 // Deterministic pseudo-random generator (seeded) — keeps SSR and client
 // output identical while still spreading fireflies out organically.

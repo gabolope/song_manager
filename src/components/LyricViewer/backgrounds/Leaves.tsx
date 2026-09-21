@@ -23,7 +23,7 @@ type LeafStyle = CSSProperties & {
   "--o"?: number;
 };
 
-const LEAF_COUNT = 48;
+const LEAF_COUNT = 80;
 
 // Deterministic pseudo-random generator (seeded) — keeps SSR and client
 // output identical while still spreading leaves out organically.

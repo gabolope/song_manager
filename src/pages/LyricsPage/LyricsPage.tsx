@@ -21,43 +21,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSession } from "@/contexts/SessionContext";
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { useSongFontSize } from "@/hooks/useSongFontSize";
+import { BACKGROUND_COLORS, DEFAULT_BACKGROUND_COLORS, LYRIC_FONTS } from "./lyricsPageConstants";
 
 const noop = () => {};
-
-// Fuentes web-safe (instaladas en prácticamente cualquier SO) más los
-// genéricos nativos de CSS: cubren estilos bien distintos sin depender de
-// una fuente externa que pueda fallar por wifi durante una sesión en vivo.
-const LYRIC_FONTS = [
-  { label: "Roboto", value: '"Roboto", sans-serif' },
-  { label: "Arial", value: "Arial, Helvetica, sans-serif" },
-  { label: "Georgia", value: 'Georgia, "Times New Roman", serif' },
-  { label: "Times New Roman", value: '"Times New Roman", Times, serif' },
-  { label: "Courier New", value: '"Courier New", Courier, monospace' },
-  { label: "Verdana", value: "Verdana, Geneva, sans-serif" },
-  { label: "Trebuchet MS", value: '"Trebuchet MS", sans-serif' },
-  { label: "Impact", value: 'Impact, "Arial Narrow", sans-serif' },
-  { label: "Comic Sans MS", value: '"Comic Sans MS", cursive' },
-  { label: "Sistema", value: 'system-ui, -apple-system, "Segoe UI", sans-serif' },
-];
-
-const BACKGROUND_COLORS = [
-  { label: "Acento", value: "var(--accent)" },
-  { label: "Verde", value: "#4ade80" },
-  { label: "Azul", value: "#4973ff" },
-  { label: "Otoño", value: "#e08a3c" },
-  { label: "Rojo", value: "#ef4444" },
-  { label: "Violeta", value: "#a78bfa" },
-  { label: "Amarillo", value: "#facc15" },
-  { label: "Rosa", value: "#f472b6" },
-  { label: "Blanco", value: "#f5f5f5" },
-];
-
-// Color por defecto según el fondo elegido (hojas verdes, luciérnagas amarillas).
-const DEFAULT_BACKGROUND_COLORS: Record<string, string> = {
-  Leaves: "#4ade80",
-  Fireflies: "#facc15",
-  Waves: "#4973ff",
-};
 
 const LyricsPage = () => {
   const { liveSong } = useSession();
