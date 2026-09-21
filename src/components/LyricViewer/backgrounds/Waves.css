@@ -1,0 +1,63 @@
+/* Los "blobs" oscurecen el color base para dar profundidad; en modo claro
+   eso se ve como una mancha negra, así que en claro aclaran en vez de
+   oscurecer (mismo patrón --token / .dark que index.css). */
+:root {
+  --wave-blob-strong: rgba(255, 255, 255, 0.35);
+  --wave-blob-soft: rgba(255, 255, 255, 0.18);
+}
+
+.dark {
+  --wave-blob-strong: rgba(0, 0, 0, 0.55);
+  --wave-blob-soft: rgba(0, 0, 0, 0.3);
+}
+
+.waves-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--wave-color, #4973ff);
+  box-shadow: inset 0 0 50px var(--wave-blob-strong);
+}
+
+.waves-bg span {
+  position: absolute;
+  width: 325vh;
+  height: 325vh;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -75%);
+}
+
+.waves-bg span:nth-child(1) {
+  border-radius: 45%;
+  background: var(--wave-blob-strong);
+  animation: wave-rotate 25s linear infinite;
+}
+
+.waves-bg span:nth-child(2) {
+  border-radius: 40%;
+  background: var(--wave-blob-soft);
+  animation: wave-rotate 30s linear infinite;
+}
+
+.waves-bg span:nth-child(3) {
+  border-radius: 42.5%;
+  background: var(--wave-blob-soft);
+  animation: wave-rotate 40s linear infinite;
+}
+
+@keyframes wave-rotate {
+  0% {
+    transform: translate(-50%, -75%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -75%) rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waves-bg span {
+    animation: none;
+  }
+}

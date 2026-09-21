@@ -2,6 +2,8 @@
 
 Menores:
 
+- [ ] Refactirizar Navbar de lyrics mode, mover todos los botones de configuración a un componente
+
 Intermedios:
 
 - [ ] Agregar habilidad de editar y borrar usuarios sólo para admins.

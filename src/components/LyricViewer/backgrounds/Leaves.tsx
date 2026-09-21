@@ -79,7 +79,7 @@ export const label = "Hojas";
 const Leaves = ({ color }: Props) => {
   return (
     <div
-      className="fixed inset-0 -z-10 pointer-events-none overflow-hidden"
+      className="leaves-bg"
       style={color ? ({ "--leaf-color": color } as CSSProperties) : undefined}
     >
       {LEAVES.map((leaf, i) => {

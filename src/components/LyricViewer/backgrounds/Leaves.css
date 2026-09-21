@@ -1,3 +1,10 @@
+.leaves-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
 /* Ambient falling-leaves background: slow, quiet motion in the accent color */
 .leaf {
   position: absolute;

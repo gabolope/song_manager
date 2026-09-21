@@ -1,0 +1,65 @@
+.fireflies-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Ambient fireflies: drifting glow dots that flash on and off */
+.firefly {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: var(--firefly-color, #fff6b0);
+  opacity: 0;
+  box-shadow: 0 0 0vw 0vw var(--firefly-color, #fff6b0);
+  animation-name: firefly-drift, firefly-flash;
+  animation-duration: var(--duration), var(--flash-duration);
+  animation-timing-function: ease-in-out, ease-in-out;
+  animation-delay: var(--delay), var(--flash-delay);
+  animation-iteration-count: infinite, infinite;
+  animation-direction: alternate, normal;
+  will-change: transform, opacity, box-shadow;
+}
+
+@keyframes firefly-drift {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(var(--tx1), var(--ty1));
+  }
+  50% {
+    transform: translate(var(--tx2), var(--ty2));
+  }
+  75% {
+    transform: translate(var(--tx3), var(--ty3));
+  }
+  100% {
+    transform: translate(var(--tx4), var(--ty4));
+  }
+}
+
+@keyframes firefly-flash {
+  0%,
+  30%,
+  100% {
+    opacity: 0;
+    box-shadow: 0 0 0vw 0vw var(--firefly-color, #fff6b0);
+  }
+  8% {
+    opacity: 1;
+    box-shadow: 0 0 1.2vw 0.3vw var(--firefly-color, #fff6b0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .firefly {
+    animation: none;
+    opacity: 0.6;
+    box-shadow: 0 0 0.8vw 0.2vw var(--firefly-color, #fff6b0);
+  }
+}

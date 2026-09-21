@@ -43,11 +43,21 @@ const LYRIC_FONTS = [
 const BACKGROUND_COLORS = [
   { label: "Acento", value: "var(--accent)" },
   { label: "Verde", value: "#4ade80" },
+  { label: "Azul", value: "#4973ff" },
   { label: "Otoño", value: "#e08a3c" },
   { label: "Rojo", value: "#ef4444" },
   { label: "Violeta", value: "#a78bfa" },
+  { label: "Amarillo", value: "#facc15" },
+  { label: "Rosa", value: "#f472b6" },
   { label: "Blanco", value: "#f5f5f5" },
 ];
+
+// Color por defecto según el fondo elegido (hojas verdes, luciérnagas amarillas).
+const DEFAULT_BACKGROUND_COLORS: Record<string, string> = {
+  Leaves: "#4ade80",
+  Fireflies: "#facc15",
+  Waves: "#4973ff",
+};
 
 const LyricsPage = () => {
   const { liveSong } = useSession();
@@ -67,7 +77,9 @@ const LyricsPage = () => {
   } = useSongFontSize(user ? `${user.uid}-lyrics` : undefined);
   const [fontFamily, setFontFamily] = useState(LYRIC_FONTS[0].value);
   const [backgroundType, setBackgroundType] = useState(BACKGROUNDS[0].value);
-  const [backgroundColor, setBackgroundColor] = useState(BACKGROUND_COLORS[0].value);
+  const [backgroundColor, setBackgroundColor] = useState(
+    DEFAULT_BACKGROUND_COLORS[BACKGROUNDS[0].value] ?? BACKGROUND_COLORS[0].value,
+  );
   const ActiveBackground = BACKGROUNDS.find((b) => b.value === backgroundType)?.Component;
 
   // Pantalla completa es local a esta pestaña, igual que en Player/Director;
@@ -209,7 +221,12 @@ const LyricsPage = () => {
                   <Menu.Content>
                     <Menu.RadioItemGroup
                       value={backgroundType}
-                      onValueChange={(e) => setBackgroundType(e.value)}
+                      onValueChange={(e) => {
+                        setBackgroundType(e.value);
+                        setBackgroundColor(
+                          DEFAULT_BACKGROUND_COLORS[e.value] ?? BACKGROUND_COLORS[0].value,
+                        );
+                      }}
                     >
                       {BACKGROUNDS.map((b) => (
                         <Menu.RadioItem key={b.value} value={b.value}>
