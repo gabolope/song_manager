@@ -1,0 +1,54 @@
+/* Ambient falling-leaves background: slow, quiet motion in the accent color */
+.leaf {
+  position: absolute;
+  top: -8vh;
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  background: var(--leaf-color, var(--accent));
+  opacity: 0;
+  border-radius: 0 100% 0 100%;
+  transform: rotate(var(--rotate));
+  animation: leaf-fall var(--duration) linear var(--delay) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes leaf-fall {
+  0% {
+    transform: translate(0, 0) rotate(var(--rotate));
+    opacity: 0;
+  }
+  6% {
+    opacity: var(--o);
+  }
+  20% {
+    transform: translate(var(--sway), 20vh) rotate(calc(var(--rotate) + 70deg));
+  }
+  40% {
+    transform: translate(calc(var(--sway) * -1), 40vh)
+      rotate(calc(var(--rotate) + 150deg));
+  }
+  60% {
+    transform: translate(var(--sway), 60vh) rotate(calc(var(--rotate) + 210deg));
+  }
+  80% {
+    transform: translate(calc(var(--sway) * -1), 80vh)
+      rotate(calc(var(--rotate) + 280deg));
+  }
+  94% {
+    opacity: var(--o);
+  }
+  100% {
+    transform: translate(0, 120vh) rotate(calc(var(--rotate) + 340deg));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leaf {
+    animation: none;
+    top: var(--y);
+    opacity: var(--o);
+    transform: rotate(var(--rotate));
+  }
+}

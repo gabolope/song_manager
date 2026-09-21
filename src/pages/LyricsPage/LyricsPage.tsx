@@ -1,4 +1,4 @@
-import { Badge, Grid, GridItem, HStack, IconButton, Menu, Portal, Text } from "@chakra-ui/react";
+import { Badge, Box, Grid, GridItem, HStack, IconButton, Menu, Portal, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { IoArrowBack } from "react-icons/io5";
 import { IoMdCheckmark } from "react-icons/io";
@@ -9,9 +9,12 @@ import {
   MdOutlineSensors,
   MdOutlineTextDecrease,
   MdOutlineTextIncrease,
+  MdPalette,
+  MdWallpaper,
 } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import LyricViewer from "@/components/LyricViewer/LyricViewer";
+import { BACKGROUNDS } from "@/components/LyricViewer/backgrounds";
 import Configuration from "@/components/Configuration/Configuration";
 import UserBadge from "@/components/UserBadge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -37,6 +40,15 @@ const LYRIC_FONTS = [
   { label: "Sistema", value: 'system-ui, -apple-system, "Segoe UI", sans-serif' },
 ];
 
+const BACKGROUND_COLORS = [
+  { label: "Acento", value: "var(--accent)" },
+  { label: "Verde", value: "#4ade80" },
+  { label: "Otoño", value: "#e08a3c" },
+  { label: "Rojo", value: "#ef4444" },
+  { label: "Violeta", value: "#a78bfa" },
+  { label: "Blanco", value: "#f5f5f5" },
+];
+
 const LyricsPage = () => {
   const { liveSong } = useSession();
   const navigate = useNavigate();
@@ -54,6 +66,9 @@ const LyricsPage = () => {
     canDecrease: canDecreaseFontSize,
   } = useSongFontSize(user ? `${user.uid}-lyrics` : undefined);
   const [fontFamily, setFontFamily] = useState(LYRIC_FONTS[0].value);
+  const [backgroundType, setBackgroundType] = useState(BACKGROUNDS[0].value);
+  const [backgroundColor, setBackgroundColor] = useState(BACKGROUND_COLORS[0].value);
+  const ActiveBackground = BACKGROUNDS.find((b) => b.value === backgroundType)?.Component;
 
   // Pantalla completa es local a esta pestaña, igual que en Player/Director;
   // acá no hay noción de "director" ni de terminar la sesión en vivo, así
@@ -89,9 +104,10 @@ const LyricsPage = () => {
       w="100vw"
       overflow="hidden"
       background="var(--bg)"
-      position={usesFullscreenFallback ? "fixed" : undefined}
+      position={usesFullscreenFallback ? "fixed" : "relative"}
       inset={usesFullscreenFallback ? 0 : undefined}
     >
+      {ActiveBackground && <ActiveBackground color={backgroundColor} />}
       <GridItem
         gridRow={1}
         position={fullscreen ? "fixed" : "static"}
@@ -182,6 +198,67 @@ const LyricsPage = () => {
                 </Menu.Positioner>
               </Portal>
             </Menu.Root>
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <IconButton aria-label="Cambiar fondo" variant="outline" size="sm">
+                  <MdWallpaper />
+                </IconButton>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content>
+                    <Menu.RadioItemGroup
+                      value={backgroundType}
+                      onValueChange={(e) => setBackgroundType(e.value)}
+                    >
+                      {BACKGROUNDS.map((b) => (
+                        <Menu.RadioItem key={b.value} value={b.value}>
+                          {b.label}
+                          <Menu.ItemIndicator>
+                            <IoMdCheckmark />
+                          </Menu.ItemIndicator>
+                        </Menu.RadioItem>
+                      ))}
+                    </Menu.RadioItemGroup>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
+            <Menu.Root>
+              <Menu.Trigger asChild>
+                <IconButton aria-label="Color del fondo" variant="outline" size="sm">
+                  <MdPalette />
+                </IconButton>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content>
+                    <Menu.RadioItemGroup
+                      value={backgroundColor}
+                      onValueChange={(e) => setBackgroundColor(e.value)}
+                    >
+                      {BACKGROUND_COLORS.map((c) => (
+                        <Menu.RadioItem key={c.value} value={c.value}>
+                          <HStack gap="8px">
+                            <Box
+                              w="14px"
+                              h="14px"
+                              borderRadius="full"
+                              background={c.value}
+                              border="1px solid var(--border-strong)"
+                            />
+                            {c.label}
+                          </HStack>
+                          <Menu.ItemIndicator>
+                            <IoMdCheckmark />
+                          </Menu.ItemIndicator>
+                        </Menu.RadioItem>
+                      ))}
+                    </Menu.RadioItemGroup>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
           </HStack>
           <HStack gap="8px" justifySelf="end">
             <UserBadge />
@@ -197,7 +274,7 @@ const LyricsPage = () => {
           </HStack>
         </Grid>
       </GridItem>
-      <GridItem gridRow={2} overflow="hidden">
+      <GridItem gridRow={2} overflow="hidden" position="relative" zIndex={1}>
         {song ? (
           <LyricViewer song={song} fontScale={fontScale} fontFamily={fontFamily} />
         ) : (
