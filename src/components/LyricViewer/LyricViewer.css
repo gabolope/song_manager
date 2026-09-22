@@ -1,8 +1,8 @@
 .lyricViewer {
   display: flex;
-  /* safe: si la canción entera no entra, se scrollea desde arriba en vez de cortarse */
+  /* safe: al medir desborde, el contenido crece hacia abajo y no se corta arriba */
   align-items: safe center;
-  overflow-y: auto;
+  overflow: hidden;
   justify-content: center;
   height: 100%;
   padding: 2rem;

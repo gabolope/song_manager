@@ -40,6 +40,8 @@ const LyricsPage = () => {
   // SongViewer (namespace propio en localStorage) porque acá la base de
   // tamaño es otra (una sola línea gigante, no un cuerpo de canción).
   const fontSize = useSongFontSize(user ? `${user.uid}-lyrics` : undefined);
+  // La letra se ajusta sola al espacio: si ya se achicó, agrandar no hace nada.
+  const [lyricsShrunk, setLyricsShrunk] = useState(false);
   const [mode, setMode] = useState<LyricMode>("line");
   const [fontFamily, setFontFamily] = useState(LYRIC_FONTS[0].value);
   const [backgroundType, setBackgroundType] = useState(BACKGROUNDS[0].value);
@@ -110,7 +112,6 @@ const LyricsPage = () => {
           gap="6px"
         >
           <HStack gap="10px">
-
             <Badge
               colorPalette={song ? "red" : "gray"}
               variant={song ? "solid" : "subtle"}
@@ -121,7 +122,12 @@ const LyricsPage = () => {
           </HStack>
           <LyricsActions
             mode={{ value: mode, setValue: setMode }}
-            font={{ ...fontSize, family: fontFamily, setFamily: setFontFamily }}
+            font={{
+              ...fontSize,
+              canIncrease: fontSize.canIncrease && !(song && lyricsShrunk),
+              family: fontFamily,
+              setFamily: setFontFamily,
+            }}
             background={{
               type: backgroundType,
               setType: setBackgroundType,
@@ -152,6 +158,7 @@ const LyricsPage = () => {
             fontScale={fontSize.scale}
             fontFamily={fontFamily}
             mode={mode}
+            onShrinkChange={setLyricsShrunk}
           />
         ) : (
           <HStack h="100%" justify="center" color="var(--text-muted)">

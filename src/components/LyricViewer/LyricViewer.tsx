@@ -1,5 +1,5 @@
 import { Box } from "@chakra-ui/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { SongDTO } from "@/types/song";
 import { parseChordProBody } from "@/utils/chordProBody";
 import "./LyricViewer.css";
@@ -18,6 +18,8 @@ interface Props {
   fontScale?: number;
   fontFamily?: string;
   mode?: LyricMode;
+  // Avisa si la letra se tuvo que achicar para entrar (no hay más lugar).
+  onShrinkChange?: (shrunk: boolean) => void;
 }
 
 const ACCENTS: Record<string, string> = {
@@ -53,9 +55,11 @@ function normalizeLyric(text: string): string {
 function lyricSections(content: string): string[][] {
   return parseChordProBody(content)
     .sections.map((section) =>
-      section.lines.flatMap((line) =>
-        line.type === "pair" ? [normalizeLyric(line.lyric)] : [],
-      ).filter((lyric) => lyric !== ""),
+      section.lines
+        .flatMap((line) =>
+          line.type === "pair" ? [normalizeLyric(line.lyric)] : [],
+        )
+        .filter((lyric) => lyric !== ""),
     )
     .filter((lines) => lines.length > 0);
 }
@@ -73,12 +77,45 @@ const LyricViewer = ({
   fontScale = 1,
   fontFamily,
   mode = "line",
+  onShrinkChange,
 }: Props) => {
   const lines = useMemo(
     () => lyricPages(song.content, mode),
     [song.content, mode],
   );
   const [current, setCurrent] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const baseFontSize = `calc(${BASE_FONT_SIZE[mode]} * ${fontScale})`;
+
+  // Achica la letra hasta el tamaño máximo que entra entero en pantalla (sin
+  // scroll). Búsqueda binaria para quedar pegado al máximo: con pasos fijos el
+  // tamaño ajustado podía quedar más chico que el del paso anterior.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const overflows = () =>
+      el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth;
+    const fit = () => {
+      el.style.fontSize = baseFontSize;
+      const shrunk = overflows();
+      if (shrunk) {
+        let lo = 6;
+        let hi = parseFloat(getComputedStyle(el).fontSize);
+        while (hi - lo > 0.5) {
+          const mid = (lo + hi) / 2;
+          el.style.fontSize = `${mid}px`;
+          if (overflows()) hi = mid;
+          else lo = mid;
+        }
+        el.style.fontSize = `${lo}px`;
+      }
+      onShrinkChange?.(shrunk);
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [baseFontSize, fontFamily, lines, current, onShrinkChange]);
 
   useEffect(() => setCurrent(0), [song.id, mode]);
 
@@ -98,7 +135,9 @@ const LyricViewer = ({
 
   if (lines.length === 0) {
     return (
-      <Box className="lyricViewerEmpty">Esta canción no tiene letra cargada</Box>
+      <Box className="lyricViewerEmpty">
+        Esta canción no tiene letra cargada
+      </Box>
     );
   }
 
@@ -108,20 +147,16 @@ const LyricViewer = ({
     const { left, width } = e.currentTarget.getBoundingClientRect();
     const isRightHalf = e.clientX - left > width / 2;
     setCurrent((i) =>
-      isRightHalf
-        ? Math.min(i + 1, lines.length - 1)
-        : Math.max(i - 1, 0),
+      isRightHalf ? Math.min(i + 1, lines.length - 1) : Math.max(i - 1, 0),
     );
   };
 
   return (
     <Box
+      ref={ref}
       className="lyricViewer"
       onClick={onClick}
-      style={{
-        fontSize: `calc(${BASE_FONT_SIZE[mode]} * ${fontScale})`,
-        fontFamily,
-      }}
+      style={{ fontFamily }}
     >
       {lines[current]}
     </Box>
