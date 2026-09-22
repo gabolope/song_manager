@@ -63,6 +63,8 @@ const Configuration = () => {
               </Dialog.Header>
               <Dialog.Body>
                 <Stack gap={5} align="stretch">
+                  {!isLyrics && (
+                  <>
                   <Stack gap={2} align="stretch">
                     <SectionLabel>Apariencia</SectionLabel>
                     <HStack
@@ -88,6 +90,8 @@ const Configuration = () => {
                   </Stack>
 
                   <Separator />
+                  </>
+                  )}
                   <Stack gap={2} align="stretch">
                     <SectionLabel>Sesión</SectionLabel>
                     <Button
