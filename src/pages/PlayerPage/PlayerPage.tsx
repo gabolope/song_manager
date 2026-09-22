@@ -131,7 +131,7 @@ const PlayerPage = () => {
                 <MdFullscreen />
                 <span className="hideOnNarrow">Pantalla completa</span>
               </Button>
-              <Configuration height={8} />
+              <Configuration />
             </HStack>
           </HStack>
         </GridItem>

@@ -3,6 +3,7 @@ import { LuMoon, LuSun } from "react-icons/lu";
 import {
   Button,
   CloseButton,
+  IconButton,
   Dialog,
   HStack,
   Portal,
@@ -19,10 +20,6 @@ import CreateUserDialog from "./CreateUserDialog";
 import SongUploader from "./SongUploader";
 import UserManager from "./UserManager";
 
-interface Props {
-  height: number;
-}
-
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   <Text
     fontSize="xs"
@@ -35,7 +32,7 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
   </Text>
 );
 
-const Configuration = ({ height }: Props) => {
+const Configuration = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin, isDemo, wantsToDirect, setWantsToDirect, logout } = useAuth();
@@ -53,9 +50,9 @@ const Configuration = ({ height }: Props) => {
     <>
       <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
         <Dialog.Trigger asChild>
-          <Button variant="outline" h={height} aria-label="Configuración">
+          <IconButton variant="outline" size="sm" aria-label="Configuración">
             <CiSettings />
-          </Button>
+          </IconButton>
         </Dialog.Trigger>
         <Portal>
           <Dialog.Backdrop />

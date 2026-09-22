@@ -3,15 +3,10 @@ import {
   Grid,
   GridItem,
   HStack,
-  IconButton,
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import {
-  MdFullscreen,
-  MdFullscreenExit,
-  MdOutlineSensors,
-} from "react-icons/md";
+import { MdOutlineSensors } from "react-icons/md";
 import LyricViewer, {
   type LyricMode,
   type LyricTransition,
@@ -112,6 +107,13 @@ const LyricsPage = () => {
           borderBottom="1px solid var(--border)"
           background="var(--bg-panel)"
           gap="6px"
+          css={{
+            "& button:not(:disabled):hover, & button[data-state=open]": {
+              background: "var(--bg-selected)",
+              borderColor: "var(--accent)",
+              color: "var(--accent)",
+            },
+          }}
         >
           <HStack gap="10px">
             <Badge
@@ -125,6 +127,7 @@ const LyricsPage = () => {
           <LyricsActions
             mode={{ value: mode, setValue: setMode }}
             transition={{ value: transition, setValue: setTransition }}
+            fullscreen={{ value: fullscreen, setValue: setFullscreen }}
             font={{
               ...fontSize,
               canIncrease: fontSize.canIncrease && !(song && lyricsShrunk),
@@ -140,17 +143,7 @@ const LyricsPage = () => {
           />
           <HStack gap="8px" justifySelf="end">
             <UserBadge />
-            <IconButton
-              aria-label={
-                fullscreen ? "Salir de pantalla completa" : "Pantalla completa"
-              }
-              variant="outline"
-              size="sm"
-              onClick={() => setFullscreen(!fullscreen)}
-            >
-              {fullscreen ? <MdFullscreenExit /> : <MdFullscreen />}
-            </IconButton>
-            {!fullscreen && <Configuration height={8} />}
+            {!fullscreen && <Configuration />}
           </HStack>
         </Grid>
       </GridItem>

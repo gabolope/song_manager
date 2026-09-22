@@ -89,7 +89,7 @@ const ViewerBar = ({
         </Button>
         <HStack gap="8px">
           <UserBadge />
-          <Configuration height={8} />
+          <Configuration />
         </HStack>
       </HStack>
       <ActionBar.Root open={isLive}>
