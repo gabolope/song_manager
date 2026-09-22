@@ -44,6 +44,7 @@ const Configuration = ({ height }: Props) => {
   const [createUserOpen, setCreateUserOpen] = useState(false);
 
   const isDirector = location.pathname === "/director";
+  const isLyrics = location.pathname === "/lyrics";
   // Subir canciones y gestionar usuarios escriben en Firestore de verdad:
   // en modo demo no hay cuenta real detrás, así que se ocultan.
   const isRealAdmin = isAdmin && !isDemo;
@@ -96,12 +97,12 @@ const Configuration = ({ height }: Props) => {
                       variant="outline"
                       onClick={() => {
                         setOpen(false);
-                        navigate("/lyrics");
+                        navigate(isLyrics ? "/player" : "/lyrics");
                       }}
                     >
-                      Modo Lyrics
+                      {isLyrics ? "Volver al reproductor" : "Modo Lyrics"}
                     </Button>
-                    {isAdmin && (
+                    {isAdmin && !isLyrics && (
                       <HStack
                         justify="space-between"
                         padding="10px 12px"
