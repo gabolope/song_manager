@@ -209,7 +209,14 @@ const LyricsActions = ({
       </Menu.Root>
       <Menu.Root>
         <Menu.Trigger asChild>
-          <IconButton aria-label="Color del fondo" variant="outline" size="sm">
+          <IconButton
+            aria-label="Color del fondo"
+            variant="outline"
+            size="sm"
+            disabled={
+              !BACKGROUNDS.find((b) => b.value === background.type)?.usesColor
+            }
+          >
             <MdPalette />
           </IconButton>
         </Menu.Trigger>
