@@ -1,4 +1,11 @@
-import { Box, HStack, IconButton, Menu, Portal } from "@chakra-ui/react";
+import {
+  Box,
+  HStack,
+  IconButton,
+  Menu,
+  NativeSelect,
+  Portal,
+} from "@chakra-ui/react";
 import { IoMdCheckmark } from "react-icons/io";
 import {
   MdFontDownload,
@@ -8,9 +15,19 @@ import {
   MdWallpaper,
 } from "react-icons/md";
 import { BACKGROUNDS } from "@/components/LyricViewer/backgrounds";
-import { BACKGROUND_COLORS, DEFAULT_BACKGROUND_COLORS, LYRIC_FONTS } from "./lyricsPageConstants";
+import type { LyricMode } from "@/components/LyricViewer/LyricViewer";
+import {
+  BACKGROUND_COLORS,
+  DEFAULT_BACKGROUND_COLORS,
+  LYRIC_FONTS,
+  LYRIC_MODES,
+} from "./lyricsPageConstants";
 
 interface Props {
+  mode: {
+    value: LyricMode;
+    setValue: (value: LyricMode) => void;
+  };
   font: {
     increase: () => void;
     decrease: () => void;
@@ -27,8 +44,22 @@ interface Props {
   };
 }
 
-const LyricsActions = ({ font, background }: Props) => (
+const LyricsActions = ({ mode, font, background }: Props) => (
   <HStack gap="8px" justifySelf="center">
+    <NativeSelect.Root size="sm" width="auto">
+      <NativeSelect.Field
+        aria-label="Modo de letra"
+        value={mode.value}
+        onChange={(e) => mode.setValue(e.target.value as LyricMode)}
+      >
+        {LYRIC_MODES.map((m) => (
+          <option key={m.value} value={m.value}>
+            {m.label}
+          </option>
+        ))}
+      </NativeSelect.Field>
+      <NativeSelect.Indicator />
+    </NativeSelect.Root>
     <IconButton
       aria-label="Disminuir tamaño de letra"
       variant="outline"

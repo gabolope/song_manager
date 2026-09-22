@@ -4,10 +4,20 @@ import type { SongDTO } from "@/types/song";
 import { parseChordProBody } from "@/utils/chordProBody";
 import "./LyricViewer.css";
 
+export type LyricMode = "line" | "section" | "song";
+
+// Tamaño base por modo: cuanto más texto entra en pantalla, más chica la letra.
+const BASE_FONT_SIZE: Record<LyricMode, string> = {
+  line: "clamp(0.9rem, 9vw, 8rem)",
+  section: "clamp(0.8rem, 4vw, 4rem)",
+  song: "clamp(0.7rem, 2vw, 2rem)",
+};
+
 interface Props {
   song: SongDTO;
   fontScale?: number;
   fontFamily?: string;
+  mode?: LyricMode;
 }
 
 const ACCENTS: Record<string, string> = {
@@ -37,28 +47,40 @@ function normalizeLyric(text: string): string {
     .replace(/,\s*/g, ",\n"); // salto de línea después de cada coma
 }
 
-// Aplana las secciones de parseChordProBody a solo texto de letra, sin
+// Reduce las secciones de parseChordProBody a solo texto de letra, sin
 // acordes ni directivas: descarta líneas "raw" (directivas sueltas) y pares
 // sin letra (separadores en blanco dentro de una sección explícita).
-function flattenLyricLines(content: string): string[] {
-  const { sections } = parseChordProBody(content);
-  const lines: string[] = [];
-  for (const section of sections) {
-    for (const line of section.lines) {
-      if (line.type === "pair") {
-        const lyric = normalizeLyric(line.lyric);
-        if (lyric !== "") lines.push(lyric);
-      }
-    }
-  }
-  return lines;
+function lyricSections(content: string): string[][] {
+  return parseChordProBody(content)
+    .sections.map((section) =>
+      section.lines.flatMap((line) =>
+        line.type === "pair" ? [normalizeLyric(line.lyric)] : [],
+      ).filter((lyric) => lyric !== ""),
+    )
+    .filter((lines) => lines.length > 0);
 }
 
-const LyricViewer = ({ song, fontScale = 1, fontFamily }: Props) => {
-  const lines = useMemo(() => flattenLyricLines(song.content), [song.content]);
+// Agrupa la letra en "páginas" según el modo: cada una se muestra entera.
+function lyricPages(content: string, mode: LyricMode): string[] {
+  const sections = lyricSections(content);
+  if (mode === "line") return sections.flat();
+  const pages = sections.map((lines) => lines.join("\n"));
+  return mode === "section" ? pages : [pages.join("\n\n")];
+}
+
+const LyricViewer = ({
+  song,
+  fontScale = 1,
+  fontFamily,
+  mode = "line",
+}: Props) => {
+  const lines = useMemo(
+    () => lyricPages(song.content, mode),
+    [song.content, mode],
+  );
   const [current, setCurrent] = useState(0);
 
-  useEffect(() => setCurrent(0), [song.id]);
+  useEffect(() => setCurrent(0), [song.id, mode]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -97,7 +119,7 @@ const LyricViewer = ({ song, fontScale = 1, fontFamily }: Props) => {
       className="lyricViewer"
       onClick={onClick}
       style={{
-        fontSize: `calc(clamp(0.9rem, 9vw, 8rem) * ${fontScale})`,
+        fontSize: `calc(${BASE_FONT_SIZE[mode]} * ${fontScale})`,
         fontFamily,
       }}
     >

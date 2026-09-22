@@ -12,7 +12,9 @@ import {
   MdFullscreenExit,
   MdOutlineSensors,
 } from "react-icons/md";
-import LyricViewer from "@/components/LyricViewer/LyricViewer";
+import LyricViewer, {
+  type LyricMode,
+} from "@/components/LyricViewer/LyricViewer";
 import { BACKGROUNDS } from "@/components/LyricViewer/backgrounds";
 import Configuration from "@/components/Configuration/Configuration";
 import UserBadge from "@/components/UserBadge";
@@ -38,6 +40,7 @@ const LyricsPage = () => {
   // SongViewer (namespace propio en localStorage) porque acá la base de
   // tamaño es otra (una sola línea gigante, no un cuerpo de canción).
   const fontSize = useSongFontSize(user ? `${user.uid}-lyrics` : undefined);
+  const [mode, setMode] = useState<LyricMode>("line");
   const [fontFamily, setFontFamily] = useState(LYRIC_FONTS[0].value);
   const [backgroundType, setBackgroundType] = useState(BACKGROUNDS[0].value);
   const [backgroundColor, setBackgroundColor] = useState(
@@ -117,6 +120,7 @@ const LyricsPage = () => {
             </Badge>
           </HStack>
           <LyricsActions
+            mode={{ value: mode, setValue: setMode }}
             font={{ ...fontSize, family: fontFamily, setFamily: setFontFamily }}
             background={{
               type: backgroundType,
@@ -147,6 +151,7 @@ const LyricsPage = () => {
             song={song}
             fontScale={fontSize.scale}
             fontFamily={fontFamily}
+            mode={mode}
           />
         ) : (
           <HStack h="100%" justify="center" color="var(--text-muted)">

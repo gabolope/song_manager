@@ -1,3 +1,5 @@
+import type { LyricMode } from "@/components/LyricViewer/LyricViewer";
+
 // Fuentes web-safe (instaladas en prácticamente cualquier SO) más los
 // genéricos nativos de CSS: cubren estilos bien distintos sin depender de
 // una fuente externa que pueda fallar por wifi durante una sesión en vivo.
@@ -43,3 +45,9 @@ export const DEFAULT_BACKGROUND_COLORS: Record<string, string> = {
   Fireflies: "#facc15",
   Waves: "#4973ff",
 };
+
+export const LYRIC_MODES: { label: string; value: LyricMode }[] = [
+  { label: "Línea a línea", value: "line" },
+  { label: "Sección a sección", value: "section" },
+  { label: "Canción entera", value: "song" },
+];
