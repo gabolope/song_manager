@@ -1,4 +1,7 @@
-import type { LyricMode } from "@/components/LyricViewer/LyricViewer";
+import type {
+  LyricMode,
+  LyricTransition,
+} from "@/components/LyricViewer/LyricViewer";
 
 // Fuentes web-safe (instaladas en prácticamente cualquier SO) más los
 // genéricos nativos de CSS: cubren estilos bien distintos sin depender de
@@ -50,4 +53,13 @@ export const LYRIC_MODES: { label: string; value: LyricMode }[] = [
   { label: "Línea a línea", value: "line" },
   { label: "Sección a sección", value: "section" },
   { label: "Canción entera", value: "song" },
+];
+
+export const LYRIC_TRANSITIONS: { label: string; value: LyricTransition }[] = [
+  { label: "Fundido", value: "fade" },
+  { label: "Deslizar", value: "slide" },
+  { label: "Subir", value: "rise" },
+  { label: "Zoom", value: "zoom" },
+  { label: "Desenfoque", value: "blur" },
+  { label: "Sin transición", value: "none" },
 ];

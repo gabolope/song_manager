@@ -24,3 +24,55 @@
   height: 100%;
   color: var(--text-muted);
 }
+
+.lyricTransition-fade {
+  animation: lyricFade 0.4s ease both;
+}
+.lyricTransition-slide {
+  animation: lyricSlide 0.4s ease both;
+}
+.lyricTransition-rise {
+  animation: lyricRise 0.4s ease both;
+}
+.lyricTransition-zoom {
+  animation: lyricZoom 0.4s ease both;
+}
+.lyricTransition-blur {
+  animation: lyricBlur 0.5s ease both;
+}
+
+@keyframes lyricFade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes lyricSlide {
+  from {
+    opacity: 0;
+    transform: translateX(8%);
+  }
+}
+@keyframes lyricRise {
+  from {
+    opacity: 0;
+    transform: translateY(8%);
+  }
+}
+@keyframes lyricZoom {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+@keyframes lyricBlur {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lyricViewer {
+    animation: none;
+  }
+}

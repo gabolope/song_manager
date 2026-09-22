@@ -8,6 +8,7 @@ import {
 } from "@chakra-ui/react";
 import { IoMdCheckmark } from "react-icons/io";
 import {
+  MdAnimation,
   MdFontDownload,
   MdOutlineTextDecrease,
   MdOutlineTextIncrease,
@@ -15,18 +16,26 @@ import {
   MdWallpaper,
 } from "react-icons/md";
 import { BACKGROUNDS } from "@/components/LyricViewer/backgrounds";
-import type { LyricMode } from "@/components/LyricViewer/LyricViewer";
+import type {
+  LyricMode,
+  LyricTransition,
+} from "@/components/LyricViewer/LyricViewer";
 import {
   BACKGROUND_COLORS,
   DEFAULT_BACKGROUND_COLORS,
   LYRIC_FONTS,
   LYRIC_MODES,
+  LYRIC_TRANSITIONS,
 } from "./lyricsPageConstants";
 
 interface Props {
   mode: {
     value: LyricMode;
     setValue: (value: LyricMode) => void;
+  };
+  transition: {
+    value: LyricTransition;
+    setValue: (value: LyricTransition) => void;
   };
   font: {
     increase: () => void;
@@ -44,7 +53,7 @@ interface Props {
   };
 }
 
-const LyricsActions = ({ mode, font, background }: Props) => (
+const LyricsActions = ({ mode, transition, font, background }: Props) => (
   <HStack gap="8px" justifySelf="center">
     <NativeSelect.Root size="sm" width="auto">
       <NativeSelect.Field
@@ -110,6 +119,34 @@ const LyricsActions = ({ mode, font, background }: Props) => (
     </Menu.Root>
     <Menu.Root>
       <Menu.Trigger asChild>
+        <IconButton aria-label="Transición" variant="outline" size="sm">
+          <MdAnimation />
+        </IconButton>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content>
+            <Menu.RadioItemGroup
+              value={transition.value}
+              onValueChange={(e) =>
+                transition.setValue(e.value as LyricTransition)
+              }
+            >
+              {LYRIC_TRANSITIONS.map((t) => (
+                <Menu.RadioItem key={t.value} value={t.value}>
+                  {t.label}
+                  <Menu.ItemIndicator>
+                    <IoMdCheckmark />
+                  </Menu.ItemIndicator>
+                </Menu.RadioItem>
+              ))}
+            </Menu.RadioItemGroup>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
+    <Menu.Root>
+      <Menu.Trigger asChild>
         <IconButton aria-label="Cambiar fondo" variant="outline" size="sm">
           <MdWallpaper />
         </IconButton>
@@ -122,7 +159,8 @@ const LyricsActions = ({ mode, font, background }: Props) => (
               onValueChange={(e) => {
                 background.setType(e.value);
                 background.setColor(
-                  DEFAULT_BACKGROUND_COLORS[e.value] ?? BACKGROUND_COLORS[0].value,
+                  DEFAULT_BACKGROUND_COLORS[e.value] ??
+                    BACKGROUND_COLORS[0].value,
                 );
               }}
             >

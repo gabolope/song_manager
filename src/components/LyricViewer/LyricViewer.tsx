@@ -5,6 +5,8 @@ import { parseChordProBody } from "@/utils/chordProBody";
 import "./LyricViewer.css";
 
 export type LyricMode = "line" | "section" | "song";
+export type LyricTransition =
+  "none" | "fade" | "slide" | "rise" | "zoom" | "blur";
 
 // Tamaño base por modo: cuanto más texto entra en pantalla, más chica la letra.
 const BASE_FONT_SIZE: Record<LyricMode, string> = {
@@ -18,6 +20,7 @@ interface Props {
   fontScale?: number;
   fontFamily?: string;
   mode?: LyricMode;
+  transition?: LyricTransition;
   // Avisa si la letra se tuvo que achicar para entrar (no hay más lugar).
   onShrinkChange?: (shrunk: boolean) => void;
 }
@@ -77,6 +80,7 @@ const LyricViewer = ({
   fontScale = 1,
   fontFamily,
   mode = "line",
+  transition = "fade",
   onShrinkChange,
 }: Props) => {
   const lines = useMemo(
@@ -153,8 +157,12 @@ const LyricViewer = ({
 
   return (
     <Box
+      // key: remonta en cada cambio de línea para reiniciar la animación CSS.
+      // La animación va sobre el propio contenedor medido: su transform no
+      // altera scrollHeight/clientHeight, así que no interfiere con el ajuste.
+      key={current}
       ref={ref}
-      className="lyricViewer"
+      className={`lyricViewer lyricTransition-${transition}`}
       onClick={onClick}
       style={{ fontFamily }}
     >

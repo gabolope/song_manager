@@ -14,6 +14,7 @@ import {
 } from "react-icons/md";
 import LyricViewer, {
   type LyricMode,
+  type LyricTransition,
 } from "@/components/LyricViewer/LyricViewer";
 import { BACKGROUNDS } from "@/components/LyricViewer/backgrounds";
 import Configuration from "@/components/Configuration/Configuration";
@@ -43,6 +44,7 @@ const LyricsPage = () => {
   // La letra se ajusta sola al espacio: si ya se achicó, agrandar no hace nada.
   const [lyricsShrunk, setLyricsShrunk] = useState(false);
   const [mode, setMode] = useState<LyricMode>("line");
+  const [transition, setTransition] = useState<LyricTransition>("fade");
   const [fontFamily, setFontFamily] = useState(LYRIC_FONTS[0].value);
   const [backgroundType, setBackgroundType] = useState(BACKGROUNDS[0].value);
   const [backgroundColor, setBackgroundColor] = useState(
@@ -122,6 +124,7 @@ const LyricsPage = () => {
           </HStack>
           <LyricsActions
             mode={{ value: mode, setValue: setMode }}
+            transition={{ value: transition, setValue: setTransition }}
             font={{
               ...fontSize,
               canIncrease: fontSize.canIncrease && !(song && lyricsShrunk),
@@ -158,6 +161,7 @@ const LyricsPage = () => {
             fontScale={fontSize.scale}
             fontFamily={fontFamily}
             mode={mode}
+            transition={transition}
             onShrinkChange={setLyricsShrunk}
           />
         ) : (
