@@ -317,3 +317,11 @@ body {
     width: var(--collapsed-width, 0);
   }
 }
+
+/* Logo y nombre de la app: solo en escritorio (mismo corte "lg" de Chakra
+   en el que aparece el menú hamburguesa). */
+@media (max-width: 1023.98px) {
+  .hideBelowDesktop {
+    display: none;
+  }
+}

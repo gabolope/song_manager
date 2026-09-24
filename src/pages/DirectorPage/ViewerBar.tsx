@@ -60,10 +60,10 @@ const ViewerBar = ({
           <img
             src={logoSrc}
             alt=""
-            className="hideOnNarrow"
+            className="hideBelowDesktop"
             style={{ height: 24, width: 24 }}
           />
-          <Text fontWeight="700" fontSize="1.05rem" className="hideOnNarrow">
+          <Text fontWeight="700" fontSize="1.05rem" className="hideBelowDesktop">
             Song Manager
           </Text>
           <Badge colorPalette="blue" variant="subtle">

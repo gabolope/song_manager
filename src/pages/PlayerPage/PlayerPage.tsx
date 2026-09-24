@@ -101,13 +101,13 @@ const PlayerPage = () => {
               <img
                 src={logoSrc}
                 alt=""
-                className="hideOnNarrow"
+                className="hideBelowDesktop"
                 style={{ height: 24, width: 24 }}
               />
               <Text
                 fontWeight="700"
                 fontSize="1.05rem"
-                className="hideOnNarrow"
+                className="hideBelowDesktop"
               >
                 Song Manager
               </Text>
