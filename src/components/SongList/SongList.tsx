@@ -1,4 +1,4 @@
-import { Button, Text } from "@chakra-ui/react";
+import { IconButton, Text } from "@chakra-ui/react";
 import { Fragment, useMemo, useState } from "react";
 import type { SongDTO, SongTipo } from "@/types/song";
 import { IoAddCircleOutline } from "react-icons/io5";
@@ -209,7 +209,8 @@ const SongList = ({
                     </div>
                     <div>
                       {selected === index && (
-                        <Button
+                        <IconButton
+                          aria-label="Agregar a la sesión"
                           onClick={(e) => {
                             e.stopPropagation();
                             addToBook(song);
@@ -226,7 +227,7 @@ const SongList = ({
                           }
                         >
                           <IoAddCircleOutline />
-                        </Button>
+                        </IconButton>
                       )}
                     </div>
                   </div>

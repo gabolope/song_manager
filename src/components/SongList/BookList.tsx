@@ -1,5 +1,5 @@
 import type { SongDTO } from "@/types/song";
-import { Button } from "@chakra-ui/react";
+import { IconButton } from "@chakra-ui/react";
 import {
   DndContext,
   KeyboardSensor,
@@ -104,18 +104,19 @@ const BookRow = ({ song, selected, draggable, onClick, onDelete }: RowProps) => 
         </div>
         <div>
           {selected && onDelete && (
-            <Button
+            <IconButton
+              aria-label="Quitar de la sesión"
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(song.id);
               }}
               colorPalette={"red"}
-              size="xs"
+              size="sm"
               borderRadius={"md"}
             >
               <MdDeleteOutline />
-            </Button>
+            </IconButton>
           )}
         </div>
       </div>
