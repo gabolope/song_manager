@@ -97,9 +97,10 @@ const SongViewer = () => {
     return () => observer.disconnect();
   }, [html, fontScale]);
 
-  // Tonos particulares de cada director (ver EditSongDialog), solo tiene
-  // sentido mostrarlos mirando el repertorio general: dentro de una sesión
-  // ya se ve/controla el tono efectivo vía transpose.
+  // Tonos particulares de cada director (ver EditSongDialog): se muestran
+  // tanto en el repertorio general como dentro de una sesión, para que cada
+  // director vea su tono de referencia aunque el tono efectivo (vía
+  // transpose) sea otro.
   const { data: users } = useUsers();
   const directorKeys = useMemo(() => {
     if (!displayedSong?.keysByDirector || !users) return [];
@@ -172,17 +173,16 @@ const SongViewer = () => {
             {transpose})
           </span>
         )}
-        {isFromRepertoire &&
-          directorKeys.map((d) => (
-            <Badge
-              key={d.name}
-              colorPalette={d.color}
-              variant="subtle"
-              className="directorKeyBadge"
-            >
-              {d.name}: {d.key}
-            </Badge>
-          ))}
+        {directorKeys.map((d) => (
+          <Badge
+            key={d.name}
+            colorPalette={d.color}
+            variant="subtle"
+            className="directorKeyBadge"
+          >
+            {d.name}: {d.key}
+          </Badge>
+        ))}
       </div>
       <div
         className="songContent"
