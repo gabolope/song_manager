@@ -1,4 +1,5 @@
-import { IconButton } from "@chakra-ui/react";
+import { Button, Dialog, IconButton, Portal, Text } from "@chakra-ui/react";
+import { useState } from "react";
 import { IoAdd, IoTrash } from "react-icons/io5";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import {
@@ -21,6 +22,10 @@ const SECTION_LABEL: Record<SectionKind, string> = {
 };
 
 const SongBodyEditor = ({ sections, onChange }: Props) => {
+  const [sectionToDelete, setSectionToDelete] = useState<EditorSection | null>(
+    null,
+  );
+
   const updateSection = (id: string, patch: Partial<EditorSection>) => {
     onChange(sections.map((s) => (s.id === id ? { ...s, ...patch } : s)));
   };
@@ -49,9 +54,10 @@ const SongBodyEditor = ({ sections, onChange }: Props) => {
     });
   };
 
-  const addLine = (sectionId: string) => {
-    const section = sections.find((s) => s.id === sectionId)!;
-    updateSection(sectionId, { lines: [...section.lines, newEditorLine()] });
+  const addLine = (sectionId: string, at: number) => {
+    const lines = [...sections.find((s) => s.id === sectionId)!.lines];
+    lines.splice(at, 0, newEditorLine());
+    updateSection(sectionId, { lines });
   };
 
   const removeLine = (sectionId: string, lineId: string) => {
@@ -116,7 +122,7 @@ const SongBodyEditor = ({ sections, onChange }: Props) => {
                 variant="ghost"
                 colorPalette="red"
                 disabled={sections.length === 1}
-                onClick={() => removeSection(section.id)}
+                onClick={() => setSectionToDelete(section)}
               >
                 <IoTrash />
               </IconButton>
@@ -124,7 +130,7 @@ const SongBodyEditor = ({ sections, onChange }: Props) => {
           </div>
 
           <div className="bodySectionLines">
-            {section.lines.map((line) => (
+            {section.lines.map((line, lineIndex) => (
               <div key={line.id} className="bodyLine">
                 {line.type === "raw" ? (
                   <input
@@ -142,7 +148,7 @@ const SongBodyEditor = ({ sections, onChange }: Props) => {
                     <input
                       className="bodyChordsRow"
                       value={line.chords}
-                      placeholder=" "
+                      placeholder="acordes"
                       spellCheck={false}
                       onChange={(e) =>
                         updateLine(section.id, line.id, {
@@ -165,25 +171,33 @@ const SongBodyEditor = ({ sections, onChange }: Props) => {
                     />
                   </div>
                 )}
-                <IconButton
-                  aria-label="Eliminar línea"
-                  size="2xs"
-                  variant="ghost"
-                  colorPalette="red"
-                  className="bodyLineRemove"
-                  onClick={() => removeLine(section.id, line.id)}
-                >
-                  <IoTrash />
-                </IconButton>
+                {line.type === "pair" &&
+                  !line.chords.trim() &&
+                  !line.lyric.trim() &&
+                  section.lines.length > 1 && (
+                    <IconButton
+                      aria-label="Eliminar línea"
+                      size="2xs"
+                      variant="ghost"
+                      colorPalette="red"
+                      className="bodyLineRemove"
+                      onClick={() => removeLine(section.id, line.id)}
+                    >
+                      <IoTrash />
+                    </IconButton>
+                  )}
+                <div className="bodyLineInsert">
+                  <button
+                    type="button"
+                    aria-label="Insertar línea"
+                    title="Insertar línea"
+                    onClick={() => addLine(section.id, lineIndex + 1)}
+                  >
+                    <IoAdd />
+                  </button>
+                </div>
               </div>
             ))}
-            <button
-              type="button"
-              className="bodyAddLineBtn"
-              onClick={() => addLine(section.id)}
-            >
-              <IoAdd /> Línea
-            </button>
           </div>
         </div>
       ))}
@@ -204,6 +218,50 @@ const SongBodyEditor = ({ sections, onChange }: Props) => {
           <IoAdd /> Coro
         </button>
       </div>
+
+      <Dialog.Root
+        role="alertdialog"
+        open={!!sectionToDelete}
+        onOpenChange={(e) => !e.open && setSectionToDelete(null)}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                <Dialog.Title>Eliminar sección</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <Text>
+                  ¿Seguro que querés eliminar "
+                  {sectionToDelete?.label ||
+                    (sectionToDelete && SECTION_LABEL[sectionToDelete.kind])}
+                  " con todas sus líneas?
+                </Text>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setSectionToDelete(null)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  colorPalette="red"
+                  onClick={() => {
+                    if (sectionToDelete) removeSection(sectionToDelete.id);
+                    setSectionToDelete(null);
+                  }}
+                >
+                  Eliminar
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </div>
   );
 };

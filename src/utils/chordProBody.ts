@@ -22,6 +22,10 @@ export interface EditorSection {
   id: string;
   kind: SectionKind;
   label: string;
+  // Nombre de una sección ChordPro que no es estrofa ni coro
+  // ({start_of_ending}, {start_of_bridge}...): se edita como estrofa pero se
+  // guarda con su directiva original para no perder el tipo.
+  tag?: string;
   lines: EditorLine[];
 }
 
@@ -41,6 +45,9 @@ const EOP_RE = /^\{\s*(?:eop|end_of_part|eov|end_of_verse)\s*\}\s*$/i;
 const SOC_RE =
   /^\{\s*(?:soc|start_of_chorus)\s*(?::\s*(?:label\s*=\s*)?"?([^"}]*?)"?\s*)?\}\s*$/i;
 const EOC_RE = /^\{\s*(?:eoc|end_of_chorus)\s*\}\s*$/i;
+const START_OF_RE =
+  /^\{\s*start_of_(\w+)\s*(?::\s*(?:label\s*=\s*)?"?([^"}]*?)"?\s*)?\}\s*$/i;
+const END_OF_RE = /^\{\s*end_of_\w+\s*\}\s*$/i;
 const DIRECTIVE_RE = /^\{.*\}\s*$/;
 
 // Separa una línea de letra en su línea de acordes y su línea de letra,
@@ -92,7 +99,9 @@ export function parseChordProBody(content: string): {
       SOP_RE.test(trimmed) ||
       SOC_RE.test(trimmed) ||
       EOP_RE.test(trimmed) ||
-      EOC_RE.test(trimmed);
+      EOC_RE.test(trimmed) ||
+      START_OF_RE.test(trimmed) ||
+      END_OF_RE.test(trimmed);
     if (trimmed === "" || (DIRECTIVE_RE.test(trimmed) && !isSectionMarker)) {
       headerLines.push(rawLines[i]);
       i++;
@@ -138,7 +147,24 @@ export function parseChordProBody(content: string): {
       currentExplicit = true;
       continue;
     }
-    if (EOP_RE.test(trimmed) || EOC_RE.test(trimmed)) {
+    const startOfMatch = trimmed.match(START_OF_RE);
+    if (startOfMatch) {
+      closeCurrent();
+      current = {
+        id: nextEditorId(),
+        kind: "verse",
+        label: (startOfMatch[2] ?? "").trim(),
+        tag: startOfMatch[1].toLowerCase(),
+        lines: [],
+      };
+      currentExplicit = true;
+      continue;
+    }
+    if (
+      EOP_RE.test(trimmed) ||
+      EOC_RE.test(trimmed) ||
+      END_OF_RE.test(trimmed)
+    ) {
       closeCurrent();
       continue;
     }
@@ -211,15 +237,14 @@ export function serializeChordProBody(
 ): string {
   const body = sections
     .map((section) => {
-      const open =
+      const [start, end] =
         section.kind === "chorus"
-          ? section.label
-            ? `{soc:${section.label}}`
-            : "{soc}"
-          : section.label
-            ? `{sop:${section.label}}`
-            : "{sop}";
-      const close = section.kind === "chorus" ? "{eoc}" : "{eop}";
+          ? ["soc", "eoc"]
+          : section.tag
+            ? [`start_of_${section.tag}`, `end_of_${section.tag}`]
+            : ["sop", "eop"];
+      const open = section.label ? `{${start}:${section.label}}` : `{${start}}`;
+      const close = `{${end}}`;
       const lines = section.lines.map((line) =>
         line.type === "raw"
           ? line.text

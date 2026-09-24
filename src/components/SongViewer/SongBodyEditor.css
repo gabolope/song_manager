@@ -27,6 +27,14 @@
   margin-bottom: 0.5rem;
 }
 
+/* Mismo alto para el select de tipo y la etiqueta: sin un alto explícito,
+   cada navegador dibuja el <select> más alto que un <input>. */
+.bodySectionKind,
+.bodySectionLabel {
+  box-sizing: border-box;
+  height: 1.75rem;
+}
+
 .bodySectionKind {
   border: 1px solid var(--border);
   background: var(--bg-panel);
@@ -56,10 +64,14 @@
 .bodySectionLines {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  --line-gap: 1.3rem;
+  gap: var(--line-gap);
+  /* Hueco tras la última línea para su "+" de insertar al final. */
+  padding-bottom: var(--line-gap);
 }
 
 .bodyLine {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.3rem;
@@ -83,8 +95,8 @@
   border: none;
   background: transparent;
   outline: none;
-  font-family: ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo,
-    monospace;
+  font-family:
+    ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
   font-size: 0.85rem;
   line-height: 1.3;
   letter-spacing: 0;
@@ -94,12 +106,14 @@
 }
 
 .bodyChordsRow {
+  padding-bottom: 0;
   color: var(--chord-color);
   font-weight: 600;
-  border-bottom: 1px dashed var(--border-strong);
+  border-bottom: 1px solid transparent;
 }
 
 .bodyLyricRow {
+  padding-top: 0;
   color: var(--text);
   border-bottom: 1px solid transparent;
 }
@@ -118,6 +132,55 @@
   opacity: 1;
 }
 
+/* Separador entre líneas: una línea punteada horizontal en el medio del
+   hueco (gap de .bodySectionLines) con un "+" centrado encima que inserta
+   una línea nueva en ese lugar. */
+.bodyLineInsert {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--line-gap) / -2);
+  height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.bodyLineInsert::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--border-strong);
+}
+
+.bodyLineInsert button {
+  position: relative;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.12s ease;
+}
+
+.bodyLineInsert button:hover,
+.bodyLineInsert button:focus-visible {
+  opacity: 1;
+  color: var(--text);
+}
+
 .bodyRawInput {
   flex: 1;
   min-width: 0;
@@ -130,7 +193,6 @@
   padding: 0.2rem 0.4rem;
 }
 
-.bodyAddLineBtn,
 .bodyAddSectionBtn {
   display: inline-flex;
   align-items: center;
@@ -143,10 +205,11 @@
   padding: 0.25rem 0.55rem;
   font-size: 0.75rem;
   cursor: pointer;
-  transition: background-color 0.12s ease, color 0.12s ease;
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
 }
 
-.bodyAddLineBtn:hover,
 .bodyAddSectionBtn:hover {
   background-color: var(--bg-hover);
   color: var(--text);

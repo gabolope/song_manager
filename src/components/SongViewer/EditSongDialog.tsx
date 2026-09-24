@@ -35,6 +35,7 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
   const { editSong, isPending } = useEditSong();
   const { removeSong, isPending: isDeleting } = useDeleteSong();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [confirmingDiscard, setConfirmingDiscard] = useState(false);
   // Directores: son quienes pueden tener un tono propio para leer la
   // canción (ver DirectorPage/ProtectedRoute, que reservan esa vista a
   // role === "admin").
@@ -159,6 +160,12 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
       <Dialog.Root
         open={!!song}
         onOpenChange={(e) => {
+          // Cerrar con la X, Escape o clic afuera con cambios sin guardar
+          // pide confirmación en vez de descartarlos en silencio.
+          if (!e.open && hasChanges) {
+            setConfirmingDiscard(true);
+            return;
+          }
           if (!e.open) setConfirmingDelete(false);
           onOpenChange(e.open);
         }}
@@ -179,25 +186,33 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
               </Dialog.Header>
               <Dialog.Body>
                 <form id="edit-song-form" onSubmit={handleSubmit}>
-                  <Flex gap={6} align="stretch" direction={{ base: "column", md: "row" }}>
-                    <Stack gap={3} width={{ md: "25%" }} flexShrink={0}>
+                  <Flex
+                    gap={6}
+                    align="stretch"
+                    direction={{ base: "column", md: "row" }}
+                  >
+                    <Stack
+                      gap={3}
+                      width={{ md: "25%" }}
+                      flexShrink={0}
+                      // Ancho común de etiqueta para que los campos horizontales
+                      // (tono, tonos por director, tempo, artista) queden alineados.
+                      css={{ "--field-label-width": "110px" }}
+                    >
                       <Field.Root required>
                         <Field.Label>Título</Field.Label>
                         <Input
+                          size="xs"
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
                         />
                       </Field.Root>
-                      <Field.Root>
-                        <Field.Label>Artista</Field.Label>
-                        <Input
-                          value={artist}
-                          onChange={(e) => setArtist(e.target.value)}
-                        />
-                      </Field.Root>
-                      <Field.Root>
+
+                      <Field.Root orientation="horizontal">
                         <Field.Label>Tono original</Field.Label>
                         <Input
+                          size="xs"
+                          textAlign="center"
                           value={key}
                           onChange={(e) => setKey(e.target.value)}
                         />
@@ -208,12 +223,16 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
                             Tono por director
                           </Text>
                           {directors.map((director) => (
-                            <Field.Root key={director.uid}>
+                            <Field.Root
+                              key={director.uid}
+                              orientation="horizontal"
+                            >
                               <Field.Label fontSize="xs" fontWeight="normal">
                                 {director.displayName}
                               </Field.Label>
                               <Input
-                                size="sm"
+                                size="xs"
+                                textAlign="center"
                                 placeholder={key || "Tono original"}
                                 value={keysByDirector[director.uid] ?? ""}
                                 onChange={(e) =>
@@ -244,19 +263,31 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
                           ))}
                         </ButtonGroup>
                       </Field.Root>
-                      <Field.Root>
+                      <Field.Root orientation="horizontal">
                         <Field.Label>Tempo (BPM)</Field.Label>
                         <Input
+                          size="xs"
                           type="number"
                           value={tempo}
                           onChange={(e) => setTempo(e.target.value)}
+                        />
+                      </Field.Root>
+                      <Field.Root orientation="horizontal">
+                        <Field.Label>Artista</Field.Label>
+                        <Input
+                          size="xs"
+                          value={artist}
+                          onChange={(e) => setArtist(e.target.value)}
                         />
                       </Field.Root>
                     </Stack>
                     <Box flex={1} minW={0}>
                       <Field.Root>
                         <Field.Label>Letra y acordes</Field.Label>
-                        <SongBodyEditor sections={sections} onChange={setSections} />
+                        <SongBodyEditor
+                          sections={sections}
+                          onChange={setSections}
+                        />
                       </Field.Root>
                     </Box>
                   </Flex>
@@ -266,7 +297,7 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
                 <Button
                   type="button"
                   colorPalette="red"
-                  variant="outline"
+                  variant="ghost"
                   mr="auto"
                   onClick={() => setConfirmingDelete(true)}
                 >
@@ -281,7 +312,7 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
                   color="var(--accent-contrast)"
                   _hover={{ bg: "var(--accent-hover)" }}
                 >
-                  {hasChanges ? "Guardar cambios" : "Sin cambios"}
+                  Guardar
                 </Button>
               </Dialog.Footer>
               <Dialog.CloseTrigger asChild>
@@ -325,6 +356,47 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
                   onClick={handleDelete}
                 >
                   Eliminar
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+
+      <Dialog.Root
+        role="alertdialog"
+        open={confirmingDiscard}
+        onOpenChange={(e) => setConfirmingDiscard(e.open)}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                <Dialog.Title>Descartar cambios</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <Text>
+                  Tenés cambios sin guardar. Si cerrás ahora, se van a perder.
+                </Text>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setConfirmingDiscard(false)}
+                >
+                  Seguir editando
+                </Button>
+                <Button
+                  type="button"
+                  colorPalette="red"
+                  onClick={() => {
+                    setConfirmingDiscard(false);
+                    onOpenChange(false);
+                  }}
+                >
+                  Descartar
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>

@@ -58,8 +58,6 @@ const ViewerControls = ({
             variant="solid"
             size="md"
             borderRadius="md"
-            // Fijo (no cambia con el tema): el mismo oscuro que usa el
-            // fondo general de la app en modo oscuro (--bg).
             bg="#101218"
             color="#e9ebf1"
             _hover={{ bg: "#1c2029" }}
