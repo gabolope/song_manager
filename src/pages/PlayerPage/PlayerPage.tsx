@@ -15,6 +15,7 @@ import { MdFullscreen, MdOutlineSensors } from "react-icons/md";
 import { RxHamburgerMenu } from "react-icons/rx";
 import BookList from "@/components/SongList/BookList";
 import Configuration from "@/components/Configuration/Configuration";
+import BroadcastMessage from "@/components/BroadcastMessage";
 import SongViewer from "@/components/SongViewer/SongViewer";
 import UserBadge from "@/components/UserBadge";
 import { useColorModeValue } from "@/components/ui/color-mode";
@@ -66,6 +67,7 @@ const PlayerPage = () => {
 
   return (
     <PlayerContext.Provider value={playerContextValue}>
+      <BroadcastMessage />
       <Grid
         templateAreas={{
           base: `"header" "viewer"`,

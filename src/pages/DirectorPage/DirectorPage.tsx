@@ -1,5 +1,6 @@
 import { Drawer, Grid, GridItem, Portal } from "@chakra-ui/react";
 import { useCallback, useMemo, useState } from "react";
+import BroadcastMessage from "@/components/BroadcastMessage";
 import SongViewer from "@/components/SongViewer/SongViewer";
 import DirectorContext from "@/contexts/DirectorContext";
 import { useSession } from "@/contexts/SessionContext";
@@ -167,6 +168,7 @@ const DirectorPage = () => {
   return (
     <DirectorContext.Provider value={directorContextValue}>
       <DemoWelcomeDialog />
+      <BroadcastMessage />
       <Grid
         templateAreas={{
           base: `"header" "viewer"`,
