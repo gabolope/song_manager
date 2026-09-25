@@ -5,7 +5,8 @@ import { useLiveSong } from "./useLiveSong";
 
 export function useSessionState() {
   const { data: book } = useBook();
-  const { liveSong, setLiveSong, clearLiveSong } = useLiveSong();
+  const { liveSong, setLiveSong, setCueSection, clearLiveSong } =
+    useLiveSong();
 
   // Se guarda el id de la canción seleccionada (no su índice) para que la
   // selección no se desincronice cuando el book cambia: si se borra una
@@ -81,6 +82,7 @@ export function useSessionState() {
     book,
     liveSong,
     setLiveSong,
+    setCueSection,
     clearLiveSong,
     selectedBookSong,
     setSelectedBookSong,

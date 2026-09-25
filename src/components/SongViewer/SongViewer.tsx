@@ -1,6 +1,13 @@
 import { Badge } from "@chakra-ui/react";
 import parse from "html-react-parser";
-import { useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  type MouseEvent,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import DirectorContext from "@/contexts/DirectorContext";
 import PlayerContext from "@/contexts/PlayerContext";
@@ -24,6 +31,7 @@ const SongViewer = () => {
     nextSong,
     clearLiveSong,
     liveSong,
+    setCueSection,
   } = useSession();
 
   const directorCtx = useContext(DirectorContext);
@@ -96,6 +104,34 @@ const SongViewer = () => {
     observer.observe(el);
     return () => observer.disconnect();
   }, [html, fontScale]);
+
+  // Sección marcada por el director ("vamos para acá"). Se lee siempre de
+  // liveSong (el director ve currentSong del book, que no la trae) y solo se
+  // muestra sobre la canción que está en vivo.
+  const isShowingLive = !!displayedSong && isCurrentLive(displayedSong);
+  const cueSection = isShowingLive ? (liveSong.data?.cueSection ?? null) : null;
+  const canCue = isDirector && isShowingLive;
+
+  // Los bloques vienen de parse(html), así que se marcan por DOM (mismo
+  // criterio que fixChordCollisions) usando su índice entre los .paragraph.
+  useLayoutEffect(() => {
+    const el = songContentRef.current;
+    if (!el) return;
+    el.querySelectorAll(".paragraph").forEach((p, i) =>
+      p.classList.toggle("cuedSection", i === cueSection),
+    );
+  }, [html, cueSection]);
+
+  const onContentClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (!canCue) return;
+    const paragraph = (e.target as Element).closest(".paragraph");
+    if (!paragraph) return;
+    const index = Array.from(
+      e.currentTarget.querySelectorAll(".paragraph"),
+    ).indexOf(paragraph);
+    // Tocar la sección ya marcada la desmarca.
+    setCueSection.mutate(index === cueSection ? null : index);
+  };
 
   // Tonos particulares de cada director (ver EditSongDialog): se muestran
   // tanto en el repertorio general como dentro de una sesión, para que cada
@@ -185,9 +221,10 @@ const SongViewer = () => {
         ))}
       </div>
       <div
-        className="songContent"
+        className={canCue ? "songContent canCue" : "songContent"}
         style={{ fontSize: `${fontScale}rem` }}
         ref={songContentRef}
+        onClick={onContentClick}
       >
         {parse(html)}
       </div>

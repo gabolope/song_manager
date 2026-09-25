@@ -204,6 +204,81 @@
   animation: live-glow 1.8s ease-in-out infinite;
 }
 
+/* Sección marcada por el director en vivo. El marco es un pseudo-elemento
+   absoluto (no ocupa espacio, así marcar/desmarcar no mueve la letra). Sus
+   lados derecho e inferior descuentan el padding de .paragraph, que en
+   pantallas anchas hace de separación entre columnas: si el marco abarcara
+   ese padding, se metería sobre la letra de la sección vecina. */
+.paragraph {
+  position: relative;
+  --cue-pad-right: 0px;
+  --cue-pad-bottom: 0px;
+}
+
+@media (min-width: 660px) {
+  .paragraph {
+    --cue-pad-right: 1rem;
+    --cue-pad-bottom: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .paragraph {
+    --cue-pad-right: 2rem;
+    --cue-pad-bottom: 2rem;
+  }
+}
+
+.canCue .paragraph {
+  cursor: pointer;
+}
+
+.canCue .paragraph::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: calc(var(--cue-pad-right) - 6px);
+  bottom: calc(var(--cue-pad-bottom) - 6px);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  pointer-events: none;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+
+@media (hover: hover) {
+  .canCue .paragraph:hover::after {
+    border-color: color-mix(in srgb, var(--live, red) 35%, transparent);
+  }
+}
+
+.songContent .paragraph.cuedSection::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: calc(var(--cue-pad-right) - 6px);
+  bottom: calc(var(--cue-pad-bottom) - 6px);
+  border: 2px solid var(--live, red);
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--live, red) 14%, transparent);
+  pointer-events: none;
+  animation: cue-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes cue-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--live, red) 0%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 14px 4px
+      color-mix(in srgb, var(--live, red) 45%, transparent);
+  }
+}
+
 @keyframes live-glow {
   0%,
   100% {

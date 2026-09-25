@@ -6,6 +6,7 @@ interface SessionContextType {
   book: SongDTO[] | undefined;
   liveSong: UseQueryResult<SongDTO | null, Error>;
   setLiveSong: UseMutationResult<void, Error, SongDTO, unknown>;
+  setCueSection: UseMutationResult<void, Error, number | null, unknown>;
   clearLiveSong: UseMutationResult<void, Error, void, unknown>;
   selectedBookSong: number | null;
   setSelectedBookSong: (index: number | null) => void;

@@ -108,7 +108,13 @@ const DirectorPage = () => {
         setSongTranspose(currentSong.id, next);
       }
       if (isLive && liveSong.data?.id === currentSong.id) {
-        setLiveSong.mutate({ ...currentSong, transpose: next });
+        // setDoc sobrescribe todo el documento: se conserva la sección
+        // marcada para que cambiar el tono no la apague.
+        setLiveSong.mutate({
+          ...currentSong,
+          transpose: next,
+          cueSection: liveSong.data?.cueSection ?? null,
+        });
       }
     },
     [

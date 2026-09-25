@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { doc, setDoc, deleteDoc } from "firebase/firestore";
+import { doc, setDoc, deleteDoc, updateDoc } from "firebase/firestore";
 import { onSnapshot } from "firebase/firestore";
 import { db } from "../services/firebase";
 import type { SongDTO } from "../types/song";
@@ -70,6 +70,21 @@ export function useLiveSong() {
     },
   });
 
+  // Marca (o desmarca con null) la sección hacia la que va la banda. Escritura
+  // parcial: no hace falta reenviar la canción entera.
+  const setCueSection = useMutation({
+    mutationFn: async (index: number | null) => {
+      if (isDemo) {
+        queryClient.setQueryData<SongDTO | null>(["liveSong"], (old) =>
+          old ? { ...old, cueSection: index } : old,
+        );
+        return;
+      }
+      const ref = doc(db, "liveSong", LIVE_SONG_DOC);
+      await updateDoc(ref, { cueSection: index });
+    },
+  });
+
   // Termina la sesión en vivo: borra el documento para que los viewers
   // dejen de ver la última canción publicada.
   const clearLiveSong = useMutation({
@@ -83,5 +98,5 @@ export function useLiveSong() {
     },
   });
 
-  return { liveSong, setLiveSong, clearLiveSong };
+  return { liveSong, setLiveSong, setCueSection, clearLiveSong };
 }

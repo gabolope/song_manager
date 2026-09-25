@@ -26,6 +26,11 @@ export interface SongDTO {
   // "book": solo viaja en el documento efímero "liveSong" para sincronizar a
   // los músicos, y no debe escribirse al editar la canción del repertorio.
   transpose?: number;
+  // Índice del bloque (.paragraph del HTML de chordsheetjs) que el director
+  // marcó en vivo como "vamos para acá". Igual que `transpose`, solo viaja
+  // en el documento efímero "liveSong"; se borra solo al cambiar de canción
+  // porque setLiveSong sobrescribe el documento entero.
+  cueSection?: number | null;
   // Tono preferido por director (uid -> tono), para que cada uno pueda leer
   // esta canción en un tono distinto sin afectar a los demás. A diferencia
   // de `transpose`, esto sí es parte del repertorio: se edita desde
