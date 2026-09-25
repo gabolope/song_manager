@@ -66,10 +66,11 @@ const SongViewer = () => {
   const setFullscreenFn = directorCtx?.setFullscreen ?? playerCtx?.setFullscreen;
   const isDirector = !!directorCtx;
 
-  const { isDemo } = useAuth();
+  const { isAdmin, isDemo } = useAuth();
   // Editar escribe en Firestore de verdad: en modo demo no hay cuenta real
-  // detrás, así que se oculta (igual que subir canciones).
-  const canEdit = isDirector && !isDemo;
+  // detrás, así que se oculta (igual que subir canciones). Un admin puede
+  // editar aunque haya elegido no dirigir.
+  const canEdit = isAdmin && !isDemo;
   const [fontScale, setFontScale] = useState(1);
 
   const { viewerRef, exitFullscreen, usesFullscreenFallback } = useFullscreen(
@@ -192,7 +193,9 @@ const SongViewer = () => {
         fullscreen={fullscreen}
         onFontScaleChange={setFontScale}
         transpose={transpose}
-        onTransposeChange={isDirector ? directorCtx.onTransposeChange : undefined}
+        onTransposeChange={
+          directorCtx?.onTransposeChange ?? playerCtx?.onTransposeChange
+        }
       />
       <div className="songTitle">
         {!isFromRepertoire && bookIndex !== null && (

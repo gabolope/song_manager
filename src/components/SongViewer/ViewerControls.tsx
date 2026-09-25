@@ -14,8 +14,8 @@ interface Props {
   fullscreen: boolean;
   onFontScaleChange: (scale: number) => void;
   transpose: number;
-  // Ausente para el Player: sólo el Director puede transportar (ver
-  // DirectorContext.onTransposeChange).
+  // Ausente para músicos: transportan el Director y los admins que eligieron
+  // no dirigir (ver DirectorContext/PlayerContext.onTransposeChange).
   onTransposeChange?: (delta: number) => void;
 }
 

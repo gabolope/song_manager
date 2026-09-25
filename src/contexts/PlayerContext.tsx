@@ -9,6 +9,9 @@ interface PlayerContextType {
   // compartida (Director y Player pueden estar en pantallas distintas).
   fullscreen: boolean;
   setFullscreen: (value: boolean) => void;
+  // Solo para admins que eligieron no dirigir: transposición local, no se
+  // retransmite (ver PlayerPage).
+  onTransposeChange?: (delta: number) => void;
 }
 
 const PlayerContext = React.createContext<PlayerContextType | null>(null);

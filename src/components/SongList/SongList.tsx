@@ -2,7 +2,7 @@ import { IconButton, Text } from "@chakra-ui/react";
 import { Fragment, useMemo, useState } from "react";
 import type { SongDTO, SongTipo } from "@/types/song";
 import { IoAddCircleOutline } from "react-icons/io5";
-import { IoSearch } from "react-icons/io5";
+import { IoClose, IoSearch } from "react-icons/io5";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { stripChordProMarkup } from "@/services/chordpro.service";
 import { normalizeForSearch } from "@/utils/text";
@@ -118,8 +118,31 @@ const SongList = ({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar canción..."
-            style={{ paddingLeft: 28 }}
+            style={{ paddingLeft: 28, paddingRight: query ? 28 : undefined }}
           />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label="Borrar búsqueda"
+              title="Borrar búsqueda"
+              style={{
+                position: "absolute",
+                right: 6,
+                top: "50%",
+                transform: "translateY(-50%)",
+                display: "flex",
+                padding: 2,
+                background: "none",
+                border: "none",
+                color: "inherit",
+                opacity: 0.6,
+                cursor: "pointer",
+              }}
+            >
+              <IoClose />
+            </button>
+          )}
         </div>
         {(availableKeys.length > 0 || availableTipos.length > 0) && (
           <div className="filterSelectRow">

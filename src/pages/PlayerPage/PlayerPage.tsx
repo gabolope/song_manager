@@ -19,9 +19,13 @@ import BroadcastMessage from "@/components/BroadcastMessage";
 import SongViewer from "@/components/SongViewer/SongViewer";
 import UserBadge from "@/components/UserBadge";
 import { useColorModeValue } from "@/components/ui/color-mode";
+import { useAuth } from "@/contexts/AuthContext";
 import PlayerContext from "@/contexts/PlayerContext";
 import { useSession } from "@/contexts/SessionContext";
+import { useBookMutations } from "@/hooks/useBookMutations";
 import { useBookNavigation } from "@/hooks/useBookNavigation";
+import useSongs from "@/hooks/useSongs";
+import DirectorSidePanels from "@/pages/DirectorPage/DirectorSidePanels";
 
 const PlayerPage = () => {
   const {
@@ -31,6 +35,8 @@ const PlayerPage = () => {
     setSelectedBookSong,
     localSong,
     setLocalSong,
+    getTranspose,
+    setSongTranspose,
   } = useSession();
 
   // Pantalla completa es local a esta pestaña, no se comparte con Director.
@@ -38,7 +44,45 @@ const PlayerPage = () => {
   // En mobile, el book se accede desde un Drawer en vez de un panel fijo.
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const displayedSong = localSong ?? liveSong.data;
+  const { isAdmin } = useAuth();
+  // Un admin que eligió no dirigir conserva todo lo del Director (repertorio,
+  // armar la sesión, editar, transportar) salvo publicar el vivo. A los
+  // músicos no les hace falta el repertorio: no se pide.
+  const { data: songs, isLoading: isSongsLoading } = useSongs(isAdmin);
+  const { addToBook, removeFromBook, reorderBook, setTranspose } =
+    useBookMutations(book);
+
+  // localSong es una copia tomada al navegar: se resuelve contra el book
+  // (que escucha Firestore) para que una edición o un cambio de tono se vea
+  // al instante. Si no está en el book es una vista previa del repertorio:
+  // igual que en DirectorPage, su tono vive solo en memoria de la sesión.
+  const bookSong = localSong && book?.find((s) => s.id === localSong.id);
+  const previewTranspose = getTranspose(localSong?.id);
+  const displayedSong = useMemo(() => {
+    if (bookSong) return bookSong;
+    if (localSong) return { ...localSong, transpose: previewTranspose };
+    return liveSong.data;
+  }, [bookSong, localSong, previewTranspose, liveSong.data]);
+
+  const selectedListSong =
+    localSong && !bookSong
+      ? (songs?.findIndex((s) => s.id === localSong.id) ?? -1)
+      : -1;
+
+  // Se persiste en el book, así que llega a todos (los Players leen del
+  // book). No se re-publica liveSong: eso queda reservado a quien dirige.
+  const onTransposeChange = useCallback(
+    (delta: number) => {
+      if (!displayedSong) return;
+      const next = Math.max(
+        -11,
+        Math.min(11, (displayedSong.transpose ?? 0) + delta),
+      );
+      if (bookSong) setTranspose.mutate({ id: displayedSong.id, value: next });
+      else setSongTranspose(displayedSong.id, next);
+    },
+    [displayedSong, bookSong, setTranspose, setSongTranspose],
+  );
   const logoSrc = useColorModeValue("/logo_black.svg", "/logo_white.svg");
 
   const onBookNavigate = useCallback(
@@ -49,6 +93,42 @@ const PlayerPage = () => {
     },
     [book, setSelectedBookSong, setLocalSong],
   );
+
+  const onListClick = useCallback(
+    (index: number) => {
+      setSelectedBookSong(null);
+      if (songs) setLocalSong(songs[index]);
+      setMobileMenuOpen(false);
+    },
+    [songs, setSelectedBookSong, setLocalSong],
+  );
+
+  const renderSidePanel = () =>
+    isAdmin ? (
+      <DirectorSidePanels
+        songs={songs}
+        book={book}
+        isLoading={isSongsLoading}
+        isBookLoading={book === undefined}
+        isAdding={addToBook.isPending}
+        selectedListSong={selectedListSong === -1 ? null : selectedListSong}
+        selectedBookSong={selectedBookSong}
+        onListClick={onListClick}
+        onBookClick={onBookNavigate}
+        onAddToBook={(song) => {
+          if (!addToBook.isPending) addToBook.mutate(song);
+        }}
+        onRemoveFromBook={(id) => removeFromBook.mutate(id)}
+        onReorderBook={(items) => reorderBook.mutate(items)}
+      />
+    ) : (
+      <BookList
+        items={book}
+        isLoading={book === undefined}
+        selected={selectedBookSong}
+        onClick={onBookNavigate}
+      />
+    );
 
   const { onLeft, onRight } = useBookNavigation(
     book,
@@ -61,8 +141,15 @@ const PlayerPage = () => {
   // cada render rompe la estabilidad de exitFullscreen en SongViewer y hace
   // que el pedido de pantalla completa se repita sin gesto de usuario.
   const playerContextValue = useMemo(
-    () => ({ displayedSong, onLeft, onRight, fullscreen, setFullscreen }),
-    [displayedSong, onLeft, onRight, fullscreen],
+    () => ({
+      displayedSong,
+      onLeft,
+      onRight,
+      fullscreen,
+      setFullscreen,
+      onTransposeChange: isAdmin ? onTransposeChange : undefined,
+    }),
+    [displayedSong, onLeft, onRight, fullscreen, isAdmin, onTransposeChange],
   );
 
   return (
@@ -145,12 +232,7 @@ const PlayerPage = () => {
           flexDirection="column"
           hideBelow="lg"
         >
-          <BookList
-            items={book}
-            isLoading={book === undefined}
-            selected={selectedBookSong}
-            onClick={onBookNavigate}
-          />
+          {renderSidePanel()}
         </GridItem>
         <GridItem area="viewer" h="100%" overflow="hidden" padding="10px">
           <SongViewer />
@@ -173,12 +255,7 @@ const PlayerPage = () => {
                 <CloseButton size="sm" />
               </Drawer.CloseTrigger>
               <div style={{ height: "100%", padding: "60px 10px 10px" }}>
-                <BookList
-                  items={book}
-                  isLoading={book === undefined}
-                  selected={selectedBookSong}
-                  onClick={onBookNavigate}
-                />
+                {renderSidePanel()}
               </div>
             </Drawer.Content>
           </Drawer.Positioner>
