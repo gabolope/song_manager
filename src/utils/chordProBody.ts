@@ -6,7 +6,8 @@
 //
 // El modelo cubre lo que efectivamente genera el uploader y lo que traen los
 // archivos reales: directivas de metadata al inicio ({t:}/{artist:}/{key:}),
-// secciones delimitadas por {sop:Label}/{eop} (estrofa) y {soc}/{eoc} (coro),
+// secciones delimitadas por {sop:Label}/{eop} (estrofa), {soc}/{eoc} (coro)
+// y {sob}/{eob} (puente),
 // y líneas de letra con acordes entre corchetes ([G]letra). Cualquier otra
 // directiva dentro del cuerpo se preserva tal cual como línea "raw" para no
 // perder información, aunque no se pueda editar visualmente.
@@ -16,14 +17,14 @@ export type EditorLine = { id: string } & (
   | { type: "raw"; text: string }
 );
 
-export type SectionKind = "verse" | "chorus";
+export type SectionKind = "verse" | "chorus" | "bridge";
 
 export interface EditorSection {
   id: string;
   kind: SectionKind;
   label: string;
-  // Nombre de una sección ChordPro que no es estrofa ni coro
-  // ({start_of_ending}, {start_of_bridge}...): se edita como estrofa pero se
+  // Nombre de una sección ChordPro que no es estrofa, coro ni puente
+  // ({start_of_ending}, {start_of_tab}...): se edita como estrofa pero se
   // guarda con su directiva original para no perder el tipo.
   tag?: string;
   lines: EditorLine[];
@@ -45,6 +46,9 @@ const EOP_RE = /^\{\s*(?:eop|end_of_part|eov|end_of_verse)\s*\}\s*$/i;
 const SOC_RE =
   /^\{\s*(?:soc|start_of_chorus)\s*(?::\s*(?:label\s*=\s*)?"?([^"}]*?)"?\s*)?\}\s*$/i;
 const EOC_RE = /^\{\s*(?:eoc|end_of_chorus)\s*\}\s*$/i;
+const SOB_RE =
+  /^\{\s*(?:sob|start_of_bridge)\s*(?::\s*(?:label\s*=\s*)?"?([^"}]*?)"?\s*)?\}\s*$/i;
+const EOB_RE = /^\{\s*(?:eob|end_of_bridge)\s*\}\s*$/i;
 const START_OF_RE =
   /^\{\s*start_of_(\w+)\s*(?::\s*(?:label\s*=\s*)?"?([^"}]*?)"?\s*)?\}\s*$/i;
 const END_OF_RE = /^\{\s*end_of_\w+\s*\}\s*$/i;
@@ -98,8 +102,10 @@ export function parseChordProBody(content: string): {
     const isSectionMarker =
       SOP_RE.test(trimmed) ||
       SOC_RE.test(trimmed) ||
+      SOB_RE.test(trimmed) ||
       EOP_RE.test(trimmed) ||
       EOC_RE.test(trimmed) ||
+      EOB_RE.test(trimmed) ||
       START_OF_RE.test(trimmed) ||
       END_OF_RE.test(trimmed);
     if (trimmed === "" || (DIRECTIVE_RE.test(trimmed) && !isSectionMarker)) {
@@ -136,12 +142,13 @@ export function parseChordProBody(content: string): {
 
     const sopMatch = trimmed.match(SOP_RE);
     const socMatch = !sopMatch ? trimmed.match(SOC_RE) : null;
-    if (sopMatch || socMatch) {
+    const sobMatch = !sopMatch && !socMatch ? trimmed.match(SOB_RE) : null;
+    if (sopMatch || socMatch || sobMatch) {
       closeCurrent();
       current = {
         id: nextEditorId(),
-        kind: socMatch ? "chorus" : "verse",
-        label: ((sopMatch ?? socMatch)?.[1] ?? "").trim(),
+        kind: socMatch ? "chorus" : sobMatch ? "bridge" : "verse",
+        label: ((sopMatch ?? socMatch ?? sobMatch)?.[1] ?? "").trim(),
         lines: [],
       };
       currentExplicit = true;
@@ -163,6 +170,7 @@ export function parseChordProBody(content: string): {
     if (
       EOP_RE.test(trimmed) ||
       EOC_RE.test(trimmed) ||
+      EOB_RE.test(trimmed) ||
       END_OF_RE.test(trimmed)
     ) {
       closeCurrent();
@@ -240,9 +248,11 @@ export function serializeChordProBody(
       const [start, end] =
         section.kind === "chorus"
           ? ["soc", "eoc"]
-          : section.tag
-            ? [`start_of_${section.tag}`, `end_of_${section.tag}`]
-            : ["sop", "eop"];
+          : section.kind === "bridge"
+            ? ["sob", "eob"]
+            : section.tag
+              ? [`start_of_${section.tag}`, `end_of_${section.tag}`]
+              : ["sop", "eop"];
       const open = section.label ? `{${start}:${section.label}}` : `{${start}}`;
       const close = `{${end}}`;
       const lines = section.lines.map((line) =>

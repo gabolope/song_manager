@@ -110,8 +110,9 @@
   font-weight: 500;
 }
 
-/* Quito el título mostrado por el parser */
-.title {
+/* Quito el título y subtítulo mostrados por el parser */
+.title,
+.subtitle {
   display: none;
 }
 

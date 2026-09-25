@@ -19,6 +19,7 @@ interface Props {
 const SECTION_LABEL: Record<SectionKind, string> = {
   verse: "Estrofa",
   chorus: "Coro",
+  bridge: "Puente",
 };
 
 const SongBodyEditor = ({ sections, onChange }: Props) => {
@@ -88,6 +89,7 @@ const SongBodyEditor = ({ sections, onChange }: Props) => {
             >
               <option value="verse">{SECTION_LABEL.verse}</option>
               <option value="chorus">{SECTION_LABEL.chorus}</option>
+              <option value="bridge">{SECTION_LABEL.bridge}</option>
             </select>
             <input
               className="bodySectionLabel"
@@ -216,6 +218,13 @@ const SongBodyEditor = ({ sections, onChange }: Props) => {
           onClick={() => addSection("chorus")}
         >
           <IoAdd /> Coro
+        </button>
+        <button
+          type="button"
+          className="bodyAddSectionBtn"
+          onClick={() => addSection("bridge")}
+        >
+          <IoAdd /> Puente
         </button>
       </div>
 

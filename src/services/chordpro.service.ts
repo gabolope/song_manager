@@ -39,6 +39,17 @@ export function stripChordProMarkup(content: string): string {
   return content.replace(/\{[^}]*\}/g, " ").replace(/\[[^\]]*\]/g, "");
 }
 
+// Secciones sin etiqueta ({soc}, {sob}, {sop}...) muestran su tipo como
+// título, con el mismo markup que chordsheetjs usa para {soc:Etiqueta}.
+const DEFAULT_LABEL: Record<string, string> = {
+  verse: "Estrofa",
+  part: "Estrofa",
+  chorus: "Coro",
+  bridge: "Puente",
+};
+const UNLABELED_SECTION_RE =
+  /<div class="paragraph (verse|part|chorus|bridge)">(?!\s*<div class="row">\s*<h3 class="label">)/g;
+
 // `transpose` es un desplazamiento en semitonos aplicado solo al render: no
 // modifica `content`, así que nunca se persiste en el repertorio.
 export function formatSong(content: string, transpose = 0): string {
@@ -46,7 +57,11 @@ export function formatSong(content: string, transpose = 0): string {
     let song = parser.parse(preserveChordSpacing(content));
     if (transpose) song = song.transpose(transpose);
     const html = formatter.format(song);
-    const cleaned = html.replace(/<div class="paragraph[^"]*">\s*<\/div>/g, "");
+    const cleaned = html
+      .replace(/<div class="paragraph[^"]*">\s*<\/div>/g, "")
+      .replace(UNLABELED_SECTION_RE, (match, kind: string) =>
+        `${match}<div class="row"><h3 class="label">${DEFAULT_LABEL[kind]}</h3></div>`,
+      );
     return DOMPurify.sanitize(cleaned);
   } catch (error) {
     console.error("Error al interpretar el archivo ChordPro:", error);
