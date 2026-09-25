@@ -1,69 +1,44 @@
-# React + TypeScript + Vite
+# Song Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+App web para equipos de alabanza: el **director** arma la lista de la sesión, elige la canción en vivo y la transpone; los **músicos** la ven sincronizada en su dispositivo, con acordes (ChordPro) o solo la letra.
 
-Currently, two official plugins are available:
+## Funcionalidades
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Repertorio de canciones en formato ChordPro, con búsqueda, tono y tipo (rápida / intermedia / lenta).
+- Lista de la sesión ("book") reordenable con drag & drop.
+- Canción en vivo sincronizada en tiempo real, con transposición y marca de sección ("vamos para acá").
+- Tono preferido por director.
+- Mensajes del director a los músicos.
+- Vista de letras a pantalla completa con fondos animados (`/lyrics`).
+- Editor de canciones y subida masiva de archivos `.cho` / `.chordpro`.
+- Usuarios con rol `admin` o `musico`, administrados desde la app.
+- Modo demo para probar sin cuenta.
 
-## Expanding the ESLint configuration
+## Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+React 19, TypeScript, Vite, Chakra UI v3, TanStack Query, Firebase (Auth + Firestore), chordsheetjs, dnd-kit.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Desarrollo
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev      # servidor de desarrollo
+npm run build    # chequeo de tipos + build de producción
+npm run lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+La configuración de Firebase está en `src/services/firebase.ts`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Deploy
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **App:** Vercel (`vercel.json` redirige todas las rutas a `index.html`).
+- **Reglas de Firestore:** `firebase deploy --only firestore:rules`.
+
+## Roles
+
+| Rol | Acceso |
+|-----|--------|
+| `admin` | `/director`, edita canciones, la lista y los usuarios. Puede elegir no dirigir y entrar como músico. |
+| `musico` | `/player` y `/lyrics`, solo lectura. |
+
+Los permisos también se aplican en el servidor, en `firestore.rules`.
