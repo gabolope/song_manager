@@ -26,11 +26,11 @@ Rama: `teams_implementation`.
    - [ ] No desplegar `firestore.rules` a `prod` desde la rama: las reglas nuevas rompen la app publicada; se despliegan recién al mergear a `main`
 
 1. Modelo y reglas
-   - [ ] Definir `teams/{teamId}` (`name`, `createdAt`) y agregar `teamId` a `UserProfile` (`types/user.ts`)
-   - [ ] Reescribir `firestore.rules`: helpers `myTeam()`, `isMember(t)`, `isTeamAdmin(t)`; `match /teams/{teamId}/{col}/{docId}` lectura para miembros, escritura para admins del equipo
-   - [ ] `users`: lectura solo de usuarios del mismo equipo (hoy cualquier logueado lee todos)
-   - [ ] `users`: create/update solo si `request.resource.data.teamId == myTeam()` (evitar que un admin se pase o cree admins en otro equipo)
-   - [ ] Evitar que un admin cambie su propio `teamId`
+   - [x] Definir `teams/{teamId}` (`name`, `createdAt`) y agregar `teamId` a `UserProfile` (`types/user.ts`)
+   - [x] Reescribir `firestore.rules`: helpers `myTeam()`, `isMember(t)`, `isTeamAdmin(t)`; `match /teams/{teamId}/{col}/{docId}` lectura para miembros, escritura para admins del equipo
+   - [x] `users`: lectura solo de usuarios del mismo equipo (hoy cualquier logueado lee todos)
+   - [x] `users`: create/update solo si `request.resource.data.teamId == myTeam()` (evitar que un admin se pase o cree admins en otro equipo)
+   - [x] Evitar que un admin cambie su propio `teamId` (cubierto por la regla de update)
 2. Código
    - [ ] Helper de rutas `teamCol(teamId, name)` / `teamDoc(teamId, name, id)` en `services/firebase.ts`
    - [ ] Exponer `teamId` desde `AuthContext` (sale de `profile.teamId`)
@@ -39,7 +39,7 @@ Rama: `teams_implementation`.
    - [ ] Migrar rutas en `hooks/useBook.ts` y `hooks/useBookMutations.ts`
    - [ ] Migrar rutas en `hooks/useLiveSong.ts`
    - [ ] Migrar rutas en `components/BroadcastMessage.tsx` y `pages/DirectorPage/SendMessageDialog.tsx`
-   - [ ] `services/auth.service.ts`: `fetchUsers` filtrado por equipo; `createUserAccount` guarda el `teamId` del admin creador
+   - [x] `services/auth.service.ts`: `fetchUsers` filtrado por equipo; `createUserAccount` guarda el `teamId` del admin creador
    - [ ] Incluir `teamId` en las query keys (`["book", teamId]`, `["songs", teamId]`, `["liveSong", teamId]`, `["users", teamId]`) para no mezclar cache al cambiar de cuenta
    - [ ] Verificar que el modo demo sigue funcionando (no tiene `teamId`)
    - [ ] Mostrar el nombre del equipo en la UI (ej. `UserBadge` o `Layout`)

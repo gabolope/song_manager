@@ -12,6 +12,7 @@ import {
 } from "react-icons/gi";
 import { FaSlidersH } from "react-icons/fa";
 import type { IconType } from "react-icons";
+import type { Timestamp } from "firebase/firestore";
 
 export type UserRole = "admin" | "musico";
 
@@ -21,6 +22,17 @@ export interface UserProfile {
   displayName: string;
   role: UserRole;
   avatar: string;
+  // Equipo al que pertenece (un usuario = un equipo por ahora). Vacío en
+  // usuarios todavía no migrados.
+  teamId: string;
+}
+
+// Doc `teams/{teamId}`. Sus datos (songs, book, liveSong, broadcast) viven en
+// subcolecciones del mismo doc.
+export interface Team {
+  id: string;
+  name: string;
+  createdAt: Timestamp;
 }
 
 export interface Avatar {

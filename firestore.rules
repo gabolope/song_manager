@@ -5,17 +5,66 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Todas las reglas leen el mismo doc de perfil; Firestore cachea el get()
+    // dentro de una misma request, así que se cobra una sola lectura.
+    function me() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // get('teamId', null) en vez de .teamId: en usuarios sin migrar el campo
+    // no existe y acceder directo tira error en vez de devolver null.
+    function myTeam() {
+      return me().get('teamId', null);
+    }
+
+    // myTeam() != null: si no, un usuario sin migrar sería "miembro" de
+    // cualquier doc sin teamId (null == null).
+    function isMember(teamId) {
+      return isSignedIn() && myTeam() != null && myTeam() == teamId;
+    }
+
+    function isTeamAdmin(teamId) {
+      return isMember(teamId) && me().role == "admin";
+    }
+
     function isAdmin() {
-      return isSignedIn() &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+      return isSignedIn() && me().role == "admin";
     }
 
     match /users/{userId} {
-      allow read: if isSignedIn();
-      allow create, update: if isAdmin();
+      // El propio doc siempre (useAuthState lo lee al loguear, aún sin
+      // teamId). El resto solo si es del mismo equipo. Ojo: las queries sobre
+      // `users` tienen que filtrar por `where("teamId", "==", ...)` o Firestore
+      // las rechaza enteras.
+      allow read: if isSignedIn() && (
+        userId == request.auth.uid ||
+        isMember(resource.data.get('teamId', null))
+      );
+      // Solo un admin del equipo, y el doc queda en su equipo: no puede crear
+      // usuarios (ni admins) en otro equipo.
+      allow create: if isTeamAdmin(request.resource.data.get('teamId', null));
+      // Además el doc tiene que ser ya de su equipo, así no puede "traerse" a
+      // alguien de otro equipo. Como antes y después deben ser myTeam(), esto
+      // también impide que un admin cambie su propio teamId.
+      allow update: if isTeamAdmin(resource.data.get('teamId', null)) &&
+        isTeamAdmin(request.resource.data.get('teamId', null));
       allow delete: if false;
     }
 
+    // Los equipos se crean a mano / por script (Admin SDK), nunca desde la app.
+    match /teams/{teamId} {
+      allow read: if isMember(teamId);
+      allow write: if false;
+
+      // songs, book, liveSong, broadcast del equipo.
+      match /{col}/{docId} {
+        allow read: if isMember(teamId);
+        allow write: if isTeamAdmin(teamId);
+      }
+    }
+
+    // Colecciones globales viejas: la app todavía las usa hasta migrar las
+    // rutas (paso 2). Borrar estos bloques junto con las colecciones (paso 3).
     match /songs/{songId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();

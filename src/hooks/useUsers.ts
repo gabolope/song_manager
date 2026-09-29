@@ -1,12 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createUserAccount, fetchAllUsers } from "../services/auth.service";
+import { createUserAccount, fetchTeamUsers } from "../services/auth.service";
+import { useAuth } from "../contexts/AuthContext";
 import { toaster } from "../components/ui/toaster";
 import type { UserProfile, UserRole } from "../types/user";
 
 export function useUsers() {
+  const teamId = useAuth().profile?.teamId;
   return useQuery<UserProfile[], Error>({
-    queryKey: ["users"],
-    queryFn: fetchAllUsers,
+    queryKey: ["users", teamId],
+    queryFn: () => fetchTeamUsers(teamId!),
+    // Sin teamId (modo demo o usuario sin migrar) no hay equipo que listar.
+    enabled: !!teamId,
   });
 }
 
@@ -20,9 +24,13 @@ interface NewUserInput {
 
 export function useCreateUser() {
   const queryClient = useQueryClient();
+  const teamId = useAuth().profile?.teamId;
 
   return useMutation({
-    mutationFn: (input: NewUserInput) => createUserAccount(input),
+    mutationFn: (input: NewUserInput) => {
+      if (!teamId) throw new Error("Tu usuario no tiene equipo asignado");
+      return createUserAccount({ ...input, teamId });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toaster.create({ type: "success", title: "Usuario creado" });

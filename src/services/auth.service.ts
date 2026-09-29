@@ -10,10 +10,10 @@ import {
   doc,
   getDoc,
   getDocs,
-  orderBy,
   query,
   serverTimestamp,
   setDoc,
+  where,
 } from "firebase/firestore";
 import { auth, db, firebaseConfig } from "./firebase";
 import type { UserProfile, UserRole } from "../types/user";
@@ -38,13 +38,17 @@ export async function fetchUserProfile(
     displayName: data.displayName ?? "",
     role: data.role ?? "musico",
     avatar: data.avatar ?? "",
+    teamId: data.teamId ?? "",
   };
 }
 
-export async function fetchAllUsers(): Promise<UserProfile[]> {
-  const q = query(collection(db, "users"), orderBy("displayName"));
+// El filtro por teamId es obligatorio: las reglas rechazan cualquier query
+// sobre `users` que pueda devolver gente de otro equipo. Se ordena en cliente
+// porque where + orderBy en campos distintos pediría un índice compuesto.
+export async function fetchTeamUsers(teamId: string): Promise<UserProfile[]> {
+  const q = query(collection(db, "users"), where("teamId", "==", teamId));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => {
+  const users = snapshot.docs.map((d) => {
     const data = d.data();
     return {
       uid: d.id,
@@ -52,8 +56,10 @@ export async function fetchAllUsers(): Promise<UserProfile[]> {
       displayName: data.displayName ?? "",
       role: data.role ?? "musico",
       avatar: data.avatar ?? "",
+      teamId: data.teamId ?? "",
     };
   });
+  return users.sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
 
 interface NewUserInput {
@@ -62,6 +68,8 @@ interface NewUserInput {
   displayName: string;
   role: UserRole;
   avatar: string;
+  // Equipo del admin que lo crea; las reglas no dejan crear en otro.
+  teamId: string;
 }
 
 // Crea la cuenta de Auth desde una segunda instancia de Firebase App (mismo
@@ -73,6 +81,7 @@ export async function createUserAccount({
   displayName,
   role,
   avatar,
+  teamId,
 }: NewUserInput): Promise<void> {
   const secondaryApp = initializeApp(
     firebaseConfig,
@@ -94,6 +103,7 @@ export async function createUserAccount({
       displayName,
       role,
       avatar,
+      teamId,
       createdAt: serverTimestamp(),
     });
   } finally {
