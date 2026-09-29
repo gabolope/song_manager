@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "song-manager-dev-a7fd4",
+    "dev": "song-manager-dev-a7fd4",
+    "prod": "song-manager-5b3bb"
+  }
+}

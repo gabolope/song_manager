@@ -16,6 +16,15 @@ Mayores:
 
 Modelo: subcolecciones por equipo (`teams/{teamId}/songs|book|liveSong|broadcast`) y `teamId` en `users/{uid}`. Un usuario = un equipo por ahora.
 
+Rama: `teams_implementation`.
+
+0. Entorno de pruebas (antes de tocar nada)
+   - [x] Proyecto Firebase de desarrollo (`song-manager-dev-a7fd4`); `firebase.ts` lo usa si `import.meta.env.DEV`
+   - [x] Alias en `.firebaserc`: `default`/`dev` → desarrollo, `prod` → producción
+   - [x] Reglas actuales desplegadas en dev (`firebase deploy --only firestore:rules`)
+   - [x] Primer admin creado en dev (Auth + doc `users/{uid}` con `role: "admin"`); alta de músicos desde la app verificada
+   - [ ] No desplegar `firestore.rules` a `prod` desde la rama: las reglas nuevas rompen la app publicada; se despliegan recién al mergear a `main`
+
 1. Modelo y reglas
    - [ ] Definir `teams/{teamId}` (`name`, `createdAt`) y agregar `teamId` a `UserProfile` (`types/user.ts`)
    - [ ] Reescribir `firestore.rules`: helpers `myTeam()`, `isMember(t)`, `isTeamAdmin(t)`; `match /teams/{teamId}/{col}/{docId}` lectura para miembros, escritura para admins del equipo
@@ -36,6 +45,7 @@ Modelo: subcolecciones por equipo (`teams/{teamId}/songs|book|liveSong|broadcast
    - [ ] Mostrar el nombre del equipo en la UI (ej. `UserBadge` o `Layout`)
 3. Migración de datos
    - [ ] Script único con `firebase-admin`: crear `teams/{equipoActual}` y copiar `songs`, `book`, `liveSong`, `broadcast`
+   - [ ] Probar el script contra el emulador (con un export de los datos reales) antes de correrlo en producción
    - [ ] Setear `teamId` en todos los docs de `users`
    - [ ] Deploy en orden: script → código → reglas
    - [ ] Probar con dos equipos y dos cuentas en paralelo (sesiones en vivo independientes, sin ver datos del otro)
