@@ -32,17 +32,17 @@ Rama: `teams_implementation`.
    - [x] `users`: create/update solo si `request.resource.data.teamId == myTeam()` (evitar que un admin se pase o cree admins en otro equipo)
    - [x] Evitar que un admin cambie su propio `teamId` (cubierto por la regla de update)
 2. Código
-   - [ ] Helper de rutas `teamCol(teamId, name)` / `teamDoc(teamId, name, id)` en `services/firebase.ts`
-   - [ ] Exponer `teamId` desde `AuthContext` (sale de `profile.teamId`)
-   - [ ] Migrar rutas en `services/songs.service.ts` (fetch/update/delete + propagación a book y liveSong)
-   - [ ] Migrar rutas en `hooks/onSongUpload.ts`
-   - [ ] Migrar rutas en `hooks/useBook.ts` y `hooks/useBookMutations.ts`
-   - [ ] Migrar rutas en `hooks/useLiveSong.ts`
-   - [ ] Migrar rutas en `components/BroadcastMessage.tsx` y `pages/DirectorPage/SendMessageDialog.tsx`
+   - [x] Helper de rutas `teamCol(teamId, name)` / `teamDoc(teamId, name, id)` en `services/firebase.ts`
+   - [x] Exponer `teamId` desde `AuthContext` (sale de `profile.teamId`)
+   - [x] Migrar rutas en `services/songs.service.ts` (fetch/update/delete + propagación a book y liveSong)
+   - [x] Migrar rutas en `hooks/onSongUpload.ts`
+   - [x] Migrar rutas en `hooks/useBook.ts` y `hooks/useBookMutations.ts`
+   - [x] Migrar rutas en `hooks/useLiveSong.ts`
+   - [x] Migrar rutas en `components/BroadcastMessage.tsx` y `pages/DirectorPage/SendMessageDialog.tsx`
    - [x] `services/auth.service.ts`: `fetchUsers` filtrado por equipo; `createUserAccount` guarda el `teamId` del admin creador
-   - [ ] Incluir `teamId` en las query keys (`["book", teamId]`, `["songs", teamId]`, `["liveSong", teamId]`, `["users", teamId]`) para no mezclar cache al cambiar de cuenta
-   - [ ] Verificar que el modo demo sigue funcionando (no tiene `teamId`)
-   - [ ] Mostrar el nombre del equipo en la UI (ej. `UserBadge` o `Layout`)
+   - [x] Incluir `teamId` en las query keys (`["book", teamId]`, `["songs", teamId]`, `["liveSong", teamId]`, `["users", teamId]`) para no mezclar cache al cambiar de cuenta
+   - [x] Verificar que el modo demo sigue funcionando (no tiene `teamId`)
+   - [x] Mostrar el nombre del equipo en la UI (ej. `UserBadge` o `Layout`)
 3. Migración de datos
    - [ ] Script único con `firebase-admin`: crear `teams/{equipoActual}` y copiar `songs`, `book`, `liveSong`, `broadcast`
    - [ ] Probar el script contra el emulador (con un export de los datos reales) antes de correrlo en producción

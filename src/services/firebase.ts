@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { initializeFirestore } from "firebase/firestore";
+import { collection, doc, initializeFirestore } from "firebase/firestore";
 
 const prodConfig = {
   apiKey: "AIzaSyCrDtz6GBIbxyXIVpeJg863xtZAXoZMASA",
@@ -33,3 +33,22 @@ const app = initializeApp(firebaseConfig);
 // silencio para cualquier canción con algún campo opcional sin definir.
 export const db = initializeFirestore(app, { ignoreUndefinedProperties: true });
 export const auth = getAuth(app);
+
+// songs, book, liveSong y broadcast viven bajo `teams/{teamId}/...`. Aceptan
+// null para que los hooks no tengan que repetir el chequeo: un usuario sin
+// teamId (sin migrar) no tiene dónde escribir, y es mejor un error claro que
+// una escritura rechazada por las reglas.
+export type TeamCol = "songs" | "book" | "liveSong" | "broadcast";
+
+function requireTeam(teamId: string | null): string {
+  if (!teamId) throw new Error("Tu usuario no tiene equipo asignado");
+  return teamId;
+}
+
+export function teamCol(teamId: string | null, name: TeamCol) {
+  return collection(db, "teams", requireTeam(teamId), name);
+}
+
+export function teamDoc(teamId: string | null, name: TeamCol, id: string) {
+  return doc(db, "teams", requireTeam(teamId), name, id);
+}

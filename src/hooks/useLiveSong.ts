@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { doc, setDoc, deleteDoc, updateDoc } from "firebase/firestore";
+import { setDoc, deleteDoc, updateDoc } from "firebase/firestore";
 import { onSnapshot } from "firebase/firestore";
-import { db } from "../services/firebase";
+import { teamDoc } from "../services/firebase";
 import type { SongDTO } from "../types/song";
 import { useEffect } from "react";
 import { toaster } from "../components/ui/toaster";
@@ -11,28 +11,30 @@ const LIVE_SONG_DOC = "current"; // documento fijo, siempre el mismo
 
 export function useLiveSong() {
   const queryClient = useQueryClient();
-  const { isDemo } = useAuth();
+  const { isDemo, teamId } = useAuth();
+  const liveKey = ["liveSong", teamId];
 
   // Listener en tiempo real
   useEffect(() => {
     // En demo no hay viewers en otro dispositivo escuchando: alcanza con el
     // cache local, que actualizan setLiveSong/clearLiveSong más abajo. Se
-    // resetea siempre a null para no arrastrar la sesión en vivo real que
-    // haya quedado cacheada de una sesión anterior.
+    // resetea siempre a null para no arrastrar lo de una demo anterior en la
+    // misma pestaña (la key ["liveSong", null] ya no choca con la real).
     if (isDemo) {
-      queryClient.setQueryData<SongDTO | null>(["liveSong"], null);
+      queryClient.setQueryData<SongDTO | null>(["liveSong", teamId], null);
       return;
     }
+    if (!teamId) return;
 
-    const ref = doc(db, "liveSong", LIVE_SONG_DOC);
+    const ref = teamDoc(teamId, "liveSong", LIVE_SONG_DOC);
 
     const unsubscribe = onSnapshot(
       ref,
       (snapshot) => {
         if (snapshot.exists()) {
-          queryClient.setQueryData(["liveSong"], snapshot.data() as SongDTO);
+          queryClient.setQueryData(["liveSong", teamId], snapshot.data() as SongDTO);
         } else {
-          queryClient.setQueryData(["liveSong"], null);
+          queryClient.setQueryData(["liveSong", teamId], null);
         }
       },
       (error) => {
@@ -48,11 +50,11 @@ export function useLiveSong() {
     );
 
     return () => unsubscribe();
-  }, [queryClient, isDemo]);
+  }, [queryClient, isDemo, teamId]);
 
   // Lectura del cache
   const liveSong = useQuery<SongDTO | null>({
-    queryKey: ["liveSong"],
+    queryKey: liveKey,
     queryFn: () => null,
     staleTime: Infinity,
     enabled: false,
@@ -62,10 +64,10 @@ export function useLiveSong() {
   const setLiveSong = useMutation({
     mutationFn: async (song: SongDTO) => {
       if (isDemo) {
-        queryClient.setQueryData(["liveSong"], song);
+        queryClient.setQueryData(liveKey, song);
         return;
       }
-      const ref = doc(db, "liveSong", LIVE_SONG_DOC);
+      const ref = teamDoc(teamId, "liveSong", LIVE_SONG_DOC);
       await setDoc(ref, song); // sobreescribe, no acumula
     },
   });
@@ -75,12 +77,12 @@ export function useLiveSong() {
   const setCueSection = useMutation({
     mutationFn: async (index: number | null) => {
       if (isDemo) {
-        queryClient.setQueryData<SongDTO | null>(["liveSong"], (old) =>
+        queryClient.setQueryData<SongDTO | null>(liveKey, (old) =>
           old ? { ...old, cueSection: index } : old,
         );
         return;
       }
-      const ref = doc(db, "liveSong", LIVE_SONG_DOC);
+      const ref = teamDoc(teamId, "liveSong", LIVE_SONG_DOC);
       await updateDoc(ref, { cueSection: index });
     },
   });
@@ -90,10 +92,10 @@ export function useLiveSong() {
   const clearLiveSong = useMutation({
     mutationFn: async () => {
       if (isDemo) {
-        queryClient.setQueryData(["liveSong"], null);
+        queryClient.setQueryData(liveKey, null);
         return;
       }
-      const ref = doc(db, "liveSong", LIVE_SONG_DOC);
+      const ref = teamDoc(teamId, "liveSong", LIVE_SONG_DOC);
       await deleteDoc(ref);
     },
   });

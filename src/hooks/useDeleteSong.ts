@@ -3,13 +3,13 @@ import { deleteSong } from "../services/songs.service";
 import { useAuth } from "../contexts/AuthContext";
 
 export function useDeleteSong() {
-  const { isDemo } = useAuth();
+  const { teamId } = useAuth();
 
   const { run: removeSong, ...mutation } = useOptimisticMutation<string>({
-    queryKey: ["songs", isDemo ? "demo" : "real"],
-    mutationFn: (id) => deleteSong(id),
+    queryKey: ["songs", teamId],
+    mutationFn: (id) => deleteSong(teamId, id),
     updater: (old, id) => old?.filter((song) => song.id !== id),
-    invalidateKeys: [["songs"], ["book"]],
+    invalidateKeys: [["songs", teamId], ["book", teamId]],
     toastMessages: {
       loading: "Eliminando canción...",
       success: "Canción eliminada",

@@ -7,6 +7,9 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   isAdmin: boolean;
+  // Equipo del usuario (sale de profile.teamId). null en demo y en usuarios
+  // sin migrar: en ese caso no se escucha ni escribe nada del equipo.
+  teamId: string | null;
   // Modo demo: navegación libre sin cuenta real ni escrituras a Firestore,
   // para que alguien sin credenciales pueda probar la app (ver TODO.md).
   isDemo: boolean;

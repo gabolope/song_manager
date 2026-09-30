@@ -5,7 +5,7 @@ import { toaster } from "../components/ui/toaster";
 import type { UserProfile, UserRole } from "../types/user";
 
 export function useUsers() {
-  const teamId = useAuth().profile?.teamId;
+  const { teamId } = useAuth();
   return useQuery<UserProfile[], Error>({
     queryKey: ["users", teamId],
     queryFn: () => fetchTeamUsers(teamId!),
@@ -24,7 +24,7 @@ interface NewUserInput {
 
 export function useCreateUser() {
   const queryClient = useQueryClient();
-  const teamId = useAuth().profile?.teamId;
+  const { teamId } = useAuth();
 
   return useMutation({
     mutationFn: (input: NewUserInput) => {
@@ -32,7 +32,7 @@ export function useCreateUser() {
       return createUserAccount({ ...input, teamId });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["users", teamId] });
       toaster.create({ type: "success", title: "Usuario creado" });
     },
     onError: (error) => {

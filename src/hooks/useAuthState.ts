@@ -57,6 +57,9 @@ export function useAuthState() {
     // En demo se muestran las mismas capacidades de director, sin que
     // exista una cuenta real detrás.
     isAdmin: isDemo || profile?.role === "admin",
+    // `|| null` convierte el "" de usuarios sin migrar en null. En demo se
+    // fuerza null aunque haya quedado un perfil real cargado.
+    teamId: isDemo ? null : profile?.teamId || null,
     wantsToDirect,
     setWantsToDirect,
     enterDemo,
