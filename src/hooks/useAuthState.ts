@@ -1,7 +1,7 @@
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { useCallback, useEffect, useState } from "react";
 import { auth } from "../services/firebase";
-import { fetchUserProfile, login, logout as logoutRequest } from "../services/auth.service";
+import { fetchIsSuperAdmin, fetchUserProfile, login, logout as logoutRequest } from "../services/auth.service";
 import type { UserProfile } from "../types/user";
 
 const wantsToDirectKey = (uid: string) => `wantsToDirect:${uid}`;
@@ -13,6 +13,7 @@ export function useAuthState() {
   // no sabemos si hay que mostrar el login o la app.
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [wantsToDirect, setWantsToDirectState] = useState(true);
 
   useEffect(() => {
@@ -23,11 +24,16 @@ export function useAuthState() {
       setLoading(true);
       setUser(firebaseUser);
       if (firebaseUser) {
-        const userProfile = await fetchUserProfile(firebaseUser.uid);
+        const [userProfile, superAdmin] = await Promise.all([
+          fetchUserProfile(firebaseUser.uid),
+          fetchIsSuperAdmin(firebaseUser.uid),
+        ]);
         setProfile(userProfile);
+        setIsSuperAdmin(superAdmin);
         setWantsToDirectState(localStorage.getItem(wantsToDirectKey(firebaseUser.uid)) !== "false");
       } else {
         setProfile(null);
+        setIsSuperAdmin(false);
       }
       setLoading(false);
     });
@@ -57,6 +63,7 @@ export function useAuthState() {
     // En demo se muestran las mismas capacidades de director, sin que
     // exista una cuenta real detrás.
     isAdmin: isDemo || profile?.role === "admin",
+    isSuperAdmin: !isDemo && isSuperAdmin,
     // `|| null` convierte el "" de usuarios sin migrar en null. En demo se
     // fuerza null aunque haya quedado un perfil real cargado.
     teamId: isDemo ? null : profile?.teamId || null,

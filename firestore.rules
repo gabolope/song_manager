@@ -31,6 +31,20 @@ service cloud.firestore {
       return isSignedIn() && me().role == "admin";
     }
 
+    // Dueño de la app (página /admin): da de alta equipos y mueve gente
+    // entre equipos. Es un doc aparte y no un campo en `users` porque los
+    // admins de equipo pueden editar los docs de su gente y podrían
+    // autopromoverse. Se crea a mano en la consola.
+    function isSuperAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/superadmins/$(request.auth.uid));
+    }
+
+    match /superadmins/{userId} {
+      allow read: if isSignedIn() && userId == request.auth.uid;
+      allow write: if false;
+    }
+
     match /users/{userId} {
       // El propio doc siempre (useAuthState lo lee al loguear, aún sin
       // teamId). El resto solo si es del mismo equipo. Ojo: las queries sobre
@@ -38,23 +52,27 @@ service cloud.firestore {
       // las rechaza enteras.
       allow read: if isSignedIn() && (
         userId == request.auth.uid ||
-        isMember(resource.data.get('teamId', null))
+        isMember(resource.data.get('teamId', null)) ||
+        isSuperAdmin()
       );
       // Solo un admin del equipo, y el doc queda en su equipo: no puede crear
       // usuarios (ni admins) en otro equipo.
-      allow create: if isTeamAdmin(request.resource.data.get('teamId', null));
+      allow create: if isTeamAdmin(request.resource.data.get('teamId', null)) ||
+        isSuperAdmin();
       // Además el doc tiene que ser ya de su equipo, así no puede "traerse" a
       // alguien de otro equipo. Como antes y después deben ser myTeam(), esto
       // también impide que un admin cambie su propio teamId.
       allow update: if isTeamAdmin(resource.data.get('teamId', null)) &&
-        isTeamAdmin(request.resource.data.get('teamId', null));
+        isTeamAdmin(request.resource.data.get('teamId', null)) ||
+        isSuperAdmin();
       allow delete: if false;
     }
 
-    // Los equipos se crean a mano / por script (Admin SDK), nunca desde la app.
+    // Los equipos los crea solo el superadmin. Solo create, no update: así un
+    // setDoc sobre un id existente se rechaza en vez de pisar el equipo.
     match /teams/{teamId} {
-      allow read: if isMember(teamId);
-      allow write: if false;
+      allow read: if isMember(teamId) || isSuperAdmin();
+      allow create: if isSuperAdmin();
 
       // songs, book, liveSong, broadcast del equipo.
       match /{col}/{docId} {

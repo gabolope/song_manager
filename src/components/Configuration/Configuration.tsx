@@ -35,7 +35,7 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 const Configuration = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAdmin, isDemo, wantsToDirect, setWantsToDirect, logout } = useAuth();
+  const { isAdmin, isSuperAdmin, isDemo, wantsToDirect, setWantsToDirect, logout } = useAuth();
   const { colorMode, toggleColorMode } = useColorMode();
   const [open, setOpen] = useState(false);
   const [createUserOpen, setCreateUserOpen] = useState(false);
@@ -155,6 +155,17 @@ const Configuration = () => {
                   <Separator />
                   <Stack gap={2} align="stretch">
                     <SectionLabel>Cuenta</SectionLabel>
+                    {isSuperAdmin && (
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setOpen(false);
+                          navigate("/admin");
+                        }}
+                      >
+                        Administrar equipos
+                      </Button>
+                    )}
                     <Button variant="outline" colorPalette="red" onClick={() => logout()}>
                       {isDemo ? "Salir del modo demo" : "Cerrar sesión"}
                     </Button>

@@ -13,6 +13,7 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { auth, db, firebaseConfig } from "./firebase";
@@ -40,6 +41,25 @@ export async function fetchUserProfile(
     avatar: data.avatar ?? "",
     teamId: data.teamId ?? "",
   };
+}
+
+// Existe `superadmins/{uid}` (se crea a mano en la consola). Si falla la
+// lectura (ej. reglas viejas sin ese match) se toma como "no": no tiene que
+// romper el login de nadie.
+export async function fetchIsSuperAdmin(uid: string): Promise<boolean> {
+  try {
+    return (await getDoc(doc(db, "superadmins", uid))).exists();
+  } catch {
+    return false;
+  }
+}
+
+// Solo lo usa el superadmin (/admin): cambiar rol o mover a otro equipo.
+export async function updateUser(
+  uid: string,
+  data: Partial<Pick<UserProfile, "role" | "teamId">>,
+) {
+  await updateDoc(doc(db, "users", uid), data);
 }
 
 // El filtro por teamId es obligatorio: las reglas rechazan cualquier query
