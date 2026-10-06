@@ -44,12 +44,19 @@ Rama: `teams_implementation`.
    - [x] Verificar que el modo demo sigue funcionando (no tiene `teamId`)
    - [x] Mostrar el nombre del equipo en la UI (ej. `UserBadge` o `Layout`)
 3. Migración de datos
-   - [ ] Script único con `firebase-admin`: crear `teams/{equipoActual}` y copiar `songs`, `book`, `liveSong`, `broadcast`
-   - [ ] Probar el script contra el emulador (con un export de los datos reales) antes de correrlo en producción
-   - [ ] Setear `teamId` en todos los docs de `users`
-   - [ ] Deploy en orden: script → código → reglas
+   - [x] Script único con `firebase-admin` (`scripts/migrate-to-teams.mjs`, dry run por defecto): crear `teams/{equipoActual}` y copiar `songs`, `book`, `liveSong`, `broadcast`; setea `teamId` en los `users` que no tienen; `--delete-old` borra las globales
+   - [x] Descargar claves de cuenta de servicio (Firebase Console → ⚙ Configuración del proyecto → Cuentas de servicio → "Generar nueva clave privada") y guardarlas como `keys/dev.json` y `keys/prod.json` (`keys/` está en .gitignore; nunca compartirlas)
+   - [x] Probar el script en dev leyendo los datos reales de prod (a prod solo se le lee). Reemplaza al emulador: pide Java 21 y acá hay Java 8. Usar el mismo `teamId` que ya tiene el admin de dev: (hecho con `--team-id test --team-name "Betesda"`; hizo falta desplegar las reglas nuevas a dev)
+     1. Dry run: `node scripts/migrate-to-teams.mjs --key keys/dev.json --source-key keys/prod.json --team-id <id> --team-name "<nombre>"`
+     2. Si los números cierran, repetir con `--write` y revisar en la app (`npm run dev`) repertorio, book, en vivo y mensajes
+   - [ ] Setear `teamId` en todos los docs de `users` (lo hace el script; en dev ya está)
+   - [ ] Antes de prod, terminar de revisar en dev: mensaje de broadcast, que editar una canción del book se propague, y login de un músico en `/player`
+   - [ ] Deploy en orden: script → reglas → código. Al revés no: el código nuevo con reglas viejas deja la app vacía (no hay `match /teams`; pasó en dev). Las reglas nuevas mantienen las globales, así que la app vieja sigue andando; en ese rato solo falla la lista/alta de usuarios (piden `teamId`)
+     1. Script en prod: `node scripts/migrate-to-teams.mjs --key keys/prod.json --team-id <id> --team-name "<nombre>"` (dry run y después `--write`)
+     2. `firebase deploy --only firestore:rules --project prod`
+     3. Merge a `main` (deploy del código en Vercel), enseguida después de las reglas
    - [ ] Probar con dos equipos y dos cuentas en paralelo (sesiones en vivo independientes, sin ver datos del otro)
-   - [ ] Borrar las colecciones globales viejas
+   - [ ] Borrar las colecciones globales viejas: `--delete-old` (sin `--team-name`; dry run y después `--write`). Solo borra si las cantidades coinciden con las del equipo. Después sacar de `firestore.rules` los bloques `match /songs|book|liveSong|broadcast` globales y de CLAUDE.md la nota de "no desplegar reglas a prod desde la rama"
 4. Alta de equipos
    - [ ] Script/manual: crear equipo + primer admin (después el admin crea sus músicos desde la app)
    - [ ] Documentar el proceso en README.md y actualizar CLAUDE.md con el nuevo modelo
