@@ -56,13 +56,14 @@ Rama: `teams_implementation`.
      2. `firebase deploy --only firestore:rules --project prod`
      3. Merge a `main` (deploy del código en Vercel), enseguida después de las reglas
    - [x] Probar con dos equipos y dos cuentas en paralelo (en dev, con un equipo creado desde `/admin`)
-   - [ ] Borrar las colecciones globales viejas: `--delete-old` (sin `--team-name`; dry run y después `--write`). Solo borra si las cantidades coinciden con las del equipo. Después sacar de `firestore.rules` los bloques `match /songs|book|liveSong|broadcast` globales y de CLAUDE.md la nota de "no desplegar reglas a prod desde la rama"
+   - [ ] Borrar las colecciones globales viejas: `--delete-old` (sin `--team-name`; dry run y después `--write`). Solo borra si las cantidades coinciden con las del equipo: si Betesda ya agregó/borró canciones o cambió el book, va a frenar (ajustar el script o borrar a mano desde la consola). Esperar unos usos reales: son el backup. Después sacar de `firestore.rules` los bloques `match /songs|book|liveSong|broadcast` globales y la mención de backup en CLAUDE.md
+   - [ ] Revocar las claves de `keys/` cuando ya no se use el script (Google Cloud Console → IAM → Cuentas de servicio → `firebase-adminsdk-…` → Claves)
 4. Alta de equipos
    - [x] Página `/admin` (solo superadmin, doc `superadmins/{uid}`): crear equipos, crear usuarios en cualquier equipo, cambiar rol y mover entre equipos
-   - [ ] Crear `superadmins/{uid}` a mano en dev y en prod
+   - [x] Crear `superadmins/{uid}` a mano en dev y en prod
    - [x] Desplegar reglas a dev y probar `/admin` (crear equipo + director; el equipo nuevo no ve nada de Betesda)
    - [x] Prod: crear `superadmins/{uid}`, `firebase deploy --only firestore:rules --project prod` y merge a `main`
-   - [ ] Documentar el proceso en README.md y actualizar CLAUDE.md con el nuevo modelo
+   - [x] Documentar el proceso en README.md y actualizar CLAUDE.md con el nuevo modelo
 5. Más adelante (solo si hace falta)
    - [ ] Custom claims (`teamId`, `role`) para no pagar un `get()` por regla
    - [ ] Usuario en varios equipos: `teams/{t}/members/{uid}` + selector de equipo

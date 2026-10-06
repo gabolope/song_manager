@@ -11,7 +11,9 @@ App web para que un equipo de alabanza comparta canciones (ChordPro) en vivo: un
 
 Deploy: Vercel (SPA, `vercel.json` reescribe todo a `index.html`). Reglas de Firestore en `firestore.rules` (se despliegan con `firebase deploy --only firestore:rules --project dev|prod`).
 
-Entornos: `npm run dev` usa el proyecto Firebase de desarrollo (`song-manager-dev-a7fd4`) y el build usa producción (`firebase.ts`, según `import.meta.env.DEV`). En `.firebaserc`, `default`/`dev` → desarrollo, `prod` → producción. Prod ya está migrado (equipo `betesda`).
+Scripts: `scripts/migrate-to-teams.mjs` (`firebase-admin`; dry run por defecto, `--write` para ejecutar) usa claves de cuenta de servicio en `keys/dev.json` / `keys/prod.json` (gitignored). Los deploys de reglas y los scripts contra Firebase los corre el usuario.
+
+Entornos: `npm run dev` usa el proyecto Firebase de desarrollo (`song-manager-dev-a7fd4`) y el build usa producción (`firebase.ts`, según `import.meta.env.DEV`). En `.firebaserc`, `default`/`dev` → desarrollo, `prod` → producción. Prod ya está migrado (equipo `betesda`). Si un cambio de código depende de reglas nuevas, se despliegan primero las reglas: código nuevo + reglas viejas deja la app vacía.
 
 ## Stack
 
@@ -25,14 +27,14 @@ React 19 + TypeScript + Vite, Chakra UI v3 (`src/components/ui/` es el snippet g
 
 **Colecciones de Firestore:**
 - `teams/{teamId}` — `name`, `createdAt`. Solo lo crea el superadmin desde `/admin` (id = slug del nombre, no se edita después).
-- `superadmins/{uid}` — doc vacío, se crea a mano en la consola (dev y prod). Marca al dueño de la app (`isSuperAdmin` en `AuthContext`). No es un campo en `users` porque los admins de equipo pueden editar esos docs.
+- `superadmins/{uid}` — sin campos obligatorios, se crea a mano en la consola (dev y prod). Marca al dueño de la app (`isSuperAdmin` en `AuthContext`). No es un campo en `users` porque los admins de equipo pueden editar esos docs.
 - `teams/{teamId}/songs` — repertorio completo (el catálogo).
 - `teams/{teamId}/book` — la lista de la sesión actual. Guarda **copias** de las canciones, no referencias. Orden: campo `order`, con fallback a `createdAt` (`utils/book.ts`, `sortBook`).
 - `teams/{teamId}/liveSong/current` — documento único con la canción en vivo (+ `transpose`, `cueSection`). Efímero.
 - `teams/{teamId}/broadcast/current` — mensajes del director a los músicos del equipo.
 - `users` (global) — perfil (`role: "admin" | "musico"`, `avatar`, `teamId`). Toda query sobre `users` tiene que filtrar `where("teamId", "==", ...)` o las reglas la rechazan entera.
 
-Reglas (`firestore.rules`): los miembros del equipo leen, solo los admins del equipo escriben; un admin solo crea/edita usuarios de su propio equipo. Las colecciones globales viejas (`songs`, `book`, …) siguen en las reglas hasta la migración de datos.
+Reglas (`firestore.rules`): los miembros del equipo leen, solo los admins del equipo escriben; un admin solo crea/edita usuarios de su propio equipo. El superadmin además lista/crea equipos (solo `create`, nunca pisa uno existente) y crea/edita usuarios de cualquier equipo. Las colecciones globales viejas (`songs`, `book`, `liveSong`, `broadcast` en la raíz) ya están migradas y el código no las usa; quedan como backup (y sus `match` en las reglas) hasta borrarlas con `--delete-old`.
 
 Como `book` y `liveSong` son copias, editar/borrar una canción tiene que propagarse a mano a las tres colecciones (ver `services/songs.service.ts`, `updateSong`/`deleteSong`).
 
