@@ -8,14 +8,14 @@ interface EditSongVars {
 }
 
 export function useEditSong() {
-  const { isDemo } = useAuth();
+  const { teamId } = useAuth();
 
   const { run: editSong, ...mutation } = useOptimisticMutation<EditSongVars>({
-    queryKey: ["songs", isDemo ? "demo" : "real"],
-    mutationFn: ({ id, data }) => updateSong(id, data),
+    queryKey: ["songs", teamId],
+    mutationFn: ({ id, data }) => updateSong(teamId, id, data),
     updater: (old, { id, data }) =>
       old?.map((song) => (song.id === id ? { ...song, ...data } : song)),
-    invalidateKeys: [["songs"]],
+    invalidateKeys: [["songs", teamId]],
     toastMessages: {
       loading: "Guardando canción...",
       success: "Canción actualizada",

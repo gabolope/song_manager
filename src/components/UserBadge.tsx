@@ -2,9 +2,11 @@ import { Badge, HStack, Text } from "@chakra-ui/react";
 import { GiSpyglass } from "react-icons/gi";
 import { useAuth } from "../contexts/AuthContext";
 import { getAvatar } from "../types/user";
+import { useTeam } from "../hooks/useTeam";
 
 const UserBadge = () => {
   const { profile, isDemo } = useAuth();
+  const { data: team } = useTeam();
 
   if (isDemo) {
     return (
@@ -27,6 +29,11 @@ const UserBadge = () => {
       <Text fontSize="0.9rem" fontWeight="600">
         {profile.displayName}
       </Text>
+      {team?.name && (
+        <Badge variant="subtle" colorPalette="gray">
+          {team.name}
+        </Badge>
+      )}
     </HStack>
   );
 };

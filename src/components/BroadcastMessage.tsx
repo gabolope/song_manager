@@ -1,8 +1,8 @@
 import { Button, CloseButton, Dialog, Portal, Text } from "@chakra-ui/react";
-import { doc, onSnapshot } from "firebase/firestore";
+import { onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { db } from "@/services/firebase";
+import { teamDoc } from "@/services/firebase";
 
 interface Message {
   id: string;
@@ -12,19 +12,19 @@ interface Message {
 }
 
 // Muestra en un diálogo los mensajes que un director manda a todos los
-// conectados (documento fijo broadcast/current, ver SendMessageDialog).
+// conectados del equipo (documento fijo teams/{teamId}/broadcast/current, ver SendMessageDialog).
 // Cerrar el diálogo descarta el mensaje solo para este usuario.
 const BroadcastMessage = () => {
-  const { user, isDemo } = useAuth();
+  const { user, isDemo, teamId } = useAuth();
   const [message, setMessage] = useState<Message | null>(null);
 
   useEffect(() => {
-    if (isDemo || !user) return;
+    if (isDemo || !user || !teamId) return;
     // El primer snapshot es el último mensaje guardado, que pudo haberse
     // mandado hace horas: solo se muestran los que llegan estando conectado.
     let first = true;
     const unsubscribe = onSnapshot(
-      doc(db, "broadcast", "current"),
+      teamDoc(teamId, "broadcast", "current"),
       (snapshot) => {
         if (first) {
           first = false;
@@ -36,7 +36,7 @@ const BroadcastMessage = () => {
       (error) => console.error("Error escuchando mensajes:", error),
     );
     return () => unsubscribe();
-  }, [isDemo, user]);
+  }, [isDemo, user, teamId]);
 
   return (
     <Dialog.Root

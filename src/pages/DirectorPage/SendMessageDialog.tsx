@@ -6,18 +6,18 @@ import {
   Portal,
   Textarea,
 } from "@chakra-ui/react";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { serverTimestamp, setDoc } from "firebase/firestore";
 import { useState } from "react";
 import { MdOutlineMessage } from "react-icons/md";
 import { toaster } from "@/components/ui/toaster";
 import { useAuth } from "@/contexts/AuthContext";
-import { db } from "@/services/firebase";
+import { teamDoc } from "@/services/firebase";
 
-// El director manda un aviso a todos los conectados. Documento fijo que se
+// El director manda un aviso a todos los conectados de su equipo. Documento fijo que se
 // sobreescribe en cada envío (mismo patrón que liveSong/current); lo muestra
 // BroadcastMessage en cada cliente.
 const SendMessageDialog = () => {
-  const { user, profile, isDemo } = useAuth();
+  const { user, profile, isDemo, teamId } = useAuth();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -28,7 +28,7 @@ const SendMessageDialog = () => {
   const send = async () => {
     setSending(true);
     try {
-      await setDoc(doc(db, "broadcast", "current"), {
+      await setDoc(teamDoc(teamId, "broadcast", "current"), {
         id: crypto.randomUUID(),
         text: text.trim(),
         sentBy: user.uid,

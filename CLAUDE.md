@@ -9,7 +9,9 @@ App web para que un equipo de alabanza comparta canciones (ChordPro) en vivo: un
 - `npm run lint` — ESLint
 - No hay tests.
 
-Deploy: Vercel (SPA, `vercel.json` reescribe todo a `index.html`). Reglas de Firestore en `firestore.rules` (se despliegan con `firebase deploy --only firestore:rules`).
+Deploy: Vercel (SPA, `vercel.json` reescribe todo a `index.html`). Reglas de Firestore en `firestore.rules` (se despliegan con `firebase deploy --only firestore:rules --project dev|prod`).
+
+Entornos: `npm run dev` usa el proyecto Firebase de desarrollo (`song-manager-dev-a7fd4`) y el build usa producción (`firebase.ts`, según `import.meta.env.DEV`). En `.firebaserc`, `default`/`dev` → desarrollo, `prod` → producción. Prod ya está migrado (equipo `betesda`).
 
 ## Stack
 
@@ -19,25 +21,30 @@ React 19 + TypeScript + Vite, Chakra UI v3 (`src/components/ui/` es el snippet g
 
 **Rutas** (`src/routes.tsx`): `/` (login/redirección), `/director` (solo admin), `/player` y `/lyrics` (cualquier usuario logueado). Director y Player comparten un único `SessionProvider` para no perder estado al cambiar de vista. `/lyrics` fuerza tema oscuro (`main.tsx`).
 
+**Multi-equipo:** cada equipo tiene su propio repertorio, sesión y usuarios. Un usuario = un equipo (`users/{uid}.teamId`). Los datos del equipo viven en subcolecciones de `teams/{teamId}`; las rutas se arman **siempre** con `teamCol(teamId, name)` / `teamDoc(teamId, name, id)` de `services/firebase.ts` (tiran error si `teamId` es null). `teamId` sale de `useAuth()`: es `null` en demo y en usuarios sin migrar, y en ese caso no se abren listeners.
+
 **Colecciones de Firestore:**
-- `songs` — repertorio completo (el catálogo).
-- `book` — la lista de la sesión actual. Guarda **copias** de las canciones, no referencias. Orden: campo `order`, con fallback a `createdAt` (`utils/book.ts`, `sortBook`).
-- `liveSong/current` — documento único con la canción en vivo (+ `transpose`, `cueSection`). Efímero.
-- `broadcast` — mensajes del director a los músicos.
-- `users` — perfil (`role: "admin" | "musico"`, `avatar`).
+- `teams/{teamId}` — `name`, `createdAt`. Solo se crea por script/consola, nunca desde la app (`useTeam` lo lee para mostrar el nombre).
+- `teams/{teamId}/songs` — repertorio completo (el catálogo).
+- `teams/{teamId}/book` — la lista de la sesión actual. Guarda **copias** de las canciones, no referencias. Orden: campo `order`, con fallback a `createdAt` (`utils/book.ts`, `sortBook`).
+- `teams/{teamId}/liveSong/current` — documento único con la canción en vivo (+ `transpose`, `cueSection`). Efímero.
+- `teams/{teamId}/broadcast/current` — mensajes del director a los músicos del equipo.
+- `users` (global) — perfil (`role: "admin" | "musico"`, `avatar`, `teamId`). Toda query sobre `users` tiene que filtrar `where("teamId", "==", ...)` o las reglas la rechazan entera.
+
+Reglas (`firestore.rules`): los miembros del equipo leen, solo los admins del equipo escriben; un admin solo crea/edita usuarios de su propio equipo. Las colecciones globales viejas (`songs`, `book`, …) siguen en las reglas hasta la migración de datos.
 
 Como `book` y `liveSong` son copias, editar/borrar una canción tiene que propagarse a mano a las tres colecciones (ver `services/songs.service.ts`, `updateSong`/`deleteSong`).
 
-**Datos en tiempo real:** `useBook` y `useLiveSong` abren `onSnapshot` y escriben directo en el cache de React Query (`setQueryData`); el `useQuery` solo lee del cache (`enabled: false`). Las mutaciones sobre listas usan `hooks/useOptimisticMutation.ts` (optimistic update + rollback + toast).
+**Datos en tiempo real:** `useBook` y `useLiveSong` abren `onSnapshot` y escriben directo en el cache de React Query (`setQueryData`); el `useQuery` solo lee del cache (`enabled: false`). Las mutaciones sobre listas usan `hooks/useOptimisticMutation.ts` (optimistic update + rollback + toast). Las query keys llevan el equipo (`["songs", teamId]`, `["book", teamId]`, `["liveSong", teamId]`, `["users", teamId]`) para no mezclar cache al cambiar de cuenta; en demo quedan con `null`.
 
 **Contexts:**
-- `AuthContext` — `user`, `profile`, `isAdmin`, `isDemo`, `wantsToDirect` (un admin puede elegir no dirigir y usar `/player`; se guarda por uid en localStorage).
+- `AuthContext` — `user`, `profile`, `teamId`, `isAdmin`, `isDemo`, `wantsToDirect` (un admin puede elegir no dirigir y usar `/player`; se guarda por uid en localStorage).
 - `SessionContext` — book, liveSong, selección, `isLive`, transposición por canción (solo en memoria, nunca se persiste).
 - `DirectorContext` / `PlayerContext` — estado propio de cada página (pantalla completa, navegación, transponer).
 
 **Modo demo** (`isDemo`): sin cuenta ni escrituras a Firestore; `book`/`liveSong` viven solo en el cache de React Query y las canciones salen de `data/demoSongs.ts`. Todo hook que escribe o escucha Firestore debe respetar `isDemo`.
 
-**Crear usuarios:** `services/auth.service.ts` usa una app Firebase secundaria para que `createUserWithEmailAndPassword` no desloguee al admin.
+**Crear usuarios:** `services/auth.service.ts` usa una app Firebase secundaria para que `createUserWithEmailAndPassword` no desloguee al admin. El usuario nuevo hereda el `teamId` del admin que lo crea.
 
 ## ChordPro
 

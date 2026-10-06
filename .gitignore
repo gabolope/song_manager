@@ -27,3 +27,5 @@ dist-ssr
 
 # Canciones de chordle
 repertorio
+# Claves de cuenta de servicio para scripts/ (nunca al repo)
+keys/

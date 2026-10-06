@@ -1,7 +1,7 @@
 import type { SongDTO } from "../types/song";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "../services/firebase";
+import { onSnapshot } from "firebase/firestore";
+import { teamCol } from "../services/firebase";
 import { useEffect } from "react";
 import { toaster } from "../components/ui/toaster";
 import { useAuth } from "../contexts/AuthContext";
@@ -9,23 +9,25 @@ import { sortBook } from "../utils/book";
 
 const useBook = () => {
   const queryClient = useQueryClient();
-  const { isDemo } = useAuth();
+  const { isDemo, teamId } = useAuth();
 
   useEffect(() => {
     // En demo el "book" vive solo en el cache de react-query (lo escriben
     // las mutaciones de useBookMutations): no hay nada que suscribir. Se
-    // resetea siempre a [] (no "prev ?? []") para no arrastrar el book real
-    // que haya quedado cacheado de una sesión anterior.
+    // resetea siempre a [] (no "prev ?? []") para no arrastrar el book de
+    // una demo anterior en la misma pestaña.
     if (isDemo) {
-      queryClient.setQueryData<SongDTO[]>(["book"], []);
+      queryClient.setQueryData<SongDTO[]>(["book", teamId], []);
       return;
     }
+    // Usuario sin equipo: no hay book que escuchar (las reglas lo rechazarían).
+    if (!teamId) return;
 
     // Sin orderBy: el orden real ("order", con fallback a createdAt) se
     // resuelve en el cliente vía sortBook, porque orderBy("order") en
     // Firestore excluiría las canciones viejas que todavía no tienen ese
     // campo (se lo asigna recién el primer reordenamiento manual).
-    const q = collection(db, "book");
+    const q = teamCol(teamId, "book");
 
     // Utilizo onSnapshot para abrir una conexión persistente con Firestore, cada vez que el book cambia Firestore pushea el cambio
     const unsubscribe = onSnapshot(
@@ -40,7 +42,7 @@ const useBook = () => {
         })) as SongDTO[];
 
         // Actualizo el cache directamente, sin hacer un fetch
-        queryClient.setQueryData(["book"], sortBook(songs));
+        queryClient.setQueryData(["book", teamId], sortBook(songs));
       },
       (error) => {
         // Si el listener falla (permisos, desconexión), avisar en vez de
@@ -54,11 +56,11 @@ const useBook = () => {
       },
     );
     return () => unsubscribe();
-  }, [queryClient, isDemo]);
+  }, [queryClient, isDemo, teamId]);
 
   // Ahora uso useQuery solo para leer del cache, sin queryFn que haga fetch
   return useQuery<SongDTO[], Error>({
-    queryKey: ["book"],
+    queryKey: ["book", teamId],
     queryFn: () => [], // nunca se ejecuta, solo silencia el error
     staleTime: Infinity,
     enabled: false,

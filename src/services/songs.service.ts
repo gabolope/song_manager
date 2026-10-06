@@ -1,18 +1,16 @@
 import {
-  collection,
   deleteField,
-  doc,
   getDoc,
   getDocs,
   orderBy,
   query,
   writeBatch,
 } from "firebase/firestore";
-import { db } from "./firebase";
+import { db, teamCol, teamDoc } from "./firebase";
 import type { SongDTO } from "../types/song";
 
-export async function fetchSongs(): Promise<SongDTO[]> {
-  const q = query(collection(db, "songs"), orderBy("title"));
+export async function fetchSongs(teamId: string | null): Promise<SongDTO[]> {
+  const q = query(teamCol(teamId, "songs"), orderBy("title"));
   const querySnapshot = await getDocs(q);
 
   return querySnapshot.docs.map((doc) => {
@@ -37,6 +35,7 @@ export type SongEditInput = Pick<
 const LIVE_SONG_DOC = "current"; // documento fijo, siempre el mismo (ver useLiveSong)
 
 export async function updateSong(
+  teamId: string | null,
   id: string,
   data: SongEditInput,
 ): Promise<void> {
@@ -57,18 +56,18 @@ export async function updateSong(
   };
 
   const batch = writeBatch(db);
-  batch.update(doc(db, "songs", id), payload);
+  batch.update(teamDoc(teamId, "songs", id), payload);
 
   // El repertorio ("book") y la canción en vivo guardan una copia propia de
   // la canción (no una referencia), así que hay que propagarles la edición
   // a mano para que no queden mostrando la versión vieja.
-  const bookRef = doc(db, "book", id);
+  const bookRef = teamDoc(teamId, "book", id);
   const bookSnap = await getDoc(bookRef);
   if (bookSnap.exists()) {
     batch.update(bookRef, payload);
   }
 
-  const liveSongRef = doc(db, "liveSong", LIVE_SONG_DOC);
+  const liveSongRef = teamDoc(teamId, "liveSong", LIVE_SONG_DOC);
   const liveSongSnap = await getDoc(liveSongRef);
   if (liveSongSnap.exists() && liveSongSnap.data()?.id === id) {
     batch.update(liveSongRef, payload);
@@ -77,20 +76,23 @@ export async function updateSong(
   await batch.commit();
 }
 
-export async function deleteSong(id: string): Promise<void> {
+export async function deleteSong(
+  teamId: string | null,
+  id: string,
+): Promise<void> {
   // Igual que updateSong: "book" y "liveSong" guardan copias propias de la
   // canción, así que hay que borrarlas a mano para no dejar referencias a
   // una canción que ya no existe en "songs".
   const batch = writeBatch(db);
-  batch.delete(doc(db, "songs", id));
+  batch.delete(teamDoc(teamId, "songs", id));
 
-  const bookRef = doc(db, "book", id);
+  const bookRef = teamDoc(teamId, "book", id);
   const bookSnap = await getDoc(bookRef);
   if (bookSnap.exists()) {
     batch.delete(bookRef);
   }
 
-  const liveSongRef = doc(db, "liveSong", LIVE_SONG_DOC);
+  const liveSongRef = teamDoc(teamId, "liveSong", LIVE_SONG_DOC);
   const liveSongSnap = await getDoc(liveSongRef);
   if (liveSongSnap.exists() && liveSongSnap.data()?.id === id) {
     batch.delete(liveSongRef);

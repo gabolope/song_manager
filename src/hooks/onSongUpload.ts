@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  collection,
   writeBatch,
   doc,
   getDocs,
   type DocumentReference,
 } from "firebase/firestore";
-import { db } from "../services/firebase";
+import { db, teamCol } from "../services/firebase";
+import { useAuth } from "../contexts/AuthContext";
 import { toaster } from "../components/ui/toaster";
 import type { SongTipo } from "../types/song";
 
@@ -87,10 +87,11 @@ interface UploadSummary {
 
 export function useSongUpload() {
   const queryClient = useQueryClient();
+  const { teamId } = useAuth();
 
   return useMutation({
     mutationFn: async (files: File[]): Promise<UploadSummary> => {
-      const snapshot = await getDocs(collection(db, "songs"));
+      const snapshot = await getDocs(teamCol(teamId, "songs"));
       const existingTitles = new Set(snapshot.docs.map((d) => d.data().title));
 
       const pending: {
@@ -112,7 +113,7 @@ export function useSongUpload() {
 
           // Se agrega de inmediato para detectar duplicados dentro del mismo lote.
           existingTitles.add(title);
-          const ref = doc(collection(db, "songs"));
+          const ref = doc(teamCol(teamId, "songs"));
           pending.push({
             ref,
             data: {
@@ -145,7 +146,7 @@ export function useSongUpload() {
       return { added: pending.length, duplicates, failed };
     },
     onSuccess: (summary) => {
-      queryClient.invalidateQueries({ queryKey: ["songs"] });
+      queryClient.invalidateQueries({ queryKey: ["songs", teamId] });
 
       const parts = [`${summary.added} canción(es) subida(s)`];
       if (summary.duplicates.length)
