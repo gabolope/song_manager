@@ -49,10 +49,10 @@ Rama: `teams_implementation`.
    - [x] Probar el script en dev leyendo los datos reales de prod (a prod solo se le lee). Reemplaza al emulador: pide Java 21 y acá hay Java 8. Usar el mismo `teamId` que ya tiene el admin de dev: (hecho con `--team-id test --team-name "Betesda"`; hizo falta desplegar las reglas nuevas a dev)
      1. Dry run: `node scripts/migrate-to-teams.mjs --key keys/dev.json --source-key keys/prod.json --team-id <id> --team-name "<nombre>"`
      2. Si los números cierran, repetir con `--write` y revisar en la app (`npm run dev`) repertorio, book, en vivo y mensajes
-   - [ ] Setear `teamId` en todos los docs de `users` (lo hace el script; en dev ya está)
-   - [ ] Antes de prod, terminar de revisar en dev: mensaje de broadcast, que editar una canción del book se propague, y login de un músico en `/player`
-   - [ ] Deploy en orden: script → reglas → código. Al revés no: el código nuevo con reglas viejas deja la app vacía (no hay `match /teams`; pasó en dev). Las reglas nuevas mantienen las globales, así que la app vieja sigue andando; en ese rato solo falla la lista/alta de usuarios (piden `teamId`)
-     1. Script en prod: `node scripts/migrate-to-teams.mjs --key keys/prod.json --team-id <id> --team-name "<nombre>"` (dry run y después `--write`)
+   - [x] Setear `teamId` en todos los docs de `users` (lo hace el script; hecho en dev y prod)
+   - [x] Antes de prod, terminar de revisar en dev: mensaje de broadcast, que editar una canción del book se propague, y login de un músico en `/player`
+   - [x] Deploy en orden: script → reglas → código. Al revés no: el código nuevo con reglas viejas deja la app vacía (no hay `match /teams`; pasó en dev). Las reglas nuevas mantienen las globales, así que la app vieja sigue andando; en ese rato solo falla la lista/alta de usuarios (piden `teamId`)
+     1. Script en prod: `node scripts/migrate-to-teams.mjs --key keys/prod.json --team-id betesda --team-name "Betesda"` (dry run y después `--write`)
      2. `firebase deploy --only firestore:rules --project prod`
      3. Merge a `main` (deploy del código en Vercel), enseguida después de las reglas
    - [ ] Probar con dos equipos y dos cuentas en paralelo (sesiones en vivo independientes, sin ver datos del otro)

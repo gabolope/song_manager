@@ -11,7 +11,7 @@ App web para que un equipo de alabanza comparta canciones (ChordPro) en vivo: un
 
 Deploy: Vercel (SPA, `vercel.json` reescribe todo a `index.html`). Reglas de Firestore en `firestore.rules` (se despliegan con `firebase deploy --only firestore:rules --project dev|prod`).
 
-Entornos: `npm run dev` usa el proyecto Firebase de desarrollo (`song-manager-dev-a7fd4`) y el build usa producción (`firebase.ts`, según `import.meta.env.DEV`). En `.firebaserc`, `default`/`dev` → desarrollo, `prod` → producción. En la rama `teams_implementation` las reglas nuevas **no** se despliegan a `prod`: rompen la app publicada hasta que se migren los datos (ver `TODO.md`, Multi-equipo).
+Entornos: `npm run dev` usa el proyecto Firebase de desarrollo (`song-manager-dev-a7fd4`) y el build usa producción (`firebase.ts`, según `import.meta.env.DEV`). En `.firebaserc`, `default`/`dev` → desarrollo, `prod` → producción. Prod ya está migrado (equipo `betesda`).
 
 ## Stack
 
