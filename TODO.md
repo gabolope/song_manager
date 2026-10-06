@@ -61,7 +61,7 @@ Rama: `teams_implementation`.
    - [x] Página `/admin` (solo superadmin, doc `superadmins/{uid}`): crear equipos, crear usuarios en cualquier equipo, cambiar rol y mover entre equipos
    - [ ] Crear `superadmins/{uid}` a mano en dev y en prod
    - [x] Desplegar reglas a dev y probar `/admin` (crear equipo + director; el equipo nuevo no ve nada de Betesda)
-   - [ ] Prod: crear `superadmins/{uid}`, `firebase deploy --only firestore:rules --project prod` y merge a `main`
+   - [x] Prod: crear `superadmins/{uid}`, `firebase deploy --only firestore:rules --project prod` y merge a `main`
    - [ ] Documentar el proceso en README.md y actualizar CLAUDE.md con el nuevo modelo
 5. Más adelante (solo si hace falta)
    - [ ] Custom claims (`teamId`, `role`) para no pagar un `get()` por regla
