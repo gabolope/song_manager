@@ -7,6 +7,9 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   isAdmin: boolean;
+  // Dueño de la app: entra a /admin (alta de equipos, mover miembros).
+  // Tiene doc en `superadmins/{uid}`; independiente de role y de teamId.
+  isSuperAdmin: boolean;
   // Equipo del usuario (sale de profile.teamId). null en demo y en usuarios
   // sin migrar: en ese caso no se escucha ni escribe nada del equipo.
   teamId: string | null;

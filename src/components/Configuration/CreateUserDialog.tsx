@@ -16,10 +16,12 @@ import AvatarPicker from "./AvatarPicker";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // Equipo destino; sin esto, el del admin logueado. Lo usa /admin.
+  teamId?: string;
 }
 
-const CreateUserDialog = ({ open, onOpenChange }: Props) => {
-  const { mutate: createUser, isPending } = useCreateUser();
+const CreateUserDialog = ({ open, onOpenChange, teamId }: Props) => {
+  const { mutate: createUser, isPending } = useCreateUser(teamId);
 
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
