@@ -1,4 +1,4 @@
-import ChordSheetJS, { Key } from "chordsheetjs";
+import ChordSheetJS, { Chord, Key } from "chordsheetjs";
 import DOMPurify from "dompurify";
 
 const parser = new ChordSheetJS.ChordProParser();
@@ -50,12 +50,40 @@ const DEFAULT_LABEL: Record<string, string> = {
 const UNLABELED_SECTION_RE =
   /<div class="paragraph (verse|part|chorus|bridge)">(?!\s*<div class="row">\s*<h3 class="label">)/g;
 
+// chordsheetjs solo transpone un corchete si entero es un acorde válido:
+// `[(G)]` o `[- F)]` quedan sin tocar, y en `[Gm7--C]` toma "--C" como
+// sufijo y solo mueve el Gm7. Por eso transponemos nosotros cada acorde
+// dentro del corchete, cortando por paréntesis, guiones, espacios y "/".
+// El regex es estricto a propósito: Chord.parse acepta casi cualquier cosa
+// ("Coro" → C, "Intro" → grado I) y no queremos tocar indicaciones.
+const CHORD_TOKEN_RE = /^[A-G][#b]?(?:maj|min|dim|aug|sus|add|m|M|\d|[+°ø#b])*$/;
+// Bajo en minúscula después de "/" (ej. "Am7/c"), que chordsheetjs acepta.
+const LOWER_BASS_RE = /^[a-g][#b]?$/;
+
+function transposeChordToken(token: string, transpose: number, afterSlash: boolean): string {
+  if (afterSlash && LOWER_BASS_RE.test(token)) token = token[0].toUpperCase() + token.slice(1);
+  if (!CHORD_TOKEN_RE.test(token)) return token;
+  try {
+    return Chord.parse(token)?.transpose(transpose).toString() ?? token;
+  } catch {
+    return token;
+  }
+}
+
+function transposeContent(content: string, transpose: number): string {
+  return content.replace(/\[([^\]]*)\]/g, (_match, inner: string) =>
+    `[${inner.replace(/[^\s()\-–,:/]+/g, (token, offset: number) =>
+      transposeChordToken(token, transpose, inner[offset - 1] === "/"),
+    )}]`,
+  );
+}
+
 // `transpose` es un desplazamiento en semitonos aplicado solo al render: no
 // modifica `content`, así que nunca se persiste en el repertorio.
 export function formatSong(content: string, transpose = 0): string {
   try {
-    let song = parser.parse(preserveChordSpacing(content));
-    if (transpose) song = song.transpose(transpose);
+    const source = transpose ? transposeContent(content, transpose) : content;
+    const song = parser.parse(preserveChordSpacing(source));
     const html = formatter.format(song);
     const cleaned = html
       .replace(/<div class="paragraph[^"]*">\s*<\/div>/g, "")
