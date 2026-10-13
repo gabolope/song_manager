@@ -8,6 +8,7 @@ import { stripChordProMarkup } from "@/services/chordpro.service";
 import { normalizeForSearch } from "@/utils/text";
 import ListSkeleton from "./ListSkeleton";
 import SongTipoTag from "./SongTipoTag";
+import AddSongDialog from "./AddSongDialog";
 import { TIPO_LABEL, compareByKeyThenTipo, formatSongMeta } from "@/utils/song";
 import "./SongList.css";
 
@@ -89,6 +90,7 @@ const SongList = ({
         <div className="panelHeaderTitle">
           <h2>Repertorio</h2>
           <span className="panelCount">{filtered?.length ?? 0}</span>
+          <AddSongDialog />
         </div>
         {onToggleExpand && (
           <button
@@ -194,7 +196,7 @@ const SongList = ({
         <div className="panelEmpty">
           {query || keyFilter || tipoFilter
             ? "Sin resultados."
-            : "No hay canciones cargadas."}
+            : "Agregá canciones a tu repertorio."}
         </div>
       ) : (
         <div className="songList">

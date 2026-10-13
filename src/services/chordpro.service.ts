@@ -32,6 +32,20 @@ export function parseChordPro(content: string) {
   return parser.parse(content);
 }
 
+// Acordes "comunes" (línea de acordes arriba de la letra, como se copian de
+// cualquier página) a ChordPro. Los títulos de sección ("Coro:") quedan como
+// líneas de letra: se acomodan después en el editor.
+// Si el parser no entiende el texto, se guarda tal cual.
+export function chordsOverWordsToChordPro(text: string): string {
+  try {
+    const song = new ChordSheetJS.ChordsOverWordsParser().parse(text);
+    return new ChordSheetJS.ChordProFormatter().format(song);
+  } catch (error) {
+    console.error("No se pudo convertir a ChordPro:", error);
+    return text;
+  }
+}
+
 // Letra "limpia" para buscar: saca directivas ({title:...}) y acordes
 // ([Bb]) para que una palabra partida por un acorde en medio (ej. "Ere[Bb]s")
 // siga siendo encontrable como "Eres".
@@ -85,11 +99,21 @@ export function formatSong(content: string, transpose = 0): string {
     const source = transpose ? transposeContent(content, transpose) : content;
     const song = parser.parse(preserveChordSpacing(source));
     const html = formatter.format(song);
-    const cleaned = html
-      .replace(/<div class="paragraph[^"]*">\s*<\/div>/g, "")
-      .replace(UNLABELED_SECTION_RE, (match, kind: string) =>
-        `${match}<div class="row"><h3 class="label">${DEFAULT_LABEL[kind]}</h3></div>`,
-      );
+    const withoutEmpty = html.replace(/<div class="paragraph[^"]*">\s*<\/div>/g, "");
+    // Las estrofas sin título se numeran ("Estrofa 1", "Estrofa 2"...) solo si
+    // hay más de una: con una sola, el número no aporta nada.
+    const isVerse = (kind: string) => DEFAULT_LABEL[kind] === DEFAULT_LABEL.verse;
+    const unlabeledVerses = [...withoutEmpty.matchAll(UNLABELED_SECTION_RE)].filter((m) =>
+      isVerse(m[1]),
+    ).length;
+    let verseNumber = 0;
+    const cleaned = withoutEmpty.replace(UNLABELED_SECTION_RE, (match, kind: string) => {
+      const label =
+        isVerse(kind) && unlabeledVerses > 1
+          ? `${DEFAULT_LABEL[kind]} ${++verseNumber}`
+          : DEFAULT_LABEL[kind];
+      return `${match}<div class="row"><h3 class="label">${label}</h3></div>`;
+    });
     return DOMPurify.sanitize(cleaned);
   } catch (error) {
     console.error("Error al interpretar el archivo ChordPro:", error);

@@ -5,7 +5,6 @@ Menores:
 - [ ] Al terminar de editar una canción, mostrar la que se acaba de editar (hoy vuelve a la canción en vivo si hay una)
 - [ ] Opción de ver el ChordPro puro
 - [ ] Agregar tipo de sección pre-coro
-- [ ] Enumerar automáticamente estrofas y versos, salvo que tengan título
 
 Intermedios:
 
