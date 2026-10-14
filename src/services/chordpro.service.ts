@@ -33,17 +33,56 @@ export function parseChordPro(content: string) {
 }
 
 // Acordes "comunes" (línea de acordes arriba de la letra, como se copian de
-// cualquier página) a ChordPro. Los títulos de sección ("Coro:") quedan como
-// líneas de letra: se acomodan después en el editor.
+// cualquier página) a ChordPro. Los títulos de sección entre corchetes
+// ("[Coro]") se convierten en secciones; los otros ("Coro:") quedan como
+// líneas de letra y se acomodan después en el editor.
 // Si el parser no entiende el texto, se guarda tal cual.
 export function chordsOverWordsToChordPro(text: string): string {
   try {
     const song = new ChordSheetJS.ChordsOverWordsParser().parse(text);
-    return new ChordSheetJS.ChordProFormatter().format(song);
+    return applySectionHeaders(new ChordSheetJS.ChordProFormatter().format(song));
   } catch (error) {
     console.error("No se pudo convertir a ChordPro:", error);
     return text;
   }
+}
+
+// Títulos genéricos: se guardan sin etiqueta para que formatSong los
+// muestre en español y numere las estrofas ("Estrofa 1", "Estrofa 2"...).
+const GENERIC_SECTION_RE = /^(estrofa|verso|verse|coro|chorus|estribillo|puente|bridge)$/i;
+
+function sectionDirectives(label: string): [string, string] {
+  const kind = /pre/i.test(label)
+    ? "v"
+    : /coro|chorus|estribillo/i.test(label)
+      ? "c"
+      : /puente|bridge/i.test(label)
+        ? "b"
+        : "v";
+  const suffix = GENERIC_SECTION_RE.test(label) ? "" : `: ${label}`;
+  return [`{so${kind}${suffix}}`, `{eo${kind}}`];
+}
+
+// El parser deja "[Estrofa]" como si fuera un acorde suelto en su propia
+// línea. Cada una abre una sección hasta la siguiente (o el final), y se
+// sacan las líneas en blanco de adentro: en ChordPro una línea en blanco
+// corta el párrafo y el resto de la sección quedaría sin título.
+function applySectionHeaders(chordPro: string): string {
+  const out: string[] = [];
+  let close: string | null = null;
+  for (const line of chordPro.split("\n")) {
+    const header = line.match(/^\s*\[([^\]]+)\]\s*$/)?.[1].trim();
+    if (header && !CHORD_TOKEN_RE.test(header)) {
+      if (close) out.push(close, "");
+      const [open, end] = sectionDirectives(header);
+      out.push(open);
+      close = end;
+    } else if (!close || line.trim()) {
+      out.push(line);
+    }
+  }
+  if (close) out.push(close);
+  return out.join("\n");
 }
 
 // Letra "limpia" para buscar: saca directivas ({title:...}) y acordes
@@ -60,9 +99,16 @@ const DEFAULT_LABEL: Record<string, string> = {
   part: "Estrofa",
   chorus: "Coro",
   bridge: "Puente",
+  // Secciones que trae el export de Chordle ({start_of_intro}, ...).
+  prechorus: "Pre-coro",
+  intro: "Intro",
+  instrumental: "Instrumental",
+  ending: "Final",
 };
-const UNLABELED_SECTION_RE =
-  /<div class="paragraph (verse|part|chorus|bridge)">(?!\s*<div class="row">\s*<h3 class="label">)/g;
+const UNLABELED_SECTION_RE = new RegExp(
+  `<div class="paragraph (${Object.keys(DEFAULT_LABEL).join("|")})">(?!\\s*<div class="row">\\s*<h3 class="label">)`,
+  "g",
+);
 
 // chordsheetjs solo transpone un corchete si entero es un acorde válido:
 // `[(G)]` o `[- F)]` quedan sin tocar, y en `[Gm7--C]` toma "--C" como

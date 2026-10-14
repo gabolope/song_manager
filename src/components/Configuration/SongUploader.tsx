@@ -9,7 +9,7 @@ const SongUploader = () => {
     <FileUpload.Root
       maxFiles={500}
       accept={{ "text/plain": [".chordpro", ".cho"] }}
-      onFileAccept={({ files }) => uploadSongs(files)}
+      onFileAccept={({ files }) => uploadSongs({ files })}
     >
       <FileUpload.HiddenInput />
       <FileUpload.Trigger asChild>

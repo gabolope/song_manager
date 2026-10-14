@@ -1,10 +1,13 @@
 import {
   Button,
+  ButtonGroup,
   CloseButton,
   Dialog,
   Field,
+  Flex,
   HStack,
   Input,
+  NativeSelect,
   Portal,
   Stack,
   Tabs,
@@ -17,8 +20,13 @@ import SongUploader from "@/components/Configuration/SongUploader";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSongUpload } from "@/hooks/onSongUpload";
 import { chordsOverWordsToChordPro } from "@/services/chordpro.service";
+import type { SongIdioma, SongTipo } from "@/types/song";
+import { IDIOMA_LABEL, TIPO_COLOR, TIPO_LABEL } from "@/utils/song";
 
 type Mode = "chords" | "chordpro" | "file";
+
+const TIPOS = Object.keys(TIPO_LABEL) as SongTipo[];
+const IDIOMAS = Object.keys(IDIOMA_LABEL) as SongIdioma[];
 
 // Alta de una canción al repertorio desde el panel. Lo pegado se convierte a
 // un archivo y pasa por la misma subida que los .chordpro (useSongUpload),
@@ -31,6 +39,12 @@ const AddSongDialog = () => {
   const [title, setTitle] = useState("");
   const [key, setKey] = useState("");
   const [text, setText] = useState("");
+  const [artist, setArtist] = useState("");
+  const [tipo, setTipo] = useState<SongTipo | "">("");
+  const [tempo, setTempo] = useState("");
+  // Vacío = se detecta de la letra al subir (detectIdioma).
+  const [idioma, setIdioma] = useState<SongIdioma | "">("");
+  const [genero, setGenero] = useState("");
 
   if (!isAdmin || isDemo) return null;
 
@@ -46,17 +60,38 @@ const AddSongDialog = () => {
       !hasKey && key.trim() && `{key: ${key.trim()}}`,
     ].filter(Boolean);
     const content = [...directives, body].join("\n");
-    uploadSongs([new File([content], "nueva.chordpro")], {
-      // Título repetido: no se agrega (lo avisa el toast) y se deja el texto
-      // para que se pueda corregir el título sin volver a pegarlo.
-      onSuccess: ({ added }) => {
-        if (!added) return;
-        setTitle("");
-        setKey("");
-        setText("");
-        setOpen(false);
+    const parsedTempo = tempo.trim() ? Number(tempo) : undefined;
+    uploadSongs(
+      {
+        files: [new File([content], "nueva.chordpro")],
+        extra: {
+          artist: artist.trim() || undefined,
+          tipo: tipo || undefined,
+          tempo:
+            parsedTempo !== undefined && !Number.isNaN(parsedTempo)
+              ? parsedTempo
+              : undefined,
+          idioma: idioma || undefined,
+          genero: genero.trim() || undefined,
+        },
       },
-    });
+      {
+        // Título repetido: no se agrega (lo avisa el toast) y se deja el texto
+        // para que se pueda corregir el título sin volver a pegarlo.
+        onSuccess: ({ added }) => {
+          if (!added) return;
+          setTitle("");
+          setKey("");
+          setText("");
+          setArtist("");
+          setTipo("");
+          setTempo("");
+          setIdioma("");
+          setGenero("");
+          setOpen(false);
+        },
+      },
+    );
   };
 
   return (
@@ -74,7 +109,12 @@ const AddSongDialog = () => {
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content minW={{ md: "560px" }}>
+          <Dialog.Content
+            width={{ md: "90vw" }}
+            maxWidth={{ md: "1100px" }}
+            maxHeight="90vh"
+            overflowY="auto"
+          >
             <Dialog.Header>
               <Dialog.Title>Agregar canción</Dialog.Title>
             </Dialog.Header>
@@ -99,9 +139,14 @@ const AddSongDialog = () => {
                 </Tabs.Content>
               </Tabs.Root>
               {mode !== "file" && (
-                <Stack gap={3} mt={4}>
-                  <HStack gap={3} align="start">
-                    <Field.Root required={!hasTitle} flex={1}>
+                <Flex
+                  gap={6}
+                  mt={4}
+                  align="stretch"
+                  direction={{ base: "column", md: "row" }}
+                >
+                  <Stack gap={3} width={{ md: "300px" }} flexShrink={0}>
+                    <Field.Root required={!hasTitle}>
                       <Field.Label>Título</Field.Label>
                       <Input
                         size="sm"
@@ -110,21 +155,86 @@ const AddSongDialog = () => {
                         placeholder={hasTitle ? "Lo toma del {title:}" : ""}
                       />
                     </Field.Root>
-                    <Field.Root width="90px">
-                      <Field.Label>Tono</Field.Label>
+                    <Field.Root>
+                      <Field.Label>Artista</Field.Label>
                       <Input
                         size="sm"
-                        textAlign="center"
-                        value={key}
-                        onChange={(e) => setKey(e.target.value)}
-                        placeholder={hasKey ? "{key:}" : "Ej: G"}
+                        value={artist}
+                        onChange={(e) => setArtist(e.target.value)}
                       />
                     </Field.Root>
-                  </HStack>
+                    <HStack gap={3} align="start">
+                      <Field.Root flex={1}>
+                        <Field.Label>Tempo (BPM)</Field.Label>
+                        <Input
+                          size="sm"
+                          type="number"
+                          value={tempo}
+                          onChange={(e) => setTempo(e.target.value)}
+                        />
+                      </Field.Root>
+                      <Field.Root flex={1}>
+                        <Field.Label>Tono</Field.Label>
+                        <Input
+                          size="sm"
+                          value={key}
+                          onChange={(e) => setKey(e.target.value)}
+                          placeholder={hasKey ? "{key:}" : "Ej: G"}
+                        />
+                      </Field.Root>
+                    </HStack>
+                    <Field.Root>
+                      <Field.Label>Género</Field.Label>
+                      <Input
+                        size="sm"
+                        value={genero}
+                        onChange={(e) => setGenero(e.target.value)}
+                      />
+                    </Field.Root>
+                    <Field.Root>
+                      <Field.Label>Idioma</Field.Label>
+                      <NativeSelect.Root size="sm">
+                        <NativeSelect.Field
+                          value={idioma}
+                          onChange={(e) =>
+                            setIdioma(e.target.value as SongIdioma | "")
+                          }
+                        >
+                          <option value="">Detectar de la letra</option>
+                          {IDIOMAS.map((i) => (
+                            <option key={i} value={i}>
+                              {IDIOMA_LABEL[i]}
+                            </option>
+                          ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
+                    </Field.Root>
+                    <Field.Root>
+                      <Field.Label>Tipo</Field.Label>
+                      <ButtonGroup attached width="full">
+                        {TIPOS.map((t) => (
+                          <Button
+                            key={t}
+                            type="button"
+                            size="sm"
+                            flex={1}
+                            colorPalette={TIPO_COLOR[t]}
+                            variant={tipo === t ? "solid" : "outline"}
+                            onClick={() => setTipo(tipo === t ? "" : t)}
+                          >
+                            {TIPO_LABEL[t]}
+                          </Button>
+                        ))}
+                      </ButtonGroup>
+                    </Field.Root>
+                  </Stack>
                   <Textarea
+                    flex={1}
+                    minW={0}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    rows={14}
+                    rows={22}
                     fontFamily="mono"
                     fontSize="sm"
                     placeholder={
@@ -133,7 +243,7 @@ const AddSongDialog = () => {
                         : "{title: Himno Nacional Argentino}\n{key: G}\n\n[G]Oíd, mortales, el [D]grito sagrado:\n¡[C]libertad, liber[D]tad, liber[G]tad!"
                     }
                   />
-                </Stack>
+                </Flex>
               )}
             </Dialog.Body>
             {mode !== "file" && (

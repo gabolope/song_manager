@@ -2,6 +2,8 @@ import type { Timestamp } from "firebase/firestore";
 
 export type SongTipo = "rapida" | "intermedia" | "lenta";
 
+export type SongIdioma = "es" | "en";
+
 export interface SongDTO {
   id: string;
   title: string;
@@ -13,6 +15,11 @@ export interface SongDTO {
   // BPM real, solo cuando el archivo chordpro trae la directiva {tempo:}.
   // Es independiente de `tipo`: no todas las canciones con tipo tienen tempo.
   tempo?: number;
+  // Se detecta solo al subir/crear la canción (detectIdioma) y se corrige a
+  // mano desde EditSongDialog si la heurística se equivocó.
+  idioma?: SongIdioma;
+  // Texto libre: el filtro del repertorio lista los que ya existen.
+  genero?: string;
   content: string;
   // Solo presente en canciones del "book": Firestore lo resuelve a null hasta
   // que el servidor confirma el serverTimestamp() con el que se escribió.

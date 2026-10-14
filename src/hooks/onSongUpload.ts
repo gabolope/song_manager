@@ -8,7 +8,8 @@ import {
 import { db, teamCol } from "../services/firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { toaster } from "../components/ui/toaster";
-import type { SongTipo } from "../types/song";
+import type { SongDTO, SongTipo } from "../types/song";
+import { detectIdioma } from "../utils/song";
 
 // Firestore no acepta más de 500 operaciones por batch.
 const BATCH_LIMIT = 500;
@@ -59,6 +60,7 @@ function extractMetadata(content: string) {
   const { title, tipo } = extractTipoAndCleanTitle(rawTitle);
   const tempoRaw = matchDirective(content, "tempo");
   const tempo = tempoRaw ? Number(tempoRaw) : undefined;
+  const idioma = detectIdioma(content);
 
   return {
     title,
@@ -66,6 +68,7 @@ function extractMetadata(content: string) {
     key: matchDirective(content, "key", "k") ?? "",
     ...(tipo ? { tipo } : {}),
     ...(tempo && !Number.isNaN(tempo) ? { tempo } : {}),
+    ...(idioma ? { idioma } : {}),
   };
 }
 
@@ -79,6 +82,11 @@ async function readFileAsText(file: File): Promise<string> {
   });
 }
 
+// Datos cargados a mano en AddSongDialog: pisan lo que se extrae del archivo.
+export type SongUploadExtra = Partial<
+  Pick<SongDTO, "artist" | "tipo" | "tempo" | "idioma" | "genero">
+>;
+
 interface UploadSummary {
   added: number;
   duplicates: string[];
@@ -90,7 +98,18 @@ export function useSongUpload() {
   const { teamId } = useAuth();
 
   return useMutation({
-    mutationFn: async (files: File[]): Promise<UploadSummary> => {
+    mutationFn: async ({
+      files,
+      extra,
+    }: {
+      files: File[];
+      extra?: SongUploadExtra;
+    }): Promise<UploadSummary> => {
+      // Los campos vacíos no pisan lo extraído (ej. idioma detectado).
+      const overrides = Object.fromEntries(
+        Object.entries(extra ?? {}).filter(([, v]) => v !== undefined),
+      );
+
       const snapshot = await getDocs(teamCol(teamId, "songs"));
       const existingTitles = new Set(snapshot.docs.map((d) => d.data().title));
 
@@ -104,7 +123,8 @@ export function useSongUpload() {
       for (const file of files) {
         try {
           const content = await readFileAsText(file);
-          const { title, artist, key, tipo, tempo } = extractMetadata(content);
+          const { title, artist, key, tipo, tempo, idioma } =
+            extractMetadata(content);
 
           if (existingTitles.has(title)) {
             duplicates.push(file.name);
@@ -123,6 +143,8 @@ export function useSongUpload() {
               content,
               ...(tipo ? { tipo } : {}),
               ...(tempo !== undefined ? { tempo } : {}),
+              ...(idioma ? { idioma } : {}),
+              ...overrides,
             },
           });
         } catch (error) {

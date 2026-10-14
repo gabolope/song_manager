@@ -54,6 +54,11 @@
   color: var(--text);
 }
 
+/* Botón de filtros con algún filtro aplicado. */
+.panelExpandBtn.active {
+  color: var(--accent);
+}
+
 .panelCount {
   font-size: 0.7rem;
   font-weight: 600;
@@ -89,8 +94,8 @@
 
 .filterSelectRow {
   display: flex;
+  flex-direction: column;
   gap: 0.4rem;
-  margin-top: 0.25rem;
 }
 
 .filterSelectWrap {

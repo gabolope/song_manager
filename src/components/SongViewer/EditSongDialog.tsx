@@ -7,6 +7,7 @@ import {
   Field,
   Flex,
   Input,
+  NativeSelect,
   Portal,
   Stack,
   Text,
@@ -15,13 +16,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useDeleteSong } from "@/hooks/useDeleteSong";
 import { useEditSong } from "@/hooks/useEditSong";
 import { useUsers } from "@/hooks/useUsers";
-import type { SongDTO, SongTipo } from "@/types/song";
+import type { SongDTO, SongIdioma, SongTipo } from "@/types/song";
 import {
   parseChordProBody,
   serializeChordProBody,
   type EditorSection,
 } from "@/utils/chordProBody";
-import { TIPO_COLOR, TIPO_LABEL } from "@/utils/song";
+import { IDIOMA_LABEL, TIPO_COLOR, TIPO_LABEL } from "@/utils/song";
 import SongBodyEditor from "./SongBodyEditor";
 
 interface Props {
@@ -30,6 +31,7 @@ interface Props {
 }
 
 const TIPOS = Object.keys(TIPO_LABEL) as SongTipo[];
+const IDIOMAS = Object.keys(IDIOMA_LABEL) as SongIdioma[];
 
 const EditSongDialog = ({ song, onOpenChange }: Props) => {
   const { editSong, isPending } = useEditSong();
@@ -50,6 +52,8 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
   const [key, setKey] = useState("");
   const [tipo, setTipo] = useState<SongTipo | "">("");
   const [tempo, setTempo] = useState("");
+  const [idioma, setIdioma] = useState<SongIdioma | "">("");
+  const [genero, setGenero] = useState("");
   const [keysByDirector, setKeysByDirector] = useState<Record<string, string>>(
     {},
   );
@@ -68,6 +72,8 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
     const nextKey = song.key ?? "";
     const nextTipo = song.tipo ?? "";
     const nextTempo = song.tempo !== undefined ? String(song.tempo) : "";
+    const nextIdioma = song.idioma ?? "";
+    const nextGenero = song.genero ?? "";
     const nextKeysByDirector = song.keysByDirector ?? {};
     const { header: nextHeader, sections: nextSections } = parseChordProBody(
       song.content ?? "",
@@ -77,6 +83,8 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
     setKey(nextKey);
     setTipo(nextTipo);
     setTempo(nextTempo);
+    setIdioma(nextIdioma);
+    setGenero(nextGenero);
     setKeysByDirector(nextKeysByDirector);
     setHeader(nextHeader);
     setSections(nextSections);
@@ -87,6 +95,8 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
         key: nextKey,
         tipo: nextTipo,
         tempo: nextTempo,
+        idioma: nextIdioma,
+        genero: nextGenero,
         keysByDirector: nextKeysByDirector,
         header: nextHeader,
         sections: nextSections,
@@ -102,6 +112,8 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
         key,
         tipo,
         tempo,
+        idioma,
+        genero,
         keysByDirector,
         header,
         sections,
@@ -112,6 +124,8 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
       key,
       tipo,
       tempo,
+      idioma,
+      genero,
       keysByDirector,
       header,
       sections,
@@ -141,6 +155,8 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
           parsedTempo !== undefined && !Number.isNaN(parsedTempo)
             ? parsedTempo
             : undefined,
+        idioma: idioma || undefined,
+        genero: genero.trim() || undefined,
         keysByDirector: cleanedKeysByDirector,
         content: serializeChordProBody(header, sections),
       },
@@ -270,6 +286,33 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
                           type="number"
                           value={tempo}
                           onChange={(e) => setTempo(e.target.value)}
+                        />
+                      </Field.Root>
+                      <Field.Root orientation="horizontal">
+                        <Field.Label>Idioma</Field.Label>
+                        <NativeSelect.Root size="xs">
+                          <NativeSelect.Field
+                            value={idioma}
+                            onChange={(e) =>
+                              setIdioma(e.target.value as SongIdioma | "")
+                            }
+                          >
+                            <option value="">Sin definir</option>
+                            {IDIOMAS.map((i) => (
+                              <option key={i} value={i}>
+                                {IDIOMA_LABEL[i]}
+                              </option>
+                            ))}
+                          </NativeSelect.Field>
+                          <NativeSelect.Indicator />
+                        </NativeSelect.Root>
+                      </Field.Root>
+                      <Field.Root orientation="horizontal">
+                        <Field.Label>Género</Field.Label>
+                        <Input
+                          size="xs"
+                          value={genero}
+                          onChange={(e) => setGenero(e.target.value)}
                         />
                       </Field.Root>
                       <Field.Root orientation="horizontal">

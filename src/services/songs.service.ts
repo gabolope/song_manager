@@ -20,8 +20,11 @@ export async function fetchSongs(teamId: string | null): Promise<SongDTO[]> {
       title: data.title ?? "",
       content: data.content ?? "",
       key: data.key ?? "",
+      artist: data.artist,
       tipo: data.tipo,
       tempo: data.tempo,
+      idioma: data.idioma,
+      genero: data.genero,
       keysByDirector: data.keysByDirector,
     };
   });
@@ -29,7 +32,15 @@ export async function fetchSongs(teamId: string | null): Promise<SongDTO[]> {
 
 export type SongEditInput = Pick<
   SongDTO,
-  "title" | "artist" | "key" | "tipo" | "tempo" | "content" | "keysByDirector"
+    | "title"
+  | "artist"
+  | "key"
+  | "tipo"
+  | "tempo"
+  | "idioma"
+  | "genero"
+  | "content"
+  | "keysByDirector"
 >;
 
 const LIVE_SONG_DOC = "current"; // documento fijo, siempre el mismo (ver useLiveSong)
@@ -48,6 +59,8 @@ export async function updateSong(
     key: data.key ?? deleteField(),
     tipo: data.tipo ?? deleteField(),
     tempo: data.tempo ?? deleteField(),
+    idioma: data.idioma ?? deleteField(),
+    genero: data.genero ?? deleteField(),
     content: data.content,
     keysByDirector:
       data.keysByDirector && Object.keys(data.keysByDirector).length > 0
