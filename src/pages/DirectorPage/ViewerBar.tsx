@@ -14,6 +14,7 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import Configuration from "@/components/Configuration/Configuration";
 import UserBadge from "@/components/UserBadge";
 import SendMessageDialog from "./SendMessageDialog";
+import ShareLiveDialog from "./ShareLiveDialog";
 import { useColorModeValue } from "@/components/ui/color-mode";
 
 interface Props {
@@ -89,6 +90,7 @@ const ViewerBar = ({
           </span>
         </Button>
         <HStack gap="8px">
+          <ShareLiveDialog />
           <SendMessageDialog />
           <UserBadge />
           <Configuration />

@@ -21,7 +21,7 @@ React 19 + TypeScript + Vite, Chakra UI v3 (`src/components/ui/` es el snippet g
 
 ## Arquitectura
 
-**Rutas** (`src/routes.tsx`): `/` (login/redirección), `/director` (solo admin), `/player` y `/lyrics` (cualquier usuario logueado), `/admin` (solo superadmin: alta de equipos y mover/cambiar rol de miembros de cualquier equipo). Director y Player comparten un único `SessionProvider` para no perder estado al cambiar de vista. `/lyrics` fuerza tema oscuro (`main.tsx`).
+**Rutas** (`src/routes.tsx`): `/` (login/redirección), `/director` (solo admin), `/player` y `/lyrics` (cualquier usuario logueado), `/admin` (solo superadmin: alta de equipos y mover/cambiar rol de miembros de cualquier equipo), `/live/:teamId` (pública, sin cuenta: solo la canción en vivo; el director comparte link/QR desde `ShareLiveDialog`). Director y Player comparten un único `SessionProvider` para no perder estado al cambiar de vista. `/lyrics` fuerza tema oscuro (`main.tsx`).
 
 **Multi-equipo:** cada equipo tiene su propio repertorio, sesión y usuarios. Un usuario = un equipo (`users/{uid}.teamId`). Los datos del equipo viven en subcolecciones de `teams/{teamId}`; las rutas se arman **siempre** con `teamCol(teamId, name)` / `teamDoc(teamId, name, id)` de `services/firebase.ts` (tiran error si `teamId` es null). `teamId` sale de `useAuth()`: es `null` en demo y en usuarios sin migrar, y en ese caso no se abren listeners.
 
@@ -34,7 +34,7 @@ React 19 + TypeScript + Vite, Chakra UI v3 (`src/components/ui/` es el snippet g
 - `teams/{teamId}/broadcast/current` — mensajes del director a los músicos del equipo.
 - `users` (global) — perfil (`role: "admin" | "musico"`, `avatar`, `teamId`). Toda query sobre `users` tiene que filtrar `where("teamId", "==", ...)` o las reglas la rechazan entera.
 
-Reglas (`firestore.rules`): los miembros del equipo leen, solo los admins del equipo escriben; un admin solo crea/edita usuarios de su propio equipo. El superadmin además lista/crea equipos (solo `create`, nunca pisa uno existente) y crea/edita usuarios de cualquier equipo. Las colecciones globales viejas (`songs`, `book`, `liveSong`, `broadcast` en la raíz) ya están migradas y el código no las usa; quedan como backup (y sus `match` en las reglas) hasta borrarlas con `--delete-old`.
+Reglas (`firestore.rules`): los miembros del equipo leen, solo los admins del equipo escriben (excepción: `liveSong/current` lo puede leer cualquiera, sin auth, para `/live`); un admin solo crea/edita usuarios de su propio equipo. El superadmin además lista/crea equipos (solo `create`, nunca pisa uno existente) y crea/edita usuarios de cualquier equipo. Las colecciones globales viejas (`songs`, `book`, `liveSong`, `broadcast` en la raíz) ya están migradas y el código no las usa; quedan como backup (y sus `match` en las reglas) hasta borrarlas con `--delete-old`.
 
 Como `book` y `liveSong` son copias, editar/borrar una canción tiene que propagarse a mano a las tres colecciones (ver `services/songs.service.ts`, `updateSong`/`deleteSong`).
 

@@ -79,6 +79,13 @@ service cloud.firestore {
         allow read: if isMember(teamId);
         allow write: if isTeamAdmin(teamId);
       }
+
+      // Link público (/live/{teamId}): cualquiera, sin cuenta, ve la canción
+      // en vivo. Solo get del doc fijo: no se puede listar ni leer nada más
+      // del equipo. Se suma (OR) a la regla genérica de arriba.
+      match /liveSong/current {
+        allow get: if true;
+      }
     }
 
     // Colecciones globales viejas: la app todavía las usa hasta migrar las

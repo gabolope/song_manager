@@ -6,6 +6,7 @@ import SessionProvider from "./contexts/SessionProvider";
 import DirectorPage from "./pages/DirectorPage/DirectorPage";
 import ErrorPage from "./pages/ErrorPage/ErrorPage";
 import HomePage from "./pages/HomePage/HomePage";
+import LivePage from "./pages/LivePage/LivePage";
 import LyricsPage from "./pages/LyricsPage/LyricsPage";
 import PlayerPage from "./pages/PlayerPage/PlayerPage";
 
@@ -16,6 +17,8 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <HomePage /> },
+      // Pública (sin cuenta): solo la canción en vivo del equipo.
+      { path: "live/:teamId", element: <LivePage /> },
       {
         // Fuera del SessionProvider: no usa book ni liveSong.
         element: <ProtectedRoute requireSuperAdmin />,
