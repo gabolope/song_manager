@@ -6,6 +6,7 @@ import { IoClose, IoFilter, IoSearch } from "react-icons/io5";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { stripChordProMarkup } from "@/services/chordpro.service";
 import { normalizeForSearch } from "@/utils/text";
+import { useAuth } from "@/contexts/AuthContext";
 import ListSkeleton from "./ListSkeleton";
 import SongTipoTag from "./SongTipoTag";
 import AddSongDialog from "./AddSongDialog";
@@ -40,6 +41,9 @@ const SongList = ({
   isExpanded,
   onToggleExpand,
 }: Props) => {
+  // Casual: sin tipo ni sesión; la fila muestra el artista y la lista va por
+  // título (los divisores por tono no tienen sentido sin el tono a la vista).
+  const { isCasual } = useAuth();
   const [query, setQuery] = useState("");
   const [keyFilter, setKeyFilter] = useState("");
   const [tipoFilter, setTipoFilter] = useState<SongTipo | "">("");
@@ -71,6 +75,7 @@ const SongList = ({
   }, [items]);
 
   const availableTipos = useMemo(() => {
+    if (isCasual) return [];
     const counts = new Map<SongTipo, number>();
     items?.forEach((song) => {
       if (song.tipo) counts.set(song.tipo, (counts.get(song.tipo) ?? 0) + 1);
@@ -78,7 +83,7 @@ const SongList = ({
     return (Object.keys(TIPO_LABEL) as SongTipo[])
       .filter((tipo) => counts.has(tipo))
       .map((tipo) => ({ tipo, count: counts.get(tipo)! }));
-  }, [items]);
+  }, [items, isCasual]);
 
   const availableIdiomas = useMemo(
     () =>
@@ -106,8 +111,12 @@ const SongList = ({
       .filter((s) => !idiomaFilter || s.song.idioma === idiomaFilter)
       .filter((s) => !generoFilter || s.song.genero === generoFilter)
       .map((s) => s.song)
-      .sort(compareByKeyThenTipo);
-  }, [searchable, query, keyFilter, tipoFilter, idiomaFilter, generoFilter]);
+      .sort(
+        isCasual
+          ? (a, b) => (a.title ?? "").localeCompare(b.title ?? "")
+          : compareByKeyThenTipo,
+      );
+  }, [searchable, query, keyFilter, tipoFilter, idiomaFilter, generoFilter, isCasual]);
 
   const hasFilters =
     availableKeys.length > 0 ||
@@ -314,7 +323,8 @@ const SongList = ({
           {filtered.map((song, i) => {
             const index = items?.indexOf(song) ?? -1;
             const isInBook = book?.some((i) => i.id === song.id) ?? false;
-            const showDivider = i === 0 || filtered[i - 1].key !== song.key;
+            const showDivider =
+              !isCasual && (i === 0 || filtered[i - 1].key !== song.key);
 
             return (
               <Fragment key={song.id}>
@@ -332,7 +342,11 @@ const SongList = ({
                       <div className="songRowTitle">
                         {song.title || <Text opacity={0.6}>Sin título</Text>}
                       </div>
-                      {(formatSongMeta(song) || song.tipo) && (
+                      {isCasual ? (
+                        song.artist && (
+                          <div className="songRowMeta">{song.artist}</div>
+                        )
+                      ) : (formatSongMeta(song) || song.tipo) && (
                         <div className="songRowMeta">
                           {formatSongMeta(song) && (
                             <span className="songRowMetaKey">
@@ -344,7 +358,7 @@ const SongList = ({
                       )}
                     </div>
                     <div>
-                      {selected === index && (
+                      {selected === index && !isCasual && (
                         <IconButton
                           aria-label="Agregar a la sesión"
                           onClick={(e) => {

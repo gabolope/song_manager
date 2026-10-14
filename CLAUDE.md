@@ -25,8 +25,10 @@ React 19 + TypeScript + Vite, Chakra UI v3 (`src/components/ui/` es el snippet g
 
 **Multi-equipo:** cada equipo tiene su propio repertorio, sesión y usuarios. Un usuario = un equipo (`users/{uid}.teamId`). Los datos del equipo viven en subcolecciones de `teams/{teamId}`; las rutas se arman **siempre** con `teamCol(teamId, name)` / `teamDoc(teamId, name, id)` de `services/firebase.ts` (tiran error si `teamId` es null). `teamId` sale de `useAuth()`: es `null` en demo y en usuarios sin migrar, y en ese caso no se abren listeners.
 
+**Modo casual** (`isCasual` en `AuthContext`, sale de `teams/{teamId}.mode`; sin el campo = profesional): para gente que toca en juntadas. Un solo usuario `admin` en su propio equipo, siempre en `/director` pero sin book/sesión, sin tipo de canción, sin badge de rol, sin mensajes ni gestión de usuarios; la lista muestra el artista y va ordenada por título. Sí comparte la canción en vivo por link/QR. Es solo UI: las reglas no cambian.
+
 **Colecciones de Firestore:**
-- `teams/{teamId}` — `name`, `createdAt`. Solo lo crea el superadmin desde `/admin` (id = slug del nombre, no se edita después).
+- `teams/{teamId}` — `name`, `createdAt`, `mode?: "casual"`. Solo lo crea el superadmin desde `/admin` (id = slug del nombre y modo, no se editan después).
 - `superadmins/{uid}` — sin campos obligatorios, se crea a mano en la consola (dev y prod). Marca al dueño de la app (`isSuperAdmin` en `AuthContext`). No es un campo en `users` porque los admins de equipo pueden editar esos docs.
 - `teams/{teamId}/songs` — repertorio completo (el catálogo).
 - `teams/{teamId}/book` — la lista de la sesión actual. Guarda **copias** de las canciones, no referencias. Orden: campo `order`, con fallback a `createdAt` (`utils/book.ts`, `sortBook`).
@@ -41,7 +43,7 @@ Como `book` y `liveSong` son copias, editar/borrar una canción tiene que propag
 **Datos en tiempo real:** `useBook` y `useLiveSong` abren `onSnapshot` y escriben directo en el cache de React Query (`setQueryData`); el `useQuery` solo lee del cache (`enabled: false`). Las mutaciones sobre listas usan `hooks/useOptimisticMutation.ts` (optimistic update + rollback + toast). Las query keys llevan el equipo (`["songs", teamId]`, `["book", teamId]`, `["liveSong", teamId]`, `["users", teamId]`) para no mezclar cache al cambiar de cuenta; en demo quedan con `null`.
 
 **Contexts:**
-- `AuthContext` — `user`, `profile`, `teamId`, `isAdmin`, `isSuperAdmin`, `isDemo`, `wantsToDirect` (un admin puede elegir no dirigir y usar `/player`; se guarda por uid en localStorage).
+- `AuthContext` — `user`, `profile`, `teamId`, `isAdmin`, `isSuperAdmin`, `isCasual`, `isDemo`, `wantsToDirect` (un admin puede elegir no dirigir y usar `/player`; se guarda por uid en localStorage).
 - `SessionContext` — book, liveSong, selección, `isLive`, transposición por canción (solo en memoria, nunca se persiste).
 - `DirectorContext` / `PlayerContext` — estado propio de cada página (pantalla completa, navegación, transponer).
 

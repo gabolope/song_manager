@@ -1,6 +1,7 @@
 import {
   Badge,
   Button,
+  Checkbox,
   Container,
   HStack,
   Heading,
@@ -28,15 +29,17 @@ const AdminPage = () => {
   const { mutate: updateUser } = useUpdateUser();
 
   const [newTeamName, setNewTeamName] = useState("");
+  const [newTeamCasual, setNewTeamCasual] = useState(false);
   const [selected, setSelected] = useState(myTeamId ?? "");
   const [createUserOpen, setCreateUserOpen] = useState(false);
   const { data: members, isLoading } = useUsers(selected || undefined);
 
   const handleCreateTeam = (e: React.FormEvent) => {
     e.preventDefault();
-    createTeam(newTeamName, {
+    createTeam({ name: newTeamName, casual: newTeamCasual }, {
       onSuccess: (id) => {
         setNewTeamName("");
+        setNewTeamCasual(false);
         setSelected(id);
       },
     });
@@ -70,6 +73,17 @@ const AdminPage = () => {
                 id: {teamIdFromName(newTeamName) || "—"} (no se puede cambiar después)
               </Text>
             )}
+            <Checkbox.Root
+              size="sm"
+              checked={newTeamCasual}
+              onCheckedChange={(e) => setNewTeamCasual(!!e.checked)}
+            >
+              <Checkbox.HiddenInput />
+              <Checkbox.Control />
+              <Checkbox.Label>
+                Casual (una sola persona, sin sesión ni tipo; tampoco se puede cambiar después)
+              </Checkbox.Label>
+            </Checkbox.Root>
           </Stack>
         </form>
 
@@ -83,6 +97,7 @@ const AdminPage = () => {
                 onClick={() => setSelected(t.id)}
               >
                 {t.name}
+                {t.mode === "casual" && <Badge size="xs">casual</Badge>}
               </Button>
             ))}
           </HStack>

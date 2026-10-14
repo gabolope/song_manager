@@ -51,14 +51,19 @@ export function teamIdFromName(name: string) {
 export function useCreateTeam() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: async ({ name, casual }: { name: string; casual: boolean }) => {
       const id = teamIdFromName(name);
       if (!id) throw new Error("El nombre no sirve como id");
       // Las reglas igual rechazan pisar un equipo (solo create), esto es
       // para dar un mensaje claro en vez de "permission denied".
       const ref = doc(db, "teams", id);
       if ((await getDoc(ref)).exists()) throw new Error(`Ya existe el equipo "${id}"`);
-      await setDoc(ref, { name: name.trim(), createdAt: serverTimestamp() });
+      await setDoc(ref, {
+        name: name.trim(),
+        createdAt: serverTimestamp(),
+        // undefined se ignora (ignoreUndefinedProperties): pro = sin campo.
+        mode: casual ? "casual" : undefined,
+      });
       return id;
     },
     onSuccess: () => {

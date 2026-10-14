@@ -32,7 +32,7 @@ const IDIOMAS = Object.keys(IDIOMA_LABEL) as SongIdioma[];
 // un archivo y pasa por la misma subida que los .chordpro (useSongUpload),
 // así comparte la extracción de metadatos y el chequeo de títulos repetidos.
 const AddSongDialog = () => {
-  const { isAdmin, isDemo } = useAuth();
+  const { isAdmin, isDemo, isCasual } = useAuth();
   const { mutate: uploadSongs, isPending } = useSongUpload();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("chords");
@@ -210,24 +210,26 @@ const AddSongDialog = () => {
                         <NativeSelect.Indicator />
                       </NativeSelect.Root>
                     </Field.Root>
-                    <Field.Root>
-                      <Field.Label>Tipo</Field.Label>
-                      <ButtonGroup attached width="full">
-                        {TIPOS.map((t) => (
-                          <Button
-                            key={t}
-                            type="button"
-                            size="sm"
-                            flex={1}
-                            colorPalette={TIPO_COLOR[t]}
-                            variant={tipo === t ? "solid" : "outline"}
-                            onClick={() => setTipo(tipo === t ? "" : t)}
-                          >
-                            {TIPO_LABEL[t]}
-                          </Button>
-                        ))}
-                      </ButtonGroup>
-                    </Field.Root>
+                    {!isCasual && (
+                      <Field.Root>
+                        <Field.Label>Tipo</Field.Label>
+                        <ButtonGroup attached width="full">
+                          {TIPOS.map((t) => (
+                            <Button
+                              key={t}
+                              type="button"
+                              size="sm"
+                              flex={1}
+                              colorPalette={TIPO_COLOR[t]}
+                              variant={tipo === t ? "solid" : "outline"}
+                              onClick={() => setTipo(tipo === t ? "" : t)}
+                            >
+                              {TIPO_LABEL[t]}
+                            </Button>
+                          ))}
+                        </ButtonGroup>
+                      </Field.Root>
+                    )}
                   </Stack>
                   <Textarea
                     flex={1}

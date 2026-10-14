@@ -13,6 +13,7 @@ import { MdOutlineSensors } from "react-icons/md";
 import { RxHamburgerMenu } from "react-icons/rx";
 import Configuration from "@/components/Configuration/Configuration";
 import UserBadge from "@/components/UserBadge";
+import { useAuth } from "@/contexts/AuthContext";
 import SendMessageDialog from "./SendMessageDialog";
 import ShareLiveDialog from "./ShareLiveDialog";
 import { useColorModeValue } from "@/components/ui/color-mode";
@@ -35,6 +36,9 @@ const ViewerBar = ({
   onMenuClick,
 }: Props) => {
   const logoSrc = useColorModeValue("/logo_black.svg", "/logo_white.svg");
+  // Casual: sin roles, sin músicos a quien mandar mensajes y sin book que
+  // recorrer con las flechas.
+  const { isCasual } = useAuth();
   return (
     <>
       <HStack
@@ -67,9 +71,11 @@ const ViewerBar = ({
           <Text fontWeight="700" fontSize="1.05rem" className="hideBelowDesktop">
             Song Manager
           </Text>
-          <Badge colorPalette="blue" variant="subtle">
-            Director
-          </Badge>
+          {!isCasual && (
+            <Badge colorPalette="blue" variant="subtle">
+              Director
+            </Badge>
+          )}
         </HStack>
         <Button
           colorPalette="red"
@@ -91,7 +97,7 @@ const ViewerBar = ({
         </Button>
         <HStack gap="8px">
           <ShareLiveDialog />
-          <SendMessageDialog />
+          {!isCasual && <SendMessageDialog />}
           <UserBadge />
           <Configuration />
         </HStack>
@@ -100,28 +106,32 @@ const ViewerBar = ({
         <Portal>
           <ActionBar.Positioner>
             <ActionBar.Content>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => songId && onLeft?.(songId)}
-                disabled={!songId}
-              >
-                <FaAngleDoubleLeft />
-              </Button>
+              {!isCasual && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => songId && onLeft?.(songId)}
+                  disabled={!songId}
+                >
+                  <FaAngleDoubleLeft />
+                </Button>
+              )}
 
               <Button variant="outline" size="sm" onClick={() => goLive()}>
                 <IoIosExit />
                 Salir
               </Button>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => songId && onRight?.(songId)}
-                disabled={!songId}
-              >
-                <FaAngleDoubleRight />
-              </Button>
+              {!isCasual && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => songId && onRight?.(songId)}
+                  disabled={!songId}
+                >
+                  <FaAngleDoubleRight />
+                </Button>
+              )}
             </ActionBar.Content>
           </ActionBar.Positioner>
         </Portal>

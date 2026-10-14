@@ -13,6 +13,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useDeleteSong } from "@/hooks/useDeleteSong";
 import { useEditSong } from "@/hooks/useEditSong";
 import { useUsers } from "@/hooks/useUsers";
@@ -42,6 +43,8 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
   // canción (ver DirectorPage/ProtectedRoute, que reservan esa vista a
   // role === "admin").
   const { data: users } = useUsers();
+  // Casual: sin tipo ni tono por director (está solo en su equipo).
+  const { isCasual } = useAuth();
   const directors = useMemo(
     () => users?.filter((u) => u.role === "admin"),
     [users],
@@ -233,7 +236,7 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
                           onChange={(e) => setKey(e.target.value)}
                         />
                       </Field.Root>
-                      {!!directors?.length && (
+                      {!isCasual && !!directors?.length && (
                         <Stack gap={2}>
                           <Text fontSize="sm" fontWeight="500">
                             Tono por director
@@ -262,23 +265,25 @@ const EditSongDialog = ({ song, onOpenChange }: Props) => {
                           ))}
                         </Stack>
                       )}
-                      <Field.Root>
-                        <Field.Label>Tipo</Field.Label>
-                        <ButtonGroup attached>
-                          {TIPOS.map((t) => (
-                            <Button
-                              key={t}
-                              type="button"
-                              size="sm"
-                              colorPalette={TIPO_COLOR[t]}
-                              variant={tipo === t ? "solid" : "outline"}
-                              onClick={() => setTipo(tipo === t ? "" : t)}
-                            >
-                              {TIPO_LABEL[t]}
-                            </Button>
-                          ))}
-                        </ButtonGroup>
-                      </Field.Root>
+                      {!isCasual && (
+                        <Field.Root>
+                          <Field.Label>Tipo</Field.Label>
+                          <ButtonGroup attached>
+                            {TIPOS.map((t) => (
+                              <Button
+                                key={t}
+                                type="button"
+                                size="sm"
+                                colorPalette={TIPO_COLOR[t]}
+                                variant={tipo === t ? "solid" : "outline"}
+                                onClick={() => setTipo(tipo === t ? "" : t)}
+                              >
+                                {TIPO_LABEL[t]}
+                              </Button>
+                            ))}
+                          </ButtonGroup>
+                        </Field.Root>
+                      )}
                       <Field.Root orientation="horizontal">
                         <Field.Label>Tempo (BPM)</Field.Label>
                         <Input

@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Login from "./Login";
 
 const HomePage = () => {
-  const { user, loading, isAdmin, wantsToDirect } = useAuth();
+  const { user, loading, isAdmin, isCasual, wantsToDirect } = useAuth();
   const navigate = useNavigate();
 
   // El rol ya no se elige: lo define la cuenta. Apenas hay sesión, se manda
@@ -15,8 +15,9 @@ const HomePage = () => {
     // está leyendo de Firestore, isAdmin vale false por default y mandaría
     // a un admin a /player por error.
     if (!loading && user)
-      navigate(isAdmin && wantsToDirect ? "/director" : "/player", { replace: true });
-  }, [user, loading, isAdmin, wantsToDirect, navigate]);
+      // Un casual no tiene músicos a quien seguir: siempre dirige.
+      navigate(isAdmin && (wantsToDirect || isCasual) ? "/director" : "/player", { replace: true });
+  }, [user, loading, isAdmin, isCasual, wantsToDirect, navigate]);
 
   if (loading || user) return null;
 

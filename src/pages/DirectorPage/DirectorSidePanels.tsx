@@ -1,5 +1,6 @@
 import { Splitter } from "@chakra-ui/react";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import type { SongDTO } from "@/types/song";
 import BookList from "@/components/SongList/BookList";
 import SongList from "@/components/SongList/SongList";
@@ -35,6 +36,7 @@ const DirectorSidePanels = ({
   onRemoveFromBook,
   onReorderBook,
 }: Props) => {
+  const { isCasual } = useAuth();
   const [size, setSize] = useState<number[]>(DEFAULT_SIZE);
 
   const toggleExpand = (panel: "a" | "b") => {
@@ -44,6 +46,37 @@ const DirectorSidePanels = ({
       return panel === "a" ? [100, 0] : [0, 100];
     });
   };
+
+  const songList = (
+    <SongList
+      addToBook={onAddToBook}
+      isAdding={isAdding}
+      book={book}
+      items={songs}
+      isLoading={isLoading}
+      onClick={onListClick}
+      selected={selectedListSong}
+      isExpanded={size[0] === 100}
+      onToggleExpand={isCasual ? undefined : () => toggleExpand("a")}
+    />
+  );
+
+  // Casual no arma sesiones: solo el repertorio, a toda altura.
+  if (isCasual)
+    return (
+      <div
+        style={{
+          height: "100%",
+          borderRadius: "12px",
+          border: "1px solid var(--border)",
+          background: "var(--bg-panel)",
+          boxShadow: "var(--shadow-sm)",
+          overflow: "hidden",
+        }}
+      >
+        {songList}
+      </div>
+    );
 
   return (
     <Splitter.Root
@@ -62,19 +95,7 @@ const DirectorSidePanels = ({
         overflow: "hidden",
       }}
     >
-      <Splitter.Panel id="a">
-        <SongList
-          addToBook={onAddToBook}
-          isAdding={isAdding}
-          book={book}
-          items={songs}
-          isLoading={isLoading}
-          onClick={onListClick}
-          selected={selectedListSong}
-          isExpanded={size[0] === 100}
-          onToggleExpand={() => toggleExpand("a")}
-        />
-      </Splitter.Panel>
+      <Splitter.Panel id="a">{songList}</Splitter.Panel>
       <Splitter.ResizeTrigger
         id="a:b"
         height="14px"

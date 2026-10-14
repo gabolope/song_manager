@@ -33,6 +33,11 @@ export interface Team {
   id: string;
   name: string;
   createdAt: Timestamp;
+  // Ausente = profesional (servicios religiosos: sesión, tipo, roles).
+  // "casual": un usuario solo en su equipo, sin sesión ni tipo; solo
+  // repertorio + canción en vivo compartida por link/QR. Se elige al crear
+  // el equipo en /admin y no se edita desde la app (no hay update en teams).
+  mode?: "casual";
 }
 
 export interface Avatar {

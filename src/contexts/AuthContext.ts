@@ -10,6 +10,9 @@ interface AuthContextType {
   // Dueño de la app: entra a /admin (alta de equipos, mover miembros).
   // Tiene doc en `superadmins/{uid}`; independiente de role y de teamId.
   isSuperAdmin: boolean;
+  // Equipo en modo casual (teams/{teamId}.mode): sin sesión/book, sin tipo
+  // de canción ni roles a la vista. Siempre false en demo.
+  isCasual: boolean;
   // Equipo del usuario (sale de profile.teamId). null en demo y en usuarios
   // sin migrar: en ese caso no se escucha ni escribe nada del equipo.
   teamId: string | null;

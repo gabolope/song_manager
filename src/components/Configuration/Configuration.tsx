@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useColorMode } from "@/components/ui/color-mode";
+import { useTeam } from "@/hooks/useTeam";
 import CreateUserDialog from "./CreateUserDialog";
 import SongUploader from "./SongUploader";
 import UserManager from "./UserManager";
@@ -35,8 +36,9 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 const Configuration = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAdmin, isSuperAdmin, isDemo, wantsToDirect, setWantsToDirect, logout } = useAuth();
+  const { isAdmin, isSuperAdmin, isDemo, isCasual, wantsToDirect, setWantsToDirect, logout } = useAuth();
   const { colorMode, toggleColorMode } = useColorMode();
+  const { data: team } = useTeam();
   const [open, setOpen] = useState(false);
   const [createUserOpen, setCreateUserOpen] = useState(false);
 
@@ -103,7 +105,7 @@ const Configuration = () => {
                     >
                       {isLyrics ? "Volver al reproductor" : "Modo Lyrics"}
                     </Button>
-                    {isAdmin && !isLyrics && (
+                    {isAdmin && !isCasual && !isLyrics && (
                       <HStack
                         justify="space-between"
                         padding="10px 12px"
@@ -137,7 +139,8 @@ const Configuration = () => {
                     </>
                   )}
 
-                  {isRealAdmin && (
+                  {/* Casual: está solo en su equipo, no hay gente que gestionar. */}
+                  {isRealAdmin && !isCasual && (
                     <>
                       <Separator />
                       <UserManager
@@ -155,6 +158,19 @@ const Configuration = () => {
                   <Separator />
                   <Stack gap={2} align="stretch">
                     <SectionLabel>Cuenta</SectionLabel>
+                    {team?.name && (
+                      <HStack
+                        justify="space-between"
+                        padding="10px 12px"
+                        borderRadius="8px"
+                        background="var(--bg-hover)"
+                      >
+                        <Text fontSize="sm">Equipo</Text>
+                        <Text fontSize="sm" fontWeight="600">
+                          {team.name}
+                        </Text>
+                      </HStack>
+                    )}
                     {isSuperAdmin && (
                       <Button
                         variant="outline"
@@ -179,7 +195,7 @@ const Configuration = () => {
           </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
-      {isRealAdmin && (
+      {isRealAdmin && !isCasual && (
         <CreateUserDialog
           open={createUserOpen}
           onOpenChange={setCreateUserOpen}

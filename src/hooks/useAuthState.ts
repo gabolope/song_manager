@@ -1,6 +1,7 @@
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { useCallback, useEffect, useState } from "react";
-import { auth } from "../services/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../services/firebase";
 import { fetchIsSuperAdmin, fetchUserProfile, login, logout as logoutRequest } from "../services/auth.service";
 import type { UserProfile } from "../types/user";
 
@@ -14,6 +15,7 @@ export function useAuthState() {
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isCasualTeam, setIsCasualTeam] = useState(false);
   const [wantsToDirect, setWantsToDirectState] = useState(true);
 
   useEffect(() => {
@@ -28,12 +30,20 @@ export function useAuthState() {
           fetchUserProfile(firebaseUser.uid),
           fetchIsSuperAdmin(firebaseUser.uid),
         ]);
+        // El modo vive en el doc del equipo. Se lee antes de bajar `loading`
+        // para que HomePage no redirija ni se vea la UI profesional un
+        // instante en una cuenta casual.
+        const team = userProfile?.teamId
+          ? await getDoc(doc(db, "teams", userProfile.teamId)).catch(() => null)
+          : null;
+        setIsCasualTeam(team?.data()?.mode === "casual");
         setProfile(userProfile);
         setIsSuperAdmin(superAdmin);
         setWantsToDirectState(localStorage.getItem(wantsToDirectKey(firebaseUser.uid)) !== "false");
       } else {
         setProfile(null);
         setIsSuperAdmin(false);
+        setIsCasualTeam(false);
       }
       setLoading(false);
     });
@@ -64,6 +74,8 @@ export function useAuthState() {
     // exista una cuenta real detrás.
     isAdmin: isDemo || profile?.role === "admin",
     isSuperAdmin: !isDemo && isSuperAdmin,
+    // El demo muestra la versión profesional completa.
+    isCasual: !isDemo && isCasualTeam,
     // `|| null` convierte el "" de usuarios sin migrar en null. En demo se
     // fuerza null aunque haya quedado un perfil real cargado.
     teamId: isDemo ? null : profile?.teamId || null,
