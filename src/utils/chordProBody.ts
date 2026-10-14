@@ -17,7 +17,10 @@ export type EditorLine = { id: string } & (
   | { type: "raw"; text: string }
 );
 
-export type SectionKind = "verse" | "chorus" | "bridge";
+export type SectionKind = "verse" | "chorus" | "bridge" | "prechorus" | "ending";
+
+// Tipos sin abreviatura en ChordPro: se guardan como {start_of_<kind>}.
+const LONG_FORM_KINDS: SectionKind[] = ["prechorus", "ending"];
 
 export interface EditorSection {
   id: string;
@@ -157,11 +160,13 @@ export function parseChordProBody(content: string): {
     const startOfMatch = trimmed.match(START_OF_RE);
     if (startOfMatch) {
       closeCurrent();
+      const tag = startOfMatch[1].toLowerCase() as SectionKind;
+      const isKind = LONG_FORM_KINDS.includes(tag);
       current = {
         id: nextEditorId(),
-        kind: "verse",
+        kind: isKind ? tag : "verse",
         label: (startOfMatch[2] ?? "").trim(),
-        tag: startOfMatch[1].toLowerCase(),
+        tag: isKind ? undefined : tag,
         lines: [],
       };
       currentExplicit = true;
@@ -228,6 +233,12 @@ export function chordsLyricPairToLine(chords: string, lyric: string): string {
   }
   if (tokens.length === 0) return lyric;
 
+  // Si los acordes pasan del final de la letra (línea solo de acordes, o
+  // acordes al final), se rellena con espacios para conservar su columna:
+  // si no, "Em B7" sin letra se guardaría como "[Em][B7]" y al reabrir
+  // volvería a quedar pegado como "EmB7".
+  lyric = lyric.padEnd(tokens[tokens.length - 1].index);
+
   let result = "";
   let pos = 0;
   for (const { index, chord } of tokens) {
@@ -250,7 +261,9 @@ export function serializeChordProBody(
           ? ["soc", "eoc"]
           : section.kind === "bridge"
             ? ["sob", "eob"]
-            : section.tag
+            : LONG_FORM_KINDS.includes(section.kind)
+              ? [`start_of_${section.kind}`, `end_of_${section.kind}`]
+              : section.tag
               ? [`start_of_${section.tag}`, `end_of_${section.tag}`]
               : ["sop", "eop"];
       const open = section.label ? `{${start}:${section.label}}` : `{${start}}`;

@@ -239,8 +239,8 @@ const AddSongDialog = () => {
                     fontSize="sm"
                     placeholder={
                       mode === "chords"
-                        ? "G              D\nOíd, mortales, el grito sagrado:\nC        D         G\n¡libertad, libertad, libertad!"
-                        : "{title: Himno Nacional Argentino}\n{key: G}\n\n[G]Oíd, mortales, el [D]grito sagrado:\n¡[C]libertad, liber[D]tad, liber[G]tad!"
+                        ? "Escribí [Estrofa], [Pre-coro], [Coro], [Puente], [Final]… en su propia línea para separar en secciones.\n\n[Estrofa]\nG              D\nOíd, mortales, el grito sagrado:\nC        D         G\n¡libertad, libertad, libertad!\nG                D\nOíd el ruido de rotas cadenas,\nC          D          G\nved en trono a la noble igualdad.\n\n[Coro]\nG            C\nSean eternos los laureles\nD               G\nque supimos conseguir.\nG           C\nCoronados de gloria vivamos\nD                G\no juremos con gloria morir."
+                        : "{title: Himno Nacional Argentino}\n{key: G}\n\n{start_of_verse}\n[G]Oíd, mortales, el [D]grito sagrado:\n¡[C]libertad, liber[D]tad, liber[G]tad!\n[G]Oíd el ruido de [D]rotas cadenas,\n[C]ved en trono a la [D]noble igual[G]dad.\n{end_of_verse}\n\n{start_of_chorus}\n[G]Sean eternos los [C]laureles\n[D]que supimos conse[G]guir.\n[G]Coronados de [C]gloria vivamos\n[D]o juremos con gloria mo[G]rir.\n{end_of_chorus}"
                     }
                   />
                 </Flex>

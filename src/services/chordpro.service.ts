@@ -49,18 +49,24 @@ export function chordsOverWordsToChordPro(text: string): string {
 
 // Títulos genéricos: se guardan sin etiqueta para que formatSong los
 // muestre en español y numere las estrofas ("Estrofa 1", "Estrofa 2"...).
-const GENERIC_SECTION_RE = /^(estrofa|verso|verse|coro|chorus|estribillo|puente|bridge)$/i;
+const GENERIC_SECTION_RE =
+  /^(estrofa|verso|verse|coro|chorus|estribillo|puente|bridge|pre-?coro|pre-?chorus|final|ending|outro)$/i;
 
 function sectionDirectives(label: string): [string, string] {
+  // Pre-coro y final no tienen abreviatura ({sov}/{soc}/{sob}) en ChordPro.
   const kind = /pre/i.test(label)
-    ? "v"
+    ? "prechorus"
     : /coro|chorus|estribillo/i.test(label)
       ? "c"
       : /puente|bridge/i.test(label)
         ? "b"
-        : "v";
+        : /final|ending|outro/i.test(label)
+          ? "ending"
+          : "v";
   const suffix = GENERIC_SECTION_RE.test(label) ? "" : `: ${label}`;
-  return [`{so${kind}${suffix}}`, `{eo${kind}}`];
+  return kind.length > 1
+    ? [`{start_of_${kind}${suffix}}`, `{end_of_${kind}}`]
+    : [`{so${kind}${suffix}}`, `{eo${kind}}`];
 }
 
 // El parser deja "[Estrofa]" como si fuera un acorde suelto en su propia

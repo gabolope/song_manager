@@ -4,7 +4,7 @@ Menores:
 
 - [ ] Al terminar de editar una canción, mostrar la que se acaba de editar (hoy vuelve a la canción en vivo si hay una)
 - [ ] Opción de ver el ChordPro puro
-- [ ] Agregar tipo de sección pre-coro
+- [x] Agregar tipos de sección pre-coro y final
 
 Intermedios:
 
@@ -19,6 +19,7 @@ Mayores:
 - [ ] Agregar habilidad de crear distintas listas (sesiones)
 - [ ] Preferencias de visualización (color de letra y acordes, fuente, color de fondo) guardadas en el perfil del usuario
 - [ ] Que cualquiera (sin cuenta) se conecte a la sesión con un link o QR y vea solo la canción en vivo
+- [ ] Dividir usuarios en dos modos: ususarios casuales y usuarios profesionales. Los profesionales tienen todas las características que tiene actualmente la app. Los casuales no crean sesiones, no acceden al tipo de cancion (intermedia lenta rapida), no ven el badge de director/musico, ven el artista en el listado de canciones en lugar del tipo y tono, pueden crear qr / link para compartir cancion que estan viendo en vivo. Los casuales son usuarios que tocan instrumentos en juntadas, fiestas, plazas, los profesionales estaran más destinados a la funcion original de la app de manejo en servicios religiosos.
 
 ## Multi-equipo
 
